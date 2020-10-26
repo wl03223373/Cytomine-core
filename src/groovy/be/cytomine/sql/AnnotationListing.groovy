@@ -700,7 +700,7 @@ class UserAnnotationListing extends AnnotationListing {
         ],
         image: [
                 originalFilename: 'ai.original_filename', // not in single annot marshaller
-                instanceFilename: 'ii.instance_filename' // not in single annot marshaller
+                instanceFilename: 'COALESCE(ii.instance_filename, ai.original_filename)' // not in single annot marshaller
         ],
         slice: [
                 channel: 'asl.channel', // not in single annot marshaller
@@ -876,7 +876,7 @@ class AlgoAnnotationListing extends AnnotationListing {
         ],
         image: [
                 originalFilename: 'ai.original_filename', // not in single annot marshaller
-                instanceFilename: 'ii.instance_filename' // not in single annot marshaller
+                instanceFilename: 'COALESCE(ii.instance_filename, ai.original_filename)' // not in single annot marshaller
         ],
         slice: [
                 channel: 'asl.channel', // not in single annot marshaller
@@ -1049,7 +1049,7 @@ class ReviewedAnnotationListing extends AnnotationListing {
         ],
         image: [
                 originalFilename: 'ai.original_filename', // not in single annot marshaller
-                instanceFilename: 'ii.instance_filename' // not in single annot marshaller
+                instanceFilename: 'COALESCE(ii.instance_filename, ai.original_filename)' // not in single annot marshaller
         ],
         slice: [
                 channel: 'asl.channel', // not in single annot marshaller
@@ -1217,7 +1217,7 @@ class RoiAnnotationListing extends AnnotationListing {
             ],
             image: [
                     originalFilename: 'ai.original_filename', // not in single annot marshaller
-                    instanceFilename: 'ii.instance_filename' // not in single annot marshaller
+                    instanceFilename: 'COALESCE(ii.instance_filename, ai.original_filename)' // not in single annot marshaller
             ],
             slice: [
                     channel: 'asl.channel', // not in single annot marshaller
