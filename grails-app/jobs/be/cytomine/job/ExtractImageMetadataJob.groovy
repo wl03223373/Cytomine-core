@@ -29,7 +29,12 @@ class ExtractImageMetadataJob {
     }
 
     def execute() {
-        Collection<AbstractImage> abstractImages = AbstractImage.findAllBySamplePerPixelIsNullOrWidthIsNullOrWidth(-1, [max: 10, sort: "created", order: "desc"])
+        Collection<AbstractImage> abstractImages = AbstractImage.findAllByWidthIsNullOrWidthLike(-1)
+        abstractImages.each { image ->
+            imagePropertiesService.extractUseful(image)
+        }
+        //TODO activate when bitPerSample is implemented
+        /*Collection<AbstractImage> abstractImages = AbstractImage.findAllBySamplePerPixelIsNullOrWidthIsNullOrWidth(-1, [max: 10, sort: "created", order: "desc"])
         abstractImages.each { image ->
             try {
                 UploadedFile.withNewSession {
@@ -45,7 +50,6 @@ class ExtractImageMetadataJob {
             catch (Exception e) {
                 log.error "Error during metadata extraction for image $image: ${e.printStackTrace()}"
             }
-
-        }
+        }*/
     }
 }

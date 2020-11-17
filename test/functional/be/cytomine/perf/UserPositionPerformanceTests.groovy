@@ -1,7 +1,7 @@
 package be.cytomine.perf
 
 /*
-* Copyright (c) 2009-2019. Authors: see NOTICE file.
+* Copyright (c) 2009-2020. Authors: see NOTICE file.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ class UserPositionPerformanceTests {
 
     void testPerfPositionListLastByImage() {
 
-        def users = [];
+        /*def users = [];
         users << [login : Infos.SUPERADMINLOGIN, password : Infos.SUPERADMINPASSWORD]
 
         def result;
@@ -121,5 +121,5 @@ class UserPositionPerformanceTests {
         //Current
         //max : 614 ms
         //avg : 53.62 ms
-    }
+*/    }
 }
