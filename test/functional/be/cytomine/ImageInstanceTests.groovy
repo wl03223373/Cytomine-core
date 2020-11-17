@@ -1,7 +1,7 @@
 package be.cytomine
 
 /*
-* Copyright (c) 2009-2019. Authors: see NOTICE file.
+* Copyright (c) 2009-2020. Authors: see NOTICE file.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -131,6 +131,13 @@ class ImageInstanceTests  {
     void testGetImageInstanceWithCredential() {
         def result = ImageInstanceAPI.show(BasicInstanceBuilder.getImageInstance().id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
+        def json = JSON.parse(result.data)
+        assert json instanceof JSONObject
+    }
+
+    void testDownloadImageInstanceWithCredential() {
+        def result = ImageInstanceAPI.download(BasicInstanceBuilder.getImageInstance().id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert result.code == 200 || result.code == 500
         def json = JSON.parse(result.data)
         assert json instanceof JSONObject
     }

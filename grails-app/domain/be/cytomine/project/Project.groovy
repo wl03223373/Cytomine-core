@@ -57,6 +57,9 @@ class Project extends CytomineDomain implements Serializable {
     @RestApiObjectField(description = "Blind mode (if true, image filename are hidden)",mandatory = false)
     boolean blindMode = false
 
+    @RestApiObjectField(description = "Allow contributors to download image instances (if true, image can be downloaded)",mandatory = false)
+    boolean areImagesDownloadable = false
+
     /**
      * Number of projects user annotations
      */
@@ -189,6 +192,7 @@ class Project extends CytomineDomain implements Serializable {
         domain.retrievalAllOntology = JSONUtils.getJSONAttrBoolean(json, 'retrievalAllOntology', true)
 
         domain.blindMode = JSONUtils.getJSONAttrBoolean(json, 'blindMode', false)
+        domain.areImagesDownloadable = JSONUtils.getJSONAttrBoolean(json, 'areImagesDownloadable', false)
         domain.created = JSONUtils.getJSONAttrDate(json, 'created')
         domain.updated = JSONUtils.getJSONAttrDate(json, 'updated')
         domain.deleted = JSONUtils.getJSONAttrDate(json, "deleted")
@@ -226,6 +230,7 @@ class Project extends CytomineDomain implements Serializable {
         returnArray['ontologyName'] = domain?.ontology?.name
         returnArray['discipline'] = domain?.discipline?.id
         returnArray['blindMode'] = (domain?.blindMode != null &&  domain?.blindMode)
+        returnArray['areImagesDownloadable'] = (domain?.areImagesDownloadable != null &&  domain?.areImagesDownloadable)
         returnArray['disciplineName'] = domain?.discipline?.name
         returnArray['numberOfSlides'] = domain?.countSamples()
         returnArray['numberOfImages'] = domain?.countImageInstance()

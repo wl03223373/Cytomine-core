@@ -139,6 +139,11 @@ class ImageInstanceAPI extends DomainAPI {
 //        action = [POST:"copyAnnotationFromSameAbstractImage"]
 //    }
 
+    static def download(Long id, String username, String password) {
+        String URL = Infos.CYTOMINEURL + "api/imageinstance/" + id + "/download"
+        return doGET(URL, username, password)
+    }
+
 
 
 

@@ -317,7 +317,7 @@ class SecurityACLService {
         }
     }
 
-    public def checkIsAdminContainer(CytomineDomain domain,SecUser currentUser) {
+    public def checkIsAdminContainer(CytomineDomain domain,SecUser currentUser = null) {
         if (domain) {
             if (!domain.container().checkPermission(ADMINISTRATION,currentRoleServiceProxy.isAdminByNow(cytomineService.currentUser))) {
                 throw new ForbiddenException("You don't have the right to do this. You must be the creator or the container admin")

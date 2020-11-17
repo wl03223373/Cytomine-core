@@ -560,7 +560,12 @@ class RestImageInstanceController extends RestController {
 
     def download() {
         ImageInstance imageInstance = imageInstanceService.read(params.long("id"))
+        securityACLService.check(imageInstance, READ)
         if (imageInstance) {
+            Project project = imageInstance.project
+            boolean canDownload = project.areImagesDownloadable
+            if(!canDownload) securityACLService.checkIsAdminContainer(project)
+
             String url = imageServerService.downloadUri(imageInstance.baseImage)
             redirect(url: url)
         } else {
