@@ -15,6 +15,7 @@
 */
 
 
+import be.cytomine.image.AbstractImage
 import be.cytomine.image.AbstractSlice
 import be.cytomine.middleware.ImageServer
 import be.cytomine.utils.CytomineMailService
@@ -227,6 +228,10 @@ class BootStrap {
         ImageServerService.metaClass.storageSpace = {
             ImageServer is -> println "\n\n mocked storageSpace \n\n";
             return [used : 1, available: 1];
+        }
+        ImageServerService.metaClass.downloadUri = {
+            AbstractImage ai -> println "\n\n mocked downloadUri \n\n";
+                return "https://www.google.com";
         }
         //mock services which use Retrieval
         ImageRetrievalService.metaClass.doRetrievalIndex = {
