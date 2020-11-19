@@ -33,12 +33,13 @@ import org.restapidoc.pojo.RestApiParamType
 @RestApi(name = "Image | abstract image services", description = "Methods for managing an image. See image instance service to manage an instance of image in a project.")
 class RestAbstractImageController extends RestController {
 
-    def imagePropertiesService
     def abstractImageService
     def cytomineService
     def projectService
     def imageServerService
     def uploadedFileService
+    def imageSequenceService
+    def securityACLService
 
     @RestApiMethod(description="Get all image available for the current user", listing = true)
     @RestApiParams(params=[

@@ -167,7 +167,7 @@ class AnnotationTermSecurityTests extends SecurityTestsAbstract {
         annotationTerm = result.data
 
         project.mode = Project.EditingMode.READ_ONLY
-        project.save(true)
+        project.save(failOnError: true, flush: true)
 
         // Get/List annotation term with user 2
         assert (200 == AnnotationTermAPI.showAnnotationTerm(annotationTerm.userAnnotation.id, annotationTerm.term.id, annotationTerm.user.id, SecurityTestsAbstract.USERNAME2, SecurityTestsAbstract.PASSWORD2).code)
@@ -178,7 +178,7 @@ class AnnotationTermSecurityTests extends SecurityTestsAbstract {
         assert (403 == AnnotationTermAPI.deleteAnnotationTerm(annotationTerm.userAnnotation.id, annotationTerm.term.id, annotationTerm.user.id, SecurityTestsAbstract.USERNAME1, SecurityTestsAbstract.PASSWORD1).code)
 
         project.mode = Project.EditingMode.RESTRICTED
-        project.save(true)
+        project.save(failOnError: true, flush: true)
 
         // Get/List annotation term with user 2
         assert (200 == AnnotationTermAPI.showAnnotationTerm(annotationTerm.userAnnotation.id, annotationTerm.term.id, annotationTerm.user.id, SecurityTestsAbstract.USERNAME2, SecurityTestsAbstract.PASSWORD2).code)
@@ -191,7 +191,7 @@ class AnnotationTermSecurityTests extends SecurityTestsAbstract {
         assert (200 == AnnotationTermAPI.deleteAnnotationTerm(annotationTerm.userAnnotation.id,annotationTerm.term.id,annotationTerm.user.id, SecurityTestsAbstract.USERNAME1, SecurityTestsAbstract.PASSWORD1).code)
 
         project.mode = Project.EditingMode.CLASSIC
-        project.save(true)
+        project.save(failOnError: true, flush: true)
 
         // Add new annotation term with user 2
         annotationTerm = BasicInstanceBuilder.getAnnotationTermNotExist()

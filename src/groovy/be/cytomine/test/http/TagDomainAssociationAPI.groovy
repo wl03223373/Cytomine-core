@@ -55,7 +55,7 @@ class TagDomainAssociationAPI extends DomainAPI {
 
     static def listByDomain(CytomineDomain domain, String username, String password) {
         String URL = Infos.CYTOMINEURL + "api/domain/"
-        // TODO when RESTE normalization replace the switch by domain.getClass().simpleName converted to snake case
+        // TODO when REST normalization replace the switch by domain.getClass().simpleName converted to snake case
         switch (domain.getClass()){
             case ImageInstance :
             case Project :

@@ -24,6 +24,12 @@ class SoftwareUrlMappings {
         "/api/software/$id.$format"(controller:"restSoftware"){
             action = [GET:"show",PUT:"update", DELETE:"delete"]
         }
+        "/api/software/upload"(controller:"restSoftware"){
+            action = [POST:"upload"]
+        }
+        "/api/software/$id/download"(controller:"restSoftware"){
+            action = [GET:"download"]
+        }
         "/api/project/$id/software.$format"(controller:"restSoftware"){
             action = [GET: "listByProject"]
         }

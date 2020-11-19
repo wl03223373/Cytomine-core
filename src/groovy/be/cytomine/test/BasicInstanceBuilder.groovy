@@ -41,6 +41,7 @@ import be.cytomine.project.ProjectDefaultLayer
 import be.cytomine.project.ProjectRepresentativeUser
 import be.cytomine.search.SearchEngineFilter
 import be.cytomine.security.*
+import be.cytomine.social.AnnotationAction
 import be.cytomine.social.LastUserPosition
 import be.cytomine.social.PersistentImageConsultation
 import be.cytomine.social.PersistentProjectConnection
@@ -111,6 +112,7 @@ class BasicInstanceBuilder {
     }
 
     static boolean checkIfDomainExist(def domain, boolean exist=true) {
+        log.info("checkIfDomainExist for "+ domain.class.name+ " " +domain.id)
         try {
             domain.refresh()
         } catch(DataRetrievalFailureException e){
@@ -269,14 +271,14 @@ class BasicInstanceBuilder {
 
 
     static ImageInstance getImageInstance() {
-        getImageInstanceNotExist(BasicInstanceBuilder.getProject(),true)
+        getImageInstanceNotExist(getProject(),true)
     }
 
-    static ImageInstance getImageInstanceNotExist(Project project = BasicInstanceBuilder.getProject(), boolean save = false) {
+    static ImageInstance getImageInstanceNotExist(Project project = getProject(), boolean save = false) {
         ImageInstance image = new ImageInstance(
-                baseImage: BasicInstanceBuilder.getAbstractImageNotExist(true),
+                baseImage: getAbstractImageNotExist(true),
                 project: project,
-                //slide: BasicInstanceBuilder.getSlide(),
+                //slide: getSlide(),
                 user: User.findByUsername(Infos.SUPERADMINLOGIN))
         if(save) {
             saveDomain(image)
@@ -292,16 +294,16 @@ class BasicInstanceBuilder {
         saveDomain(getNestedImageInstanceNotExist())
     }
 
-    static NestedImageInstance getNestedImageInstanceNotExist(ImageInstance imageInstance = BasicInstanceBuilder.getImageInstance(), boolean save = false) {
+    static NestedImageInstance getNestedImageInstanceNotExist(ImageInstance imageInstance = getImageInstance(), boolean save = false) {
         NestedImageInstance nestedImage = new NestedImageInstance(
                 baseImage: getAbstractImageNotExist(true),
                 parent: imageInstance,
                 x: 10,
                 y: 20,
                 project: imageInstance.project,
-                //slide: BasicInstanceBuilder.getSlide(),
+                //slide: getSlide(),
                 user: imageInstance.user)
-        save ? BasicInstanceBuilder.saveDomain(nestedImage) : BasicInstanceBuilder.checkDomain(nestedImage)
+        save ? saveDomain(nestedImage) : checkDomain(nestedImage)
     }
 
     static AlgoAnnotation getAlgoAnnotationNotExist(Project project, boolean save = false) {
@@ -506,7 +508,7 @@ class BasicInstanceBuilder {
         checkDomain(annotation)
         saveDomain(annotation)
         annotation
-     }
+    }
 
     static ReviewedAnnotation getReviewedAnnotationNotExist(Project project, boolean save = false) {
         def basedAnnotation = saveDomain(getUserAnnotationNotExist())
@@ -731,7 +733,7 @@ class BasicInstanceBuilder {
         )
 
         sharedannotation.receivers = new HashSet<User>();
-        sharedannotation.receivers.add(BasicInstanceBuilder.getUser( Infos.ADMINLOGIN, Infos.ADMINPASSWORD))
+        sharedannotation.receivers.add(getUser( Infos.ADMINLOGIN, Infos.ADMINPASSWORD))
         saveDomain(sharedannotation)
     }
 
@@ -744,7 +746,7 @@ class BasicInstanceBuilder {
                 annotationClassName: annotation.class.name
         )
         sharedannotation.receivers = new HashSet<User>();
-        sharedannotation.receivers.add(BasicInstanceBuilder.getSuperAdmin( Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD))
+        sharedannotation.receivers.add(getSuperAdmin( Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD))
         save ? saveDomain(sharedannotation) : checkDomain(sharedannotation)
     }
 
@@ -1105,9 +1107,9 @@ class BasicInstanceBuilder {
         getJobDataNotExist(saveDomain(getJobNotExist()))
     }
 
-    static JobData getJobDataNotExist(Job job) {
+    static JobData getJobDataNotExist(Job job, boolean save = false) {
         JobData jobData =  new JobData(job:job, key : "TESTKEY", filename: "filename.jpg")
-        checkDomain(jobData)
+        save ? saveDomain(jobData) : checkDomain(jobData)
     }
 
     static JobData getJobData() {
@@ -1472,10 +1474,30 @@ class BasicInstanceBuilder {
         save ? saveDomain(term) :  checkDomain(term)
     }
 
+    static ProcessingServer getProcessingServer() {
+        def processingServer = ProcessingServer.findByName("TestingProcessingServer")
+
+        if (!processingServer) {
+            processingServer = new ProcessingServer(username : "test", name: "TestingProcessingServer", host: "localhost",port : 10022, index : 0)
+            saveDomain(processingServer)
+        }
+        processingServer
+    }
+
+    static ProcessingServer getProcessingServerNotExist(boolean save = false) {
+        def processingServer = new ProcessingServer(username : "test", name: getRandomString(), host: getRandomString(),port : 10022, index : 0)
+        if(save) {
+            saveDomain(processingServer)
+        } else {
+            checkDomain(processingServer)
+        }
+        processingServer
+    }
+
     static Software getSoftware() {
         def software = Software.findByName("AnotherBasicSoftware")
         if (!software) {
-            software = new Software(name: "AnotherBasicSoftware", serviceName:"helloWorldJobService")
+            software = new Software(name: "AnotherBasicSoftware")
             saveDomain(software)
             Infos.addUserRight(Infos.SUPERADMINLOGIN,software)
         }
@@ -1483,7 +1505,7 @@ class BasicInstanceBuilder {
     }
 
     static Software getSoftwareNotExist(boolean save = false) {
-        def software = new Software(name: getRandomString(),serviceName:"helloWorldJobService")
+        def software = new Software(name: getRandomString())
         if(save) {
             saveDomain(software)
             Infos.addUserRight(Infos.SUPERADMINLOGIN,software)
@@ -1495,7 +1517,7 @@ class BasicInstanceBuilder {
     }
 
     static Software getSoftwareNotExistForRabbit(boolean save = false) {
-        def software = new Software(name: getRandomString(),serviceName:"createRabbitJobService")
+        def software = new Software(name: getRandomString())
         if(save) {
             saveDomain(software)
             Infos.addUserRight(Infos.SUPERADMINLOGIN,software)
@@ -1515,7 +1537,6 @@ class BasicInstanceBuilder {
         }
         parameter
     }
-
     static SoftwareParameter getSoftwareParameterNotExist(boolean save = false) {
         Software software = getSoftware()
         def parameter =   new SoftwareParameter(name: getRandomString(),software:software,type:"String")
@@ -1524,8 +1545,69 @@ class BasicInstanceBuilder {
         } else {
             checkDomain(parameter)
         }
-
     }
+
+    static ParameterConstraint getParameterConstraint() {
+        ParameterConstraint parameter = ParameterConstraint.findByNameAndDataType("equals","Number")
+        if (!parameter) {
+            parameter = new ParameterConstraint(name: "equals", expression: '(Double.valueOf("[parameterValue]") as Number) == (Double.valueOf("[value]") as Number)', dataType: "Number")
+            saveDomain(parameter)
+        }
+        parameter
+    }
+
+    static ParameterConstraint getParameterConstraintNotExist(boolean save = false) {
+        def parameter = new ParameterConstraint(name : getRandomString(), expression: getRandomString(), dataType: "String")
+        if(save) {
+            saveDomain(parameter)
+        } else {
+            checkDomain(parameter)
+        }
+    }
+
+    static SoftwareParameterConstraint getSoftwareParameterConstraint() {
+        SoftwareParameter parameter = getSoftwareParameter()
+        ParameterConstraint parameterConstraint = getParameterConstraint()
+
+        def constraint = SoftwareParameterConstraint.findBySoftwareParameterAndParameterConstraint(parameter, parameterConstraint)
+
+        if (!constraint) {
+            constraint = new SoftwareParameterConstraint(parameterConstraint:parameterConstraint,softwareParameter:parameter, value:"0")
+            saveDomain(constraint)
+        }
+        constraint
+    }
+
+    static SoftwareParameterConstraint getSoftwareParameterConstraintNotExist(boolean save = false) {
+        SoftwareParameter parameter = getSoftwareParameterNotExist(true)
+        ParameterConstraint parameterConstraint = ParameterConstraint.findByNameAndDataType("equals","String")
+        def constraint =   new SoftwareParameterConstraint(parameterConstraint:parameterConstraint,softwareParameter:parameter, value:getRandomString())
+        if(save) {
+            saveDomain(constraint)
+        } else {
+            checkDomain(constraint)
+        }
+    }
+
+
+    static SoftwareUserRepository getSoftwareUserRepository() {
+        def repo = SoftwareUserRepository.findByProvider("github")
+        if (!repo) {
+            repo = new SoftwareUserRepository(provider: "github", username:getRandomString(),dockerUsername:getRandomString())
+            saveDomain(repo)
+        }
+        repo
+    }
+
+    static SoftwareUserRepository getSoftwareUserRepositoryNotExist(boolean save = false) {
+        def repo = new SoftwareUserRepository(provider: getRandomString(), username:getRandomString(),dockerUsername:getRandomString())
+        if(save) {
+            saveDomain(repo)
+        } else {
+            checkDomain(repo)
+        }
+    }
+
 
     static Description getDescriptionNotExist(CytomineDomain domain,boolean save = false) {
         Description description = new Description(domainClassName: domain.class.name, domainIdent: domain.id, data: "A description for this domain!")
@@ -1662,7 +1744,7 @@ class BasicInstanceBuilder {
             imageServer.url =  urlImageServer
             imageServer.available = true
             imageServer.basePath = "/tmp/"
-            BasicInstanceBuilder.saveDomain(imageServer)
+            saveDomain(imageServer)
         }
 
         Mime mime = Mime.findByMimeType("image/pyrtiff")
@@ -1670,7 +1752,7 @@ class BasicInstanceBuilder {
             mime = new Mime()
             mime.mimeType = "image/pyrtiff"
             mime.extension = "tif"
-            BasicInstanceBuilder.saveDomain(mime)
+            saveDomain(mime)
         }
 
         MimeImageServer mimeImageServer = MimeImageServer.findByMimeAndImageServer(mime,imageServer)
@@ -1678,7 +1760,7 @@ class BasicInstanceBuilder {
             mimeImageServer = new MimeImageServer()
             mimeImageServer.mime = mime
             mimeImageServer.imageServer = imageServer
-            BasicInstanceBuilder.saveDomain(mimeImageServer)
+            saveDomain(mimeImageServer)
         }
 
         Storage storage = Storage.findByUser(user)
@@ -1686,14 +1768,14 @@ class BasicInstanceBuilder {
             storage = new Storage()
             storage.name = "lrollus test storage"
             storage.user = user
-            BasicInstanceBuilder.saveDomain(storage)
+            saveDomain(storage)
         }
 
         Project project = Project.findByName("testimage")
         if(!project) {
-            project = BasicInstanceBuilder.getProjectNotExist(true)
+            project = getProjectNotExist(true)
             project.name = "testimage"
-            BasicInstanceBuilder.saveDomain(project)
+            saveDomain(project)
         }
 
         UploadedFile uploadedFile = UploadedFile.findByOriginalFilename("originalFilename")
@@ -1707,7 +1789,7 @@ class BasicInstanceBuilder {
             uploadedFile.storage = storage
             uploadedFile.projects = [project.id]
             uploadedFile.size = 0 //fake
-            BasicInstanceBuilder.saveDomain(uploadedFile)
+            saveDomain(uploadedFile)
         }
 
         AbstractImage abstractImage = AbstractImage.findByOriginalFilename("1383567901006/test.tif")
@@ -1731,7 +1813,7 @@ class BasicInstanceBuilder {
             imageInstance.baseImage = abstractImage
             imageInstance.project = project
             imageInstance.user = User.findByUsername(Infos.SUPERADMINLOGIN)
-            BasicInstanceBuilder.saveDomain(imageInstance)
+            saveDomain(imageInstance)
         }
 
 
@@ -1739,7 +1821,7 @@ class BasicInstanceBuilder {
         if (!imagingServer) {
             imagingServer = new ImagingServer()
             imagingServer.url = "http://image.cytomine.be"
-            BasicInstanceBuilder.saveDomain(imagingServer)
+            saveDomain(imagingServer)
         }
 
         ReviewedAnnotation.findAllByImage(imageInstance).each {
@@ -1830,19 +1912,20 @@ class BasicInstanceBuilder {
     static MessageBrokerServer getMessageBrokerServer() {
         MessageBrokerServer msb = MessageBrokerServer.findByName("BasicMessageBrokerServer")
         if (!msb) {
-            msb = new MessageBrokerServer(host: "localhost", port: getRandomInteger(1024, 65535), name: "BasicMessageBrokerServer")
+            msb = new MessageBrokerServer(host: "localhost", port: 5672, name: "BasicMessageBrokerServer")
             saveDomain(msb)
         }
         msb
     }
 
     static MessageBrokerServer getMessageBrokerServerNotExist(boolean save = false) {
-        MessageBrokerServer messageBrokerServers = new MessageBrokerServer(host: "localhost", port: getRandomInteger(1024, 65535), name: getRandomString())
+        MessageBrokerServer messageBrokerServers = new MessageBrokerServer(host: "localhost", port: 5672, name: getRandomString())
         save ? saveDomain(messageBrokerServers) : checkDomain(messageBrokerServers)
         messageBrokerServers
     }
 
     static AmqpQueue getAmqpQueue() {
+        getMessageBrokerServer()
         AmqpQueue amqpQueue = AmqpQueue.findByName("BasicAmqpQueue")
         if(!amqpQueue) {
             amqpQueue = new AmqpQueue(name: "BasicAmqpQueue", host: "localhost", exchange: "exchange"+getRandomString())
@@ -1852,7 +1935,9 @@ class BasicInstanceBuilder {
     }
 
     static AmqpQueue getAmqpQueueNotExist(boolean save = false){
+        getMessageBrokerServer()
         AmqpQueue amqpQueue = new AmqpQueue(name: getRandomString(), host: "localhost", exchange: "exchange"+getRandomString())
+        amqpQueue.validate(failOnError: true)
         save ? saveDomain(amqpQueue) : checkDomain(amqpQueue)
         amqpQueue
     }
@@ -1947,6 +2032,14 @@ class BasicInstanceBuilder {
                 imageThumb: 'NO THUMB', mode:"test", user:getUser(Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD).id,
                 project: image.project.id)
         insert ? insertDomain(consult) : checkDomain(consult)
+    }
+
+    static AnnotationAction getAnnotationActionNotExist(UserAnnotation annot, boolean insert = false) {
+        AnnotationAction action = new AnnotationAction(image : annot.image.id, action: "TEST",
+                annotationIdent: annot.id, annotationClassName: annot.getClass().name,
+                annotationCreator: annot.user, project: annot.project,
+                user:getUser(Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD).id)
+        insert ? insertDomain(action) : checkDomain(action)
     }
 
     static PersistentUserPosition getPersistentUserPosition(SliceInstance slice, User user, boolean insert = false){

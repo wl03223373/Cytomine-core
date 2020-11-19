@@ -19,6 +19,7 @@ package be.cytomine.utils.bootstrap
 import be.cytomine.security.SecUser
 import groovy.sql.Sql
 import org.apache.commons.lang.RandomStringUtils
+import be.cytomine.processing.SoftwareUserRepository
 
 /**
  * Cytomine @ ULG
@@ -37,6 +38,7 @@ class BootstrapDataService {
 
         recreateTableFromNotDomainClass()
         amqpQueueConfigService.initAmqpQueueConfigDefaultValues()
+        bootstrapUtilsService.initRabbitMq()
 
         def imagingServer = bootstrapUtilsService.createNewImagingServer()
         def filters = [
@@ -120,6 +122,9 @@ class BootstrapDataService {
         superAdmin.setPublicKey((String) grailsApplication.config.grails.superAdminPublicKey)
         superAdmin.save(flush : true)
 
+        bootstrapUtilsService.addDefaultProcessingServer()
+        bootstrapUtilsService.addDefaultConstraints()
+
         SecUser rabbitMQUser = SecUser.findByUsername("rabbitmq")
         if(!grailsApplication.config.grails.rabbitMQPrivateKey) {
             throw new IllegalArgumentException("rabbitMQPrivateKey must be set!")
@@ -131,8 +136,8 @@ class BootstrapDataService {
         rabbitMQUser.setPublicKey(grailsApplication.config.grails.rabbitMQPublicKey)
         rabbitMQUser.save(flush : true)
 
-        bootstrapUtilsService.addDefaultProcessingServer()
-        bootstrapUtilsService.addDefaultConstraints()
+        SoftwareUserRepository sur = new SoftwareUserRepository(provider : "GitHub", username: "cytomine", dockerUsername : "cytomine", prefix : "S_")
+        sur.save(failOnError: true)
     }
 
     public void recreateTableFromNotDomainClass() {

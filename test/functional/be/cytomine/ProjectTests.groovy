@@ -210,7 +210,7 @@ class ProjectTests  {
 
     void testEditProjectCorrect() {
 
-        def project = BasicInstanceBuilder.getProject()
+        def project = BasicInstanceBuilder.getProjectNotExist(true)
         def data = UpdateData.createUpdateSet(project,[name: ["OLDNAME","NEWNAME"]])
 
         def result = ProjectAPI.update(project.id, data.postData,Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)

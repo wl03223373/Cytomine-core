@@ -216,6 +216,7 @@ class ImageInstanceService extends ModelService {
             map['updated'] = map['updated']?.getTime()
             map['reviewStart'] = map['reviewStart']?.getTime()
             map['reviewStop'] = map['reviewStop']?.getTime()
+            map['reviewUser'] = map['reviewUserId']
             map['baseImage'] = map['baseImageId']
             map['project'] = map['projectId']
             map['reviewUser'] = map['reviewUserId']
@@ -341,6 +342,7 @@ class ImageInstanceService extends ModelService {
         if(sortColumn.equals("numberOfReviewedAnnotations")) sortColumn = "countImageReviewedAnnotations"
 
         String sortedProperty = ReflectionUtils.findField(ImageInstance, sortColumn) ? "${imageInstanceAlias}." + sortColumn : null
+        if(sortColumn.equals("blindedName")) sortColumn = "id"
         if(!sortedProperty) sortedProperty = ReflectionUtils.findField(AbstractImage, sortColumn) ? abstractImageAlias + "." + sortColumn : null
         if(!sortedProperty) sortedProperty = ReflectionUtils.findField(UploadedFile, sortColumn) ? mimeAlias + "." + sortColumn : null
         if(!sortedProperty) throw new CytomineMethodNotYetImplementedException("ImageInstance list sorted by $sortDirection is not implemented")

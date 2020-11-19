@@ -176,12 +176,10 @@ class ReviewedAnnotation extends AnnotationDomain implements Serializable {
 
         if (json.location && json.location instanceof Geometry) {
             domain.location = json.location
-        }
-        else {
+        } else {
             try {
                 domain.location = new WKTReader().read(json.location)
-            }
-            catch (com.vividsolutions.jts.io.ParseException ex) {
+            } catch (com.vividsolutions.jts.io.ParseException ex) {
                 throw new WrongArgumentException(ex.toString())
             }
         }

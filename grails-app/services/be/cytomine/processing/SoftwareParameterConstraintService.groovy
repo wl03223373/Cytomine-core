@@ -92,6 +92,11 @@ class SoftwareParameterConstraintService extends ModelService {
     }
 
     def evaluate(SoftwareParameterConstraint domain, def parameterValue) {
+
+        if (parameterValue.contains("\"") || parameterValue.contains(";")) {
+            throw new SoftwareParameterConstraintException("\" and ; are unauthorized characters")
+        }
+
         ParameterConstraint currentParameterConstraint = domain.parameterConstraint
         SoftwareParameter currentSoftwareParameter = domain.softwareParameter
 

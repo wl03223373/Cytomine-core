@@ -27,6 +27,7 @@ import be.cytomine.security.UserJob
 import be.cytomine.test.BasicInstanceBuilder
 import be.cytomine.test.Infos
 import be.cytomine.test.http.AnnotationDomainAPI
+import be.cytomine.test.http.AnnotationTermAPI
 import be.cytomine.test.http.DomainAPI
 import be.cytomine.test.http.UserAnnotationAPI
 import com.vividsolutions.jts.io.WKTReader
@@ -129,6 +130,14 @@ class UserAnnotationListingTests {
          //generic way test
         checkUserAnnotationResultNumber("user=${dataSet.user.id}&multipleTerm=true&project=${dataSet.project.id}",1)
 
+        result = AnnotationTermAPI.deleteAnnotationTerm(at.userAnnotation.id,at.term.id,dataSet.user.id,Infos.SUPERADMINLOGIN,Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+
+        result = UserAnnotationAPI.listByProjectAndUsersSeveralTerm(dataSet.project.id,dataSet.user.id,Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert JSON.parse(result.data).collection instanceof JSONArray
+        assert JSON.parse(result.data).collection.size()==0
+        //generic way test
+        checkUserAnnotationResultNumber("user=${dataSet.user.id}&multipleTerm=true&project=${dataSet.project.id}",0)
     }
 
 
@@ -142,6 +151,16 @@ class UserAnnotationListingTests {
          //generic way test
         checkUserAnnotationResultNumber("user=${dataSet.user.id}&noTerm=true&project=${dataSet.project.id}",1)
 
+        result = AnnotationTermAPI.deleteAnnotationTerm(dataSet.annotations[0].id,dataSet.term.id,dataSet.user.id,Infos.SUPERADMINLOGIN,Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+
+        result = UserAnnotationAPI.listByProjectAndUsersWithoutTerm(dataSet.project.id,dataSet.user.id,Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+        json = JSON.parse(result.data)
+        assert json.collection instanceof JSONArray
+        assert json.collection.size()==2
+        //generic way test
+        checkUserAnnotationResultNumber("user=${dataSet.user.id}&noTerm=true&project=${dataSet.project.id}",2)
     }
 
     void testListAnnotationSearchByProjectTerm() {

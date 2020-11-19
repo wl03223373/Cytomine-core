@@ -305,12 +305,14 @@ class GeneralTests  {
     }
 
     void testVersion() {
-        Version.setCurrentVersion(21140101)
-        Version.setCurrentVersion(21140102)
-        Version.setCurrentVersion(21140103)
-        assert 21140103==Version.getLastVersion().number
-        assert Version.isOlderVersion(21140104)
-        assert !Version.isOlderVersion(21140102)
-        assert !Version.isOlderVersion(21140103)
+        Version.setCurrentVersion("1.0.0")
+        Version.setCurrentVersion("1.1.0")
+        Version.setCurrentVersion("27.3.0")
+        assert 27==Version.getLastVersion().major
+        assert 3==Version.getLastVersion().minor
+        assert 0==Version.getLastVersion().patch
+        assert Version.isOlderVersion(new Version(major: 27, minor: 3, patch: 1))
+        assert !Version.isOlderVersion(new Version(major: 27, minor: 0, patch: 0))
+        assert !Version.isOlderVersion(new Version(major: 2, minor: 185, patch: 200))
     }
 }

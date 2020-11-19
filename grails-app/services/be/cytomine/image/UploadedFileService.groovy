@@ -1,7 +1,5 @@
 package be.cytomine.image
 
-import be.cytomine.Exception.ConstraintException
-
 /*
 * Copyright (c) 2009-2020. Authors: see NOTICE file.
 *
@@ -18,7 +16,6 @@ import be.cytomine.Exception.ConstraintException
 * limitations under the License.
 */
 
-import be.cytomine.Exception.ForbiddenException
 import be.cytomine.api.UrlApi
 import be.cytomine.command.AddCommand
 import be.cytomine.command.Command
@@ -26,6 +23,7 @@ import be.cytomine.command.DeleteCommand
 import be.cytomine.command.EditCommand
 import be.cytomine.command.Transaction
 import be.cytomine.image.server.Storage
+import be.cytomine.Exception.ForbiddenException
 import be.cytomine.security.SecUser
 import be.cytomine.security.User
 import be.cytomine.security.UserJob

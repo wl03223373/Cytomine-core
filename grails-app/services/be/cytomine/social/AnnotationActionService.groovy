@@ -53,13 +53,13 @@ class AnnotationActionService extends ModelService {
         }
     }
 
-    def list(ImageInstance image, User user, Long afterThan = null, Long beforeThan = null){
+    def list(ImageInstance image, User user, Long afterThan = null, Long beforeThan = null) {
         securityACLService.check(image,WRITE)
         return AnnotationAction.createCriteria().list(sort: "created", order: "asc") {
-            if(user) eq("user", user)
+            if (user) eq("user", user)
             eq("image", image)
-            if(afterThan) gte("created", new Date(afterThan))
-            if(beforeThan) lte("created", new Date(beforeThan))
+            if (afterThan) gte("created", new Date(afterThan))
+            if (beforeThan) lte("created", new Date(beforeThan))
         }
     }
 

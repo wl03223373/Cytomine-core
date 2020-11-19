@@ -25,8 +25,8 @@ import be.cytomine.project.Project
 import be.cytomine.security.SecUser
 import be.cytomine.utils.JSONUtils
 import grails.converters.JSON
-import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.codehaus.groovy.grails.web.json.JSONArray
 import org.restapidoc.annotation.*
 import org.restapidoc.pojo.RestApiParamType
 
@@ -55,7 +55,7 @@ class RestUserAnnotationController extends RestController {
      */
     @RestApiMethod(description = "List all annotation (very light format)", listing = true)
     def list() {
-        responseSuccess(userAnnotationService.listLightForRetrieval())
+        responseSuccess(userAnnotationService.listLight())
     }
 
     @RestApiMethod(description = "Count the number of annotation for the current user")

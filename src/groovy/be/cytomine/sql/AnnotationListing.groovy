@@ -301,7 +301,14 @@ abstract class AnnotationListing {
         if (kmeansValue >= 3) {
             def requestHeadList = []
             columns.each {
-                requestHeadList << it.value + " as " + it.key
+                if (it.key == 'term' && !(this instanceof ReviewedAnnotationListing)) {
+                    String table =""
+                    if(it.value.contains("aat")) table = "aat"
+                    else if(it.value.contains("at")) table = "at"
+                    requestHeadList << "CASE WHEN ${table}.deleted IS NOT NULL THEN NULL ELSE ${it.value} END as ${it.key}"
+                } else {
+                    requestHeadList << it.value + " as " + it.key
+                }
             }
 
             if (track || tracks) {
@@ -445,12 +452,15 @@ abstract class AnnotationListing {
                 throw new ObjectNotFoundException("Term $term not exist!")
             }
             addIfMissingColumn('term')
-            return " AND (at.term_id = ${term}" + ((noTerm) ? " OR at.term_id IS NULL" : "") + ")\n"
+
+            if (this instanceof ReviewedAnnotationListing)
+                return " AND (at.term_id = ${term}" + ((noTerm) ? " OR at.term_id IS NULL" : "") + ")\n"
+            else
+                return " AND ((at.term_id = ${term} AND at.deleted IS NULL)" + ((noTerm) ? " OR at.term_id IS NULL" : "") + ")\n"
         } else {
             return ""
         }
     }
-
     def getParentsConst() {
         if (parents) {
             return " AND a.parent_ident IN (${parents.join(",")})\n"
@@ -538,7 +548,7 @@ abstract class AnnotationListing {
                 throw new ObjectNotFoundException("Term $suggestedTerm not exist!")
             }
             addIfMissingColumn('algo')
-            return "AND aat.term_id = ${suggestedTerm}\n"
+            return "AND aat.term_id = ${suggestedTerm}  AND aat.deleted IS NULL \n"
         } else {
             return ""
         }
@@ -726,14 +736,23 @@ class UserAnnotationListing extends AnnotationListing {
             from += "LEFT OUTER JOIN annotation_term at ON a.id = at.user_annotation_id "
             from += "LEFT OUTER JOIN annotation_term at2 ON a.id = at2.user_annotation_id "
             where += "AND at.id <> at2.id AND at.term_id <> at2.term_id AND at.deleted IS NULL AND at2.deleted IS NULL "
+            /*from = "$from, annotation_term at, annotation_term at2 "
+            where = "$where" +
+                    "AND a.id = at.user_annotation_id\n" +
+                    " AND a.id = at2.user_annotation_id\n" +
+                    " AND at.id <> at2.id \n" +
+                    " AND at.term_id <> at2.term_id \n"+
+                    " AND at.deleted IS NULL\n"+
+                    " AND at2.deleted IS NULL\n"*/
+
         }
         else if (noTerm && !(term || terms)) {
             from += "LEFT JOIN (SELECT * from annotation_term x ${users ? "where x.deleted IS NULL AND x.user_id IN (${users.join(",")})" : ""}) at ON a.id = at.user_annotation_id "
-            where += "AND at.id IS NULL \n"
+            where = "$where AND (at.id IS NULL OR at.deleted IS NOT NULL) \n"
         }
         else if (noAlgoTerm) {
-            from += "LEFT JOIN (SELECT * from algo_annotation_term x ${users ? "where x.deleted IS NULL AND x.user_id IN (${users.join(",")})" : ""}) aat ON a.id = aat.annotation_ident "
-            where += "AND aat.id IS NULL \n"
+            from = "$from LEFT JOIN (SELECT * from algo_annotation_term x where true ${users ? "and x.user_id IN (${users.join(",")})" : ""} and x.deleted IS NULL) aat ON a.id = aat.annotation_ident "
+            where = "$where AND (aat.id IS NULL OR aat.deleted IS NOT NULL) \n"
         }
         else if (columnToPrint.contains('term')) {
             from += "LEFT OUTER JOIN annotation_term at ON a.id = at.user_annotation_id "
@@ -763,6 +782,9 @@ class UserAnnotationListing extends AnnotationListing {
         if (columnToPrint.contains('algo')) {
             from += "INNER JOIN algo_annotation_term aat ON aat.annotation_ident = a.id "
             where += "AND aat.deleted IS NULL "
+            /*from = "$from, algo_annotation_term aat "
+            where = "$where AND aat.annotation_ident = a.id\n"
+            where = "$where AND aat.deleted IS NULL\n"*/
         }
 
         if (columnToPrint.contains('slice') || tracks || track) {
@@ -876,18 +898,32 @@ class AlgoAnnotationListing extends AnnotationListing {
         def from = "FROM algo_annotation a "
         def where = "WHERE true\n"
 
+        if(tags) from += " LEFT OUTER JOIN tag_domain_association tda ON a.id = tda.domain_ident AND tda.domain_class_name = '${getDomainClass()}' "
+
         if (multipleTerm) {
             from += "LEFT OUTER JOIN algo_annotation_term aat ON a.id = aat.annotation_ident "
             from += "LEFT OUTER JOIN algo_annotation_term aat2 ON a.id = aat2.annotation_ident "
             where += "AND aat.id <> aat2.id AND aat.term_id <> aat2.term_id AND aat.deleted IS NULL AND aat2.deleted IS NULL "
+            /*from = "$from, algo_annotation_term aat, algo_annotation_term aat2 "
+            where = "$where" +
+                    "AND a.id = aat.annotation_ident\n" +
+                    " AND a.id = aat2.annotation_ident\n" +
+                    " AND aat.id <> aat2.id \n" +
+                    " AND aat.term_id <> aat2.term_id \n" +
+                    " AND aat.deleted is NULL \n"+
+                    " AND aat2.deleted is NULL \n"*/
         }
         else if ((noTerm || noAlgoTerm) && !(term || terms)) {
-            from = "$from LEFT JOIN (SELECT * from algo_annotation_term x ${users ? "where x.deleted IS NULL AND x.user_job_id IN (${users.join(",")})" : ""}) aat ON a.id = aat.annotation_ident "
-            where = "$where AND aat.id IS NULL \n"
+            //from = "$from LEFT JOIN (SELECT * from algo_annotation_term x ${users ? "where x.deleted IS NULL AND x.user_job_id IN (${users.join(",")})" : ""}) aat ON a.id = aat.annotation_ident "
+            from = "$from LEFT JOIN (SELECT * from algo_annotation_term x where true ${users ? "and x.user_job_id IN (${users.join(",")})" : ""} and x.deleted IS NULL) aat ON a.id = aat.annotation_ident "
+            //where = "$where AND aat.id IS NULL \n"
+            where = "$where AND (aat.id IS NULL OR aat.deleted IS NOT NULL) \n"
 
         } else if (columnToPrint.contains('term')) {
             from += "LEFT JOIN algo_annotation_term aat ON a.id = aat.annotation_ident "
             where += "AND aat.deleted IS NULL "
+            //from = "$from LEFT OUTER JOIN algo_annotation_term aat ON a.id = aat.annotation_ident"
+            //where = "$where AND aat.deleted IS NULL \n"
         }
 
         if (columnToPrint.contains('track')) {
@@ -906,8 +942,6 @@ class AlgoAnnotationListing extends AnnotationListing {
             from += "INNER JOIN sec_user u ON a.user_id = u.id INNER JOIN job j ON u.job_id = j.id INNER JOIN software s ON j.software_id = s.id "
         }
 
-        if(tags) from += " LEFT OUTER JOIN tag_domain_association tda ON a.id = tda.domain_ident AND tda.domain_class_name = '${getDomainClass()}' "
-
         return from + "\n" + where
     }
 
@@ -918,7 +952,7 @@ class AlgoAnnotationListing extends AnnotationListing {
     def getTermConst() {
         if (term) {
             addIfMissingColumn('term')
-            return " AND (aat.term_id = ${term}" + ((noTerm) ? " OR aat.term_id IS NULL" : "") + ")\n"
+            return " AND ((aat.term_id = ${term} AND aat.deleted IS NULL)" + ((noTerm) ? " OR aat.term_id IS NULL" : "") + ")\n"
         } else {
             return ""
         }
@@ -1041,10 +1075,17 @@ class ReviewedAnnotationListing extends AnnotationListing {
         def from = "FROM reviewed_annotation a "
         def where = "WHERE true\n"
 
+        if(tags) from += " LEFT OUTER JOIN tag_domain_association tda ON a.id = tda.domain_ident AND tda.domain_class_name = '${getDomainClass()}' "
+
         if (multipleTerm) {
             from += "LEFT OUTER JOIN reviewed_annotation_term at ON a.id = at.reviewed_annotation_terms_id "
             from += "LEFT OUTER JOIN reviewed_annotation_term at2 ON a.id = at2.reviewed_annotation_terms_id "
-            where += "AND at.term_id <> at2.term_id AND at.deleted IS NULL AND at2.deleted IS NULL "
+            where += "AND at.term_id <> at2.term_id  "
+            /*from = "$from, reviewed_annotation_term at, reviewed_annotation_term at2 "
+            where = "$where" +
+                    "AND a.id = at.reviewed_annotation_terms_id\n" +
+                    " AND a.id = at2.reviewed_annotation_terms_id\n" +
+                    " AND at.term_id <> at2.term_id \n"*/
         }
         else if (noTerm && !(term || terms)) {
             from = "$from LEFT OUTER JOIN reviewed_annotation_term at ON a.id = at.reviewed_annotation_terms_id "
@@ -1065,8 +1106,6 @@ class ReviewedAnnotationListing extends AnnotationListing {
         if (columnToPrint.contains('user')) {
             from += "INNER JOIN sec_user u ON a.user_id = u.id "
         }
-
-        if(tags) from += " LEFT OUTER JOIN tag_domain_association tda ON a.id = tda.domain_ident AND tda.domain_class_name = '${getDomainClass()}' "
 
         return from + "\n" + where
     }

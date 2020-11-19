@@ -20,7 +20,7 @@ grails.reload.enabled = true
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
-grails.project.war.file = "core.war"
+grails.project.war.file = "target/${appName}.war"
 grails.project.dependency.resolver = "maven"
 
 //UNCOMMENT TO HAVE WORKING TEST
@@ -99,8 +99,6 @@ grails.project.dependency.resolution = {
         compile ':spring-security-core:2.0-RC4'
         compile ":spring-security-acl:2.0-RC2"
         compile ':spring-security-appinfo:2.0-RC2'
-        compile ":spring-security-cas:2.0-RC1"
-        compile ":spring-security-ldap:2.0-RC2"
         runtime ':export:1.6'
         compile ":quartz:1.0.1"
         runtime ":quartz-monitor:0.3-RC3"

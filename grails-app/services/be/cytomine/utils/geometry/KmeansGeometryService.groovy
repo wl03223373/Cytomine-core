@@ -115,7 +115,7 @@ class KmeansGeometryService {
 
         def ruleLine = rules.get(Math.min(ratio25,100))
 
-        int numberOfAnnotation = annotationIndexService.count(slice,user)
+        int numberOfAnnotation = Math.max(0, annotationIndexService.count(slice,user))
 
         def rule = getRuleForNumberOfAnnotations(numberOfAnnotation, ruleLine)
 

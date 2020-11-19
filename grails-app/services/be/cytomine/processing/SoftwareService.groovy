@@ -18,13 +18,10 @@ package be.cytomine.processing
 
 import be.cytomine.Exception.CytomineException
 import be.cytomine.command.*
-import be.cytomine.middleware.AmqpQueue
-import be.cytomine.middleware.MessageBrokerServer
 import be.cytomine.project.Project
 import be.cytomine.security.SecUser
 import be.cytomine.utils.ModelService
 import be.cytomine.utils.Task
-import groovy.json.JsonBuilder
 import org.springframework.security.acls.domain.BasePermission
 
 import static org.springframework.security.acls.domain.BasePermission.*
@@ -99,7 +96,7 @@ class SoftwareService extends ModelService {
      */
     def add(def json) throws CytomineException {
         SecUser currentUser = cytomineService.getCurrentUser()
-        securityACLService.checkGuest(currentUser)
+        securityACLService.checkUser(currentUser)
         json.user = currentUser.id
         return executeCommand(new AddCommand(user: currentUser),null,json)
     }

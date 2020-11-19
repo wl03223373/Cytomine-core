@@ -22,6 +22,7 @@ import be.cytomine.test.BasicInstanceBuilder
 import be.cytomine.test.Infos
 import be.cytomine.test.http.OntologyAPI
 import be.cytomine.test.http.ProjectAPI
+import be.cytomine.utils.UpdateData
 import grails.converters.JSON
 
 /**
@@ -110,9 +111,9 @@ class OntologySecurityTests extends SecurityTestsAbstract {
       assert 200 == resAddUser.code
 
       Infos.printRight(ontology)
-      //currently user 2 still can access to ontology
-      assert (200 == OntologyAPI.show(ontology.id,USERNAME2,PASSWORD2).code)
-      assert(true==OntologyAPI.containsInJSONList(ontology.id,JSON.parse(OntologyAPI.list(USERNAME2,PASSWORD2).data)))
+      //as user 2 is no more into a project with this ontologyn it can't access it
+      assert (403 == OntologyAPI.show(ontology.id,USERNAME2,PASSWORD2).code)
+      assert(false==OntologyAPI.containsInJSONList(ontology.id,JSON.parse(OntologyAPI.list(USERNAME2,PASSWORD2).data)))
       //check if user 2 cannot update/delete
       assert (403 == OntologyAPI.update(ontology.id,ontology.encodeAsJSON(),USERNAME2,PASSWORD2).code)
 
@@ -231,7 +232,104 @@ class OntologySecurityTests extends SecurityTestsAbstract {
         assert 200 == resAddUser.code
 
         //check if user 2 cannot access/update/delete
+        assert (403 == OntologyAPI.show(ontology.id,USERNAME2,PASSWORD2).code)
+        assert(false==OntologyAPI.containsInJSONList(ontology.id,JSON.parse(OntologyAPI.list(USERNAME2,PASSWORD2).data)))
+    }
+
+    void testOntologyAccessForProjectUser() {
+
+        //Get user1
+        User user1 = BasicInstanceBuilder.getUser(USERNAME1,PASSWORD1)
+        //Get user2
+        User user2 = BasicInstanceBuilder.getUser(USERNAME2,PASSWORD2)
+
+        def result = OntologyAPI.create(BasicInstanceBuilder.getOntologyNotExist().encodeAsJSON(),USERNAME1,PASSWORD1)
+        assert 200 == result.code
+        Ontology ontology = result.data
+
+        //Create new project (user1)
+        result = ProjectAPI.create(BasicInstanceBuilder.getProjectNotExist(ontology).encodeAsJSON(),USERNAME1,PASSWORD1)
+        assert 200 == result.code
+        Project project = result.data
+
+        //Add right to user2
+        def resAddUser = ProjectAPI.addUserProject(project.id,user2.id,USERNAME1,PASSWORD1)
+        assert 200 == resAddUser.code
+
+        //check if user 2 can access/update/delete
         assert (200 == OntologyAPI.show(ontology.id,USERNAME2,PASSWORD2).code)
-        assert(true==OntologyAPI.containsInJSONList(ontology.id,JSON.parse(OntologyAPI.list(USERNAME2,PASSWORD2).data)))
+        assert (true ==OntologyAPI.containsInJSONList(ontology.id,JSON.parse(OntologyAPI.list(USERNAME2,PASSWORD2).data)))
+
+        result = OntologyAPI.create(BasicInstanceBuilder.getOntologyNotExist().encodeAsJSON(),USERNAME1,PASSWORD1)
+        Ontology ontology2 = result.data
+        def data = UpdateData.createUpdateSet(project,[ontology: [project.ontology, ontology2]])
+        result = ProjectAPI.update(project.id, data.postData, USERNAME1,PASSWORD1)
+        assert 200 == result.code
+
+        def json = JSON.parse(result.data)
+        int idProject = json.project.id
+        result = ProjectAPI.show(idProject, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        json = JSON.parse(result.data)
+
+        assert (403 == OntologyAPI.show(ontology.id,USERNAME2,PASSWORD2).code)
+        assert (false ==OntologyAPI.containsInJSONList(ontology.id,JSON.parse(OntologyAPI.list(USERNAME2,PASSWORD2).data)))
+        assert (200 == OntologyAPI.show(ontology2.id,USERNAME2,PASSWORD2).code)
+        assert (true ==OntologyAPI.containsInJSONList(ontology2.id,JSON.parse(OntologyAPI.list(USERNAME2,PASSWORD2).data)))
+    }
+
+    void testOntologyAdminAccessWithProject() {
+
+        //Get user1
+        User user1 = BasicInstanceBuilder.getUser(USERNAME1,PASSWORD1)
+        //Get user2
+        User user2 = BasicInstanceBuilder.getUser(USERNAME2,PASSWORD2)
+
+        Ontology ontology = BasicInstanceBuilder.getOntologyNotExist(true)
+
+        //Create new project (project1)
+        def result = ProjectAPI.create(BasicInstanceBuilder.getProjectNotExist(ontology).encodeAsJSON(),USERNAME1,PASSWORD1)
+        Project project = result.data
+
+        //Add right to user2
+        result = ProjectAPI.addUserProject(project.id,user2.id,USERNAME1,PASSWORD1)
+
+        //check if user 2 can access
+        assert (200 == OntologyAPI.show(ontology.id,USERNAME2,PASSWORD2).code)
+        assert (true ==OntologyAPI.containsInJSONList(ontology.id,JSON.parse(OntologyAPI.list(USERNAME2,PASSWORD2).data)))
+        assert (403 == OntologyAPI.update(ontology.id,ontology.encodeAsJSON(), USERNAME2,PASSWORD2).code)
+
+        //Create new project (project2)
+        result = ProjectAPI.create(BasicInstanceBuilder.getProjectNotExist(ontology).encodeAsJSON(),USERNAME1,PASSWORD1)
+        Project project2 = result.data
+
+        //Add admin right to user2
+        ProjectAPI.addUserProject(project2.id,user2.id, USERNAME1,PASSWORD1)
+        ProjectAPI.addAdminProject(project2.id,user2.id, USERNAME1,PASSWORD1)
+
+        //Create new project (project2)
+        result = ProjectAPI.create(BasicInstanceBuilder.getProjectNotExist(ontology).encodeAsJSON(),USERNAME1,PASSWORD1)
+        Project project3 = result.data
+
+        //Add admin right to user2
+        ProjectAPI.addUserProject(project3.id,user2.id, USERNAME1,PASSWORD1)
+        ProjectAPI.addAdminProject(project3.id,user2.id, USERNAME1,PASSWORD1)
+
+        //check if user 2 has ontology admin rights
+        assert (200 == OntologyAPI.show(ontology.id,USERNAME2,PASSWORD2).code)
+        assert (true ==OntologyAPI.containsInJSONList(ontology.id,JSON.parse(OntologyAPI.list(USERNAME2,PASSWORD2).data)))
+        assert (200 == OntologyAPI.update(ontology.id,ontology.encodeAsJSON(), USERNAME2,PASSWORD2).code)
+
+        result = ProjectAPI.deleteAdminProject(project2.id,user2.id, USERNAME1,PASSWORD1)
+
+        //check if user 2 has ontology admin rights
+        assert (200 == OntologyAPI.show(ontology.id,USERNAME2,PASSWORD2).code)
+        assert (true ==OntologyAPI.containsInJSONList(ontology.id,JSON.parse(OntologyAPI.list(USERNAME2,PASSWORD2).data)))
+        assert (200 == OntologyAPI.update(ontology.id,ontology.encodeAsJSON(), USERNAME2,PASSWORD2).code)
+
+        result = ProjectAPI.deleteAdminProject(project3.id,user2.id, USERNAME1,PASSWORD1)
+
+        assert (200 == OntologyAPI.show(ontology.id,USERNAME2,PASSWORD2).code)
+        assert (true ==OntologyAPI.containsInJSONList(ontology.id,JSON.parse(OntologyAPI.list(USERNAME2,PASSWORD2).data)))
+        assert (403 == OntologyAPI.update(ontology.id,ontology.encodeAsJSON(), USERNAME2,PASSWORD2).code)
     }
 }

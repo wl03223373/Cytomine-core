@@ -59,7 +59,7 @@ class AmqpQueueConfigInstance extends CytomineDomain implements Serializable{
         AmqpQueueConfigInstance.withNewSession {
             AmqpQueueConfigInstance amqpQueueConfigInstance = AmqpQueueConfigInstance.findByQueueAndConfig(queue, config)
             if(amqpQueueConfigInstance && (amqpQueueConfigInstance.id != id))
-                throw new AlreadyExistException("The configuration instance '" + name + "' already exists!")
+                throw new AlreadyExistException("The configuration instance '" + config.name + " for " + queue.name + "' already exists!")
         }
     }
 

@@ -249,7 +249,7 @@ class RetrievalProjectTests  {
 
     void testUpdateProjectRetrievalRemoveProject() {
         //project with AO=T
-        Project projectToAdd = BasicInstanceBuilder.getProject()
+        Project projectToAdd = BasicInstanceBuilder.getProjectNotExist()
         projectToAdd.retrievalAllOntology = false;
         projectToAdd.retrievalDisable = false;
         projectToAdd.retrievalProjects?.clear()
@@ -287,7 +287,7 @@ class RetrievalProjectTests  {
 
     void testUpdateProjectRetrievalRemoveProjectAndDisableRetrieval() {
         //project with AO=T
-        Project projectToAdd = BasicInstanceBuilder.getProject()
+        Project projectToAdd = BasicInstanceBuilder.getProjectNotExist()
         projectToAdd.retrievalAllOntology = false;
         projectToAdd.retrievalDisable = false;
         projectToAdd.retrievalProjects?.clear()

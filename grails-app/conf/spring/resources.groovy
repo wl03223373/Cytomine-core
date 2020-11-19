@@ -15,8 +15,6 @@
 */
 
 
-import be.cytomine.ldap.CustomUserContextMapper
-import be.cytomine.security.CASLdapUserDetailsService
 import be.cytomine.security.SimpleUserDetailsService
 import be.cytomine.spring.CustomAjaxAwareAuthenticationEntryPoint
 import be.cytomine.spring.CustomDefaultRedirectStrategy
@@ -47,10 +45,7 @@ beans = {
     }
     springConfig.addAlias "springSecurityService", "springSecurityCoreSpringSecurityService"
     
-    //CAS + LDAP STUFF
     def config = SpringSecurityUtils.securityConfig
-    SpringSecurityUtils.loadSecondaryConfig 'DefaultLdapSecurityConfig'
-    config = SpringSecurityUtils.securityConfig
 
 
     redirectStrategy(CustomDefaultRedirectStrategy) {
@@ -58,6 +53,7 @@ beans = {
     }
     successRedirectHandler(CustomSavedRequestAwareAuthenticationSuccessHandler) {
         alwaysUseDefaultTargetUrl = false
+        useReferer = false
         //defaultTargetUrl = '/'
     }
 
@@ -85,45 +81,7 @@ beans = {
     }
 
 
-    if(config.ldap.active){
-        initialDirContextFactory(org.springframework.security.ldap.DefaultSpringSecurityContextSource,
-                config.ldap.context.server){
-            userDn = config.ldap.context.managerDn
-            password = config.ldap.context.managerPassword
-            anonymousReadOnly = config.ldap.context.anonymousReadOnly
-        }
-
-        ldapUserSearch(org.springframework.security.ldap.search.FilterBasedLdapUserSearch,
-                config.ldap.search.base,
-                config.ldap.search.filter,
-                initialDirContextFactory){
-        }
-
-        ldapAuthoritiesPopulator(org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator,
-                initialDirContextFactory,
-                config.ldap.authorities.groupSearchBase){
-            groupRoleAttribute = config.ldap.authorities.groupRoleAttribute
-            groupSearchFilter = config.ldap.authorities.groupSearchFilter
-            searchSubtree = config.ldap.authorities.searchSubtree
-            convertToUpperCase = config.ldap.mapper.convertToUpperCase
-            ignorePartialResultException = config.ldap.authorities.ignorePartialResultException
-        }
-
-        ldapUserDetailsMapper(CustomUserContextMapper)
-
-        ldapUserDetailsService(org.springframework.security.ldap.userdetails.LdapUserDetailsService,
-                ldapUserSearch,
-                ldapAuthoritiesPopulator){
-            userDetailsMapper = ref('ldapUserDetailsMapper')
-        }
-
-        userDetailsService(CASLdapUserDetailsService) {
-            ldapUserDetailsService=ref('ldapUserDetailsService')
-            grailsApplication = ref('grailsApplication')
-        }
-    } else {
-        userDetailsService(SimpleUserDetailsService)
-    }
+    userDetailsService(SimpleUserDetailsService)
 
     ehcacheAclCache(EhCacheFactoryBean) {
         cacheManager = ref('aclCacheManager')

@@ -116,8 +116,8 @@ class TermSecurityTests extends SecurityTestsAbstract {
       resAddUser = ProjectAPI.deleteUserProject(project.id,user2.id,USERNAME1,PASSWORD1)
       assert 200 == resAddUser.code
       //check if user 2 still can access
-      assert (200 == TermAPI.show(term.id,USERNAME2,PASSWORD2).code)
-      assert (200 == TermAPI.listByOntology(term.ontology.id,USERNAME2,PASSWORD2).code)
+      assert (403 == TermAPI.show(term.id,USERNAME2,PASSWORD2).code)
+      assert (403 == TermAPI.listByOntology(term.ontology.id,USERNAME2,PASSWORD2).code)
       //check if user 2 cannot access/update/delete
       assert (403 == TermAPI.update(term.id,term.encodeAsJSON(),USERNAME2,PASSWORD2).code)
 

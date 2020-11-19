@@ -43,7 +43,7 @@ class ImageGroupUrlMappings {
         }
 
         /* Image group Hdf5 special */
-        "/api/imagegroupHDF5.$format"(controller: "restImageGroupHDF5"){
+        /*"/api/imagegroupHDF5.$format"(controller: "restImageGroupHDF5"){
             action = [POST:"add"]
         }
 
@@ -61,7 +61,7 @@ class ImageGroupUrlMappings {
 
         "/api/imagegroupHDF5/$id/$x/$y/$w/$h/rectangle.$format"(controller: "restImageGroupHDF5"){
             action = [GET: "rectangleHDF5"]
-        }
+        }*/
 
     }
 }

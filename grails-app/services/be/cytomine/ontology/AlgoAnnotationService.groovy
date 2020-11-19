@@ -314,12 +314,6 @@ class AlgoAnnotationService extends ModelService {
         }
     }
 
-    def deleteDependentProperty(AlgoAnnotation aa, Transaction transaction, Task task = null) {
-        Property.findAllByDomainIdent(aa.id).each {
-            propertyService.delete(it,transaction,null,false)
-        }
-
-    }
     def deleteDependentSharedAnnotation(AlgoAnnotation aa, Transaction transaction, Task task = null) {
         SharedAnnotation.findAllByAnnotationClassNameAndAnnotationIdent(aa.class.name, aa.id).each {
             sharedAnnotationService.delete(it,transaction,null,false)

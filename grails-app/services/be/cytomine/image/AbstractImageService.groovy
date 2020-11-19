@@ -1,7 +1,5 @@
 package be.cytomine.image
 
-import be.cytomine.Exception.ConstraintException
-
 /*
 * Copyright (c) 2009-2020. Authors: see NOTICE file.
 *
@@ -18,9 +16,9 @@ import be.cytomine.Exception.ConstraintException
 * limitations under the License.
 */
 
+import be.cytomine.Exception.ConstraintException
 import be.cytomine.Exception.CytomineException
 import be.cytomine.Exception.ForbiddenException
-import be.cytomine.Exception.WrongArgumentException
 import be.cytomine.command.AddCommand
 import be.cytomine.command.Command
 import be.cytomine.command.DeleteCommand
@@ -36,6 +34,7 @@ import be.cytomine.utils.JSONUtils
 import be.cytomine.utils.ModelService
 import be.cytomine.utils.Task
 import grails.converters.JSON
+import org.codehaus.groovy.grails.web.json.JSONObject
 
 import static org.springframework.security.acls.domain.BasePermission.READ
 import static org.springframework.security.acls.domain.BasePermission.WRITE
@@ -106,8 +105,7 @@ class AbstractImageService extends ModelService {
             result =  criteriaRequestWithPagination(AbstractImage, max, offset, {
                 isNull("deleted")
             }, validSearchParameters, sortedProperty, sortDirection)
-        }
-        else {
+        } else {
             List<Storage> storages = securityACLService.getStorageList(cytomineService.currentUser, false)
             result =  criteriaRequestWithPagination(AbstractImage, max, offset, {
                 createAlias("uploadedFile", "uf")
@@ -131,9 +129,19 @@ class AbstractImageService extends ModelService {
         return result
     }
 
-    def add(def json) throws CytomineException {
-        def currentUser = cytomineService.currentUser
+    /**
+     * Add the new domain with JSON data
+     * @param json New domain data
+     * @return Response structure (created domain data,..)
+     */
+    def add(JSONObject json) throws CytomineException {
+        transactionService.start()
+        SecUser currentUser = cytomineService.getCurrentUser()
         securityACLService.checkUser(currentUser)
+        Command c = new AddCommand(user: currentUser)
+        def res = executeCommand(c,null,json)
+        //AbstractImage abstractImage = retrieve(res.data.abstractimage)
+        AbstractImage abstractImage = res.object
 
         if (json.uploadedFile) {
             UploadedFile uploadedFile = uploadedFileService.read(json.uploadedFile as Long)

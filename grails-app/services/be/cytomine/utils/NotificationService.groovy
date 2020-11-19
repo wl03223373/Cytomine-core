@@ -104,7 +104,7 @@ class NotificationService {
                 username : guestUser.getUsername(),
                 tokenKey : forgotPasswordToken.getTokenKey(),
                 expiryDate : forgotPasswordToken.getExpiryDate(),
-                by: grailsApplication.config.grails.UIURL,
+                by: grailsApplication.config.grails.serverURL,
                 website: grailsApplication.config.grails.instanceHostWebsite,
                 mailFrom: grailsApplication.config.grails.instanceHostSupportMail,
                 phoneNumber: grailsApplication.config.grails.instanceHostPhoneNumber
@@ -127,8 +127,8 @@ class NotificationService {
                 comment: request.comment,
                 annotationURL: request.annotationURL,
                 shareAnnotationURL: request.shareAnnotationURL,
-                by: grailsApplication.config.grails.UIURL,
                 cid : cid,
+                by: grailsApplication.config.grails.serverURL,
                 website: grailsApplication.config.grails.instanceHostWebsite,
                 mailFrom: grailsApplication.config.grails.instanceHostSupportMail,
                 phoneNumber: grailsApplication.config.grails.instanceHostPhoneNumber
@@ -146,7 +146,7 @@ class NotificationService {
     def notifyForgotUsername(User user) {
         String message = renderService.createForgotUsernameMessage([
                 username : user.getUsername(),
-                by: grailsApplication.config.grails.UIURL,
+                by: grailsApplication.config.grails.serverURL,
                 website: grailsApplication.config.grails.instanceHostWebsite,
                 mailFrom: grailsApplication.config.grails.instanceHostSupportMail,
                 phoneNumber: grailsApplication.config.grails.instanceHostPhoneNumber
@@ -164,7 +164,7 @@ class NotificationService {
                 username : user.getUsername(),
                 tokenKey : forgotPasswordToken.getTokenKey(),
                 expiryDate : forgotPasswordToken.getExpiryDate(),
-                by: grailsApplication.config.grails.UIURL,
+                by: grailsApplication.config.grails.serverURL,
                 website: grailsApplication.config.grails.instanceHostWebsite,
                 mailFrom: grailsApplication.config.grails.instanceHostSupportMail,
                 phoneNumber: grailsApplication.config.grails.instanceHostPhoneNumber

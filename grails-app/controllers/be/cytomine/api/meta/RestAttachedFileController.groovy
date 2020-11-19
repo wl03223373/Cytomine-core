@@ -93,14 +93,11 @@ class RestAttachedFileController extends RestController {
     ])
     @RestApiResponseObject(objectIdentifier = "file")
     def download() {
-       def attached = attachedFileService.read(params.get('id'))
+        AttachedFile attached = attachedFileService.read(params.get('id'))
         if(!attached) {
             responseNotFound("AttachedFile",params.get('id'))
         } else {
-            response.setContentType "application/octet-stream"
-            response.setHeader "Content-disposition", "attachment; filename=${attached.filename}"
-            response.outputStream << attached.data
-            response.outputStream.flush()
+            responseFile(attached.filename, attached.data)
         }
     }
 

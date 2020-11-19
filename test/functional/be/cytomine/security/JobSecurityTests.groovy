@@ -24,13 +24,6 @@ import be.cytomine.test.http.JobAPI
 import be.cytomine.test.http.ProjectAPI
 import grails.converters.JSON
 
-/**
- * Created by IntelliJ IDEA.
- * User: lrollus
- * Date: 2/03/11
- * Time: 11:08
- * To change this template use File | Settings | File Templates.
- */
 class JobSecurityTests extends SecurityTestsAbstract{
 
 
@@ -60,6 +53,8 @@ class JobSecurityTests extends SecurityTestsAbstract{
       assert 200 == result.code
       assert (true ==JobAPI.containsInJSONList(job.id,JSON.parse(result.data)))
       assert (200 == JobAPI.update(job.id,job.encodeAsJSON(),SecurityTestsAbstract.USERNAMEADMIN,SecurityTestsAbstract.PASSWORDADMIN).code)
+      addLog(job)
+      assert (200 == JobAPI.getLog(job.id,SecurityTestsAbstract.USERNAMEADMIN,SecurityTestsAbstract.PASSWORDADMIN).code)
       assert (200 == JobAPI.delete(job.id,SecurityTestsAbstract.USERNAMEADMIN,SecurityTestsAbstract.PASSWORDADMIN).code)
   }
 
@@ -96,6 +91,8 @@ class JobSecurityTests extends SecurityTestsAbstract{
       assert 200 == result.code
       assert (true ==JobAPI.containsInJSONList(job.id,JSON.parse(result.data)))
       //assert (200 == JobAPI.update(job,USERNAME2,PASSWORD2).code)
+      addLog(job)
+      assert (200 == JobAPI.getLog(job.id,SecurityTestsAbstract.USERNAME2,SecurityTestsAbstract.PASSWORD2).code)
       assert (200 == JobAPI.delete(job.id,SecurityTestsAbstract.USERNAME2,SecurityTestsAbstract.PASSWORD2).code)
   }
 
@@ -130,7 +127,17 @@ class JobSecurityTests extends SecurityTestsAbstract{
       assert (403 == JobAPI.show(job.id,SecurityTestsAbstract.USERNAME2,SecurityTestsAbstract.PASSWORD2).code)
       assert (403 ==JobAPI.listBySoftwareAndProject(job.software.id,project.id,SecurityTestsAbstract.USERNAME2,SecurityTestsAbstract.PASSWORD2,true).code)
       //assert (403 == JobAPI.update(job,USERNAME2,PASSWORD2).code)
+      addLog(job)
+      assert (403 == JobAPI.getLog(job.id,SecurityTestsAbstract.USERNAME2,SecurityTestsAbstract.PASSWORD2).code)
       assert (403 == JobAPI.delete(job.id,SecurityTestsAbstract.USERNAME2,SecurityTestsAbstract.PASSWORD2).code)
   }
+
+    private void addLog(Job job){
+        def log = BasicInstanceBuilder.getAttachedFileNotExist()
+        log.domainClassName = job.class.name
+        log.domainIdent = job.id
+        log.filename = "log.out"
+        log.save(flush: true)
+    }
 
 }

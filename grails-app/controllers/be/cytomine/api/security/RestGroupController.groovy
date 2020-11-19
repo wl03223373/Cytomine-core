@@ -94,28 +94,4 @@ class RestGroupController extends RestController {
     def delete() {
         delete(groupService, JSON.parse("{id : $params.id}"),null)
     }
-
-    @RestApiMethod(description="Check if a group is in the LDAP")
-    @RestApiParams(params=[
-            @RestApiParam(name="id", type="long", paramType = RestApiParamType.PATH, description = "The group id "),
-    ])
-    def isInLDAP() {
-        def result = groupService.isInLdap(params.long('id'))
-        def returnArray = [:]
-        returnArray["result"] = result
-        responseSuccess(returnArray)
-    }
-
-    @RestApiMethod(description="Create a group from the LDAP")
-    def createFromLDAP() {
-        responseSuccess(groupService.createFromLDAP(request.JSON))
-    }
-
-    @RestApiParams(params=[
-            @RestApiParam(name="id", type="long", paramType = RestApiParamType.PATH, description = "The group id "),
-    ])
-    @RestApiMethod(description="Reset a group with the informations in the LDAP")
-    def resetFromLDAP() {
-        responseSuccess(groupService.resetFromLDAP(params.long('id')))
-    }
 }

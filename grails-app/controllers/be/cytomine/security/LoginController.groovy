@@ -140,7 +140,7 @@ class LoginController extends RestController {
                 msg = "Account locked"
             }
             else {
-                msg = "Bad login or password"
+                msg = "Bad username or password"
             }
         }
 

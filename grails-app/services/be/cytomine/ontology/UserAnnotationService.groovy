@@ -41,7 +41,6 @@ import com.vividsolutions.jts.io.ParseException
 import com.vividsolutions.jts.io.WKTReader
 import com.vividsolutions.jts.io.WKTWriter
 import grails.converters.JSON
-import grails.converters.JSON
 import grails.transaction.Transactional
 import groovy.sql.Sql
 import org.codehaus.groovy.grails.web.json.JSONObject
@@ -49,7 +48,7 @@ import org.hibernate.FetchMode
 import org.hibernate.criterion.Restrictions
 import org.hibernate.spatial.criterion.SpatialRestrictions
 
-import static org.springframework.security.acls.domain.BasePermission.ADMINISTRATION
+
 import static org.springframework.security.acls.domain.BasePermission.READ
 
 //import org.hibernatespatial.criterion.SpatialRestrictions
@@ -147,6 +146,7 @@ class UserAnnotationService extends ModelService {
     def list(ImageInstance image, Geometry bbox, List<Long> termsIDS, List<Long> userIDS) {
         //:to do use listlight and parse WKT instead ?
         Collection<UserAnnotation> annotations = UserAnnotation.createCriteria()
+                .add(Restrictions.isNull("deleted"))
                 .add(Restrictions.in("user.id", userIDS))
                 .add(Restrictions.eq("image.id", image.id))
                 .add(SpatialRestrictions.intersects("location", bbox))
@@ -207,6 +207,26 @@ class UserAnnotationService extends ModelService {
     }
 
     /**
+     * List all annotation with a very light structure: id, project and crop url
+     */
+    def listLight() {
+        securityACLService.checkAdmin(cytomineService.currentUser)
+        String request = "" +
+                "SELECT a.id as id, a.project_id as project FROM user_annotation a, image_instance ii, abstract_image ai WHERE a.image_id = ii.id AND ii.base_image_id = ai.id AND ai.original_filename not like '%ndpi%svs%' AND GeometryType(a.location) != 'POINT' AND st_area(a.location) < 1500000 ORDER BY st_area(a.location) DESC"
+        def data = []
+        def sql = new Sql(dataSource)
+        sql.eachRow(request) {
+
+            long idAnnotation = it[0]
+            long idContainer = it[1]
+            def url = UrlApi.getUserAnnotationCropWithAnnotationIdWithMaxSize(idAnnotation)
+            data << [id: idAnnotation, container: idContainer, url: url]
+        }
+        sql.close()
+        data
+    }
+
+    /**
      * Add the new domain with JSON data
      * @param json New domain data
      * @return Response structure (created domain data,..)
@@ -228,6 +248,10 @@ class UserAnnotationService extends ModelService {
 
         if (!project) {
             throw new WrongArgumentException("Annotation does not have a valid project.")
+        }
+
+        if (json.isNull('location')) {
+            throw new WrongArgumentException("Annotation must have a valid geometry:" + json.location)
         }
 
         json.slice = slice.id
@@ -316,16 +340,6 @@ class UserAnnotationService extends ModelService {
         }
         result.data.annotation.annotationTrack = annotationTracks
         result.data.annotation.track = annotationTracks.collect { it -> it.track }
-
-        // Add to retrieval index
-        if (addedAnnotation.location.getNumPoints() >= 3 && !currentUser.algo()) {
-            try {
-                indexRetrievalAnnotation(addedAnnotation)
-            }
-            catch (CytomineException ex) {
-                log.error "CytomineException index in retrieval:" + ex.toString()
-            }
-        }
 
         return result
     }
@@ -502,13 +516,6 @@ class UserAnnotationService extends ModelService {
 
     }
 
-    def deleteDependentProperty(UserAnnotation ua, Transaction transaction, Task task = null) {
-        Property.findAllByDomainIdent(ua.id).each {
-            propertyService.delete(it, transaction, null, false)
-        }
-
-    }
-
     def annotationTrackService
 
     def deleteDependentAnnotationTrack(UserAnnotation ua, Transaction transaction, Task task = null) {
@@ -516,78 +523,4 @@ class UserAnnotationService extends ModelService {
             annotationTrackService.delete(it, transaction, task)
         }
     }
-
-    /**
-     * List all annotation with a very light strcuture: id, project and crop url
-     * Use for retrieval server (suggest term)
-     */
-    def listLightForRetrieval() {
-        securityACLService.checkAdmin(cytomineService.currentUser)
-        //String request = "SELECT a.id as id, a.project_id as project FROM user_annotation a WHERE GeometryType(a.location) != 'POINT' ORDER BY id desc"
-        extractAnnotationForRetrieval(dataSource)
-    }
-
-    static def extractAnnotationForRetrieval(def dataSource) {
-        String request = "" +
-                "SELECT a.id as id, a.project_id as project FROM user_annotation a, image_instance ii, abstract_image ai WHERE a.image_id = ii.id AND ii.base_image_id = ai.id AND ai.original_filename not like '%ndpi%svs%' AND GeometryType(a.location) != 'POINT' AND st_area(a.location) < 1500000 ORDER BY st_area(a.location) DESC"
-        return selectUserAnnotationLightForRetrieval(dataSource, request)
-    }
-
-    /**
-     * Add annotation to retrieval server for similar annotation listing and term suggestion
-     */
-    private indexRetrievalAnnotation(def annotation) {
-        //TODO
-//        def url = annotation.urlImageServerCrop(abstractImageService)
-//        log.info "urlCrop=${url}"
-//        imageRetrievalService.indexImageAsync(
-//                new URL(url),
-//                id+"",
-//                annotation.project.id+"",
-//                [:]
-//        )//indexAnnotationAsynchronous(UserAnnotation.read(id), retrieval)
-    }
-
-    /**
-     * Add annotation from retrieval server
-     */
-    private deleteRetrievalAnnotation(Long id, Long project) {
-        RetrievalServer retrieval = RetrievalServer.findByDeletedIsNull()
-        log.info "userAnnotation.id=" + id + " retrieval-server=" + retrieval
-        if (id && retrieval) {
-            log.info "delete userAnnotation " + id + " on  " + retrieval.getFullURL()
-            imageRetrievalService.deleteAnnotationAsynchronous(id, project + "")
-        }
-    }
-
-    /**
-     *  Update annotation in retrieval server
-     */
-    private updateRetrievalAnnotation(Long id) {
-        RetrievalServer retrieval = RetrievalServer.findByDeletedIsNull()
-        log.info "userAnnotation.id=" + id + " retrieval-server=" + retrieval
-        log.warn "UPDATE NOT IMPLEMENTED"
-        if (id && retrieval) {
-//            log.info "update userAnnotation " + id + " on  " + retrieval.getFullURL()
-//            imageRetrievalService.updateAnnotationAsynchronous(id)
-        }
-    }
-
-    /**
-     * Execute request and format result into a list of map
-     */
-    private static def selectUserAnnotationLightForRetrieval(def dataSource, String request) {
-        def data = []
-        def sql = new Sql(dataSource)
-        sql.eachRow(request) {
-
-            long idAnnotation = it[0]
-            long idContainer = it[1]
-            def url = UrlApi.getUserAnnotationCropWithAnnotationIdWithMaxSize(idAnnotation, 256)
-            data << [id: idAnnotation, container: idContainer, url: url]
-        }
-        sql.close()
-        data
-    }
-
 }

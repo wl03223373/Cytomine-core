@@ -1,15 +1,5 @@
 package be.cytomine.api.social
 
-import be.cytomine.Exception.CytomineException
-import be.cytomine.api.RestController
-import be.cytomine.image.SliceInstance
-import org.restapidoc.annotation.RestApiMethod
-import org.restapidoc.annotation.RestApiParam
-import org.restapidoc.annotation.RestApiParams
-import org.restapidoc.pojo.RestApiParamType
-import be.cytomine.project.Project
-import static org.springframework.security.acls.domain.BasePermission.READ
-
 /*
 * Copyright (c) 2009-2020. Authors: see NOTICE file.
 *
@@ -30,12 +20,16 @@ import be.cytomine.Exception.CytomineException
 import be.cytomine.Exception.ObjectNotFoundException
 import be.cytomine.api.RestController
 import be.cytomine.image.ImageInstance
+import be.cytomine.image.SliceInstance
+import be.cytomine.project.Project
 import be.cytomine.security.User
 import org.restapidoc.annotation.RestApi
 import org.restapidoc.annotation.RestApiMethod
 import org.restapidoc.annotation.RestApiParam
 import org.restapidoc.annotation.RestApiParams
 import org.restapidoc.pojo.RestApiParamType
+
+import static org.springframework.security.acls.domain.BasePermission.WRITE
 
 
 @RestApi(name = "Social | annotation action services", description = "Methods to manage actions performed on annotations")
@@ -88,8 +82,10 @@ class RestAnnotationActionController extends RestController {
     ])
     def listByImage() {
         ImageInstance image = imageInstanceService.read(params.image)
+        securityACLService.checkIsAdminContainer(image)
         User user = secUserService.read(params.user)
         if(params.user != null && user == null) throw new ObjectNotFoundException("Invalid user")
+
         Long afterThan = params.long("afterThan")
         Long beforeThan = params.long("beforeThan")
         responseSuccess(annotationActionService.list(image, user, afterThan, beforeThan))
@@ -104,14 +100,11 @@ class RestAnnotationActionController extends RestController {
     ])
     def countByProject() {
         Project project = projectService.read(params.project)
-        securityACLService.check(project, READ)
+        securityACLService.check(project, WRITE)
 
         Long startDate = params.long("startDate")
         Long endDate = params.long("endDate")
 
         responseSuccess(annotationActionService.countByProject(project, startDate, endDate, params.type))
     }
-
-
-   
 }

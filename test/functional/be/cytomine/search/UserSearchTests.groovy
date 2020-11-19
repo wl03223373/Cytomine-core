@@ -78,6 +78,15 @@ class UserSearchTests {
         assert json.size == 1
         assert UserAPI.containsInJSONList(u2.id,json)
 
+        searchParameters = [[operator : "ilike", field : "fullName", value:u2.username]]
+
+        result = UserAPI.searchAndList(searchParameters, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+        json = JSON.parse(result.data)
+        assert json.collection instanceof JSONArray
+        assert json.size == 1
+        assert UserAPI.containsInJSONList(u2.id,json)
+
         searchParameters = [[operator : "ilike", field : "fullName", value:u2.email]]
 
         result = UserAPI.searchAndList( searchParameters, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
@@ -202,6 +211,38 @@ class UserSearchTests {
         assert json.collection[0].containsKey("role")
         assert json.size == 2
 
+
+        searchParameters = [[operator : "in", field : "projectRole", value: "contributor"]]
+
+        result = UserAPI.searchAndList(project.id,"project","user", true, true, true, searchParameters, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+        json = JSON.parse(result.data)
+        assert json.collection instanceof JSONArray
+        assert json.collection[0].containsKey("role")
+        assert json.size == 1
+
+
+        searchParameters = [[operator : "in", field : "projectRole", value: "representative"]]
+
+        result = UserAPI.searchAndList(project.id,"project","user", true, true, true, searchParameters, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+        json = JSON.parse(result.data)
+        assert json.collection instanceof JSONArray
+        assert json.size == 0
+
+
+        def pur = BasicInstanceBuilder.getProjectRepresentativeUserNotExist()
+        pur.project = project
+        pur.user = u2
+        BasicInstanceBuilder.saveDomain(pur)
+        searchParameters = [[operator : "in", field : "projectRole", value: "representative"]]
+
+        result = UserAPI.searchAndList(project.id,"project","user", true, true, true, searchParameters, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+        json = JSON.parse(result.data)
+        assert json.collection instanceof JSONArray
+        assert json.collection[0].containsKey("role")
+        assert json.size == 1
     }
 
 

@@ -87,7 +87,7 @@ class Ontology extends CytomineDomain implements Serializable {
      * @return Term list
      */
     def terms() {
-        Term.findAllByOntology(this)
+        Term.findAllByOntologyAndDeletedIsNull(this)
     }
 
     /**
@@ -99,7 +99,7 @@ class Ontology extends CytomineDomain implements Serializable {
         if(!parent) {
             return []
         } else {
-           return Term.executeQuery('SELECT term FROM Term as term WHERE ontology = :ontology AND term.id NOT IN (SELECT DISTINCT rel.term1.id FROM RelationTerm as rel, Term as t WHERE rel.relation = :relation AND t.ontology = :ontology AND t.id=rel.term1.id)',['ontology':this,'relation':parent])
+           return Term.executeQuery('SELECT term FROM Term as term WHERE ontology = :ontology AND deleted IS NULL AND term.id NOT IN (SELECT DISTINCT rel.term1.id FROM RelationTerm as rel, Term as t WHERE rel.relation = :relation AND t.ontology = :ontology AND t.id=rel.term1.id)',['ontology':this,'relation':parent])
         }
     }
 

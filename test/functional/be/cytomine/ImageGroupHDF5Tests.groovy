@@ -39,7 +39,7 @@ class ImageGroupHDF5Tests {
 //        assert 200 == result.code
     }
 
-    void testDeleteImageGroupHDF5(){
+    /*void testDeleteImageGroupHDF5(){
         ImageGroupHDF5 imageGroupHDF5 = BasicInstanceBuilder.getImageGroupHDF5()
         def result = ImageGroupHDF5API.delete(imageGroupHDF5.id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 403 == result.code
@@ -80,12 +80,7 @@ class ImageGroupHDF5Tests {
         ImageGroupHDF5 imageGroupHDF5 = BasicInstanceBuilder.getImageGroupHDF5()
         println imageGroupHDF5
         def result = ImageGroupHDF5API.show(imageGroupHDF5.id, Infos.ANOTHERLOGIN, Infos.ANOTHERPASSWORD)
-        assert 403 == result.code
-        def json = JSON.parse(result.data)
-        assert json.errors.contains("removed")
-        /*assert 200 == result.code
-        def json = JSON.parse(result.data)
-        assert json instanceof JSONObject*/
+        assert 404 == result.code
     }
 
     void testShowImageGroupFromImageGroupId(){
@@ -95,11 +90,7 @@ class ImageGroupHDF5Tests {
         BasicInstanceBuilder.saveDomain(imageGroupHDF5)
 
         def result = ImageGroupHDF5API.showFromImageGroup(imageGroup.id ,Infos.ANOTHERLOGIN, Infos.ANOTHERPASSWORD)
-        assert 403 == result.code
-        def json = JSON.parse(result.data)
-        assert json.errors.contains("removed")
-        //assert 200 == result.code
-
+        assert 404 == result.code
     }
 
 }

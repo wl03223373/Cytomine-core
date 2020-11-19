@@ -52,11 +52,6 @@ class AbstractImageTests {
         assert json.collection.collect{it.inProject}.contains(false)
     }
 
-    void testListImagesDatatable() {
-        def result = AbstractImageAPI.list(true,Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-        assert 200 == result.code
-    }
-
     void testListImagesWithoutCredential() {
         BasicInstanceBuilder.getAbstractImage()
         def result = AbstractImageAPI.list(Infos.BADLOGIN, Infos.BADPASSWORD)

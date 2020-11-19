@@ -1,9 +1,5 @@
 package be.cytomine.meta
 
-import be.cytomine.CytomineDomain
-
-import be.cytomine.AnnotationDomain
-
 /*
 * Copyright (c) 2009-2020. Authors: see NOTICE file.
 *
@@ -22,8 +18,8 @@ import be.cytomine.AnnotationDomain
 
 import be.cytomine.Exception.ObjectNotFoundException
 import be.cytomine.command.*
-import be.cytomine.meta.Description
 import be.cytomine.security.SecUser
+import be.cytomine.AnnotationDomain
 import be.cytomine.utils.ModelService
 import be.cytomine.utils.Task
 
@@ -81,7 +77,7 @@ class DescriptionService extends ModelService {
             json.domainClassName = annotation.getClass().name
             securityACLService.check(json.domainIdent,annotation.getClass().name,READ)
             securityACLService.checkFullOrRestrictedForOwner(json.domainIdent,annotation.getClass().name, "user")
-        } else {
+        } else if (!json.domainClassName.contains("AbstractImage")){
             securityACLService.check(json.domainIdent,json.domainClassName,READ)
             securityACLService.checkFullOrRestrictedForOwner(json.domainIdent,json.domainClassName, "user")
         }

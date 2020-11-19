@@ -174,21 +174,22 @@ class SharedAnnotationService extends ModelService {
             json.receivers = receivers.collect{it.id}
         }
 
+        securityACLService.checkFullOrRestrictedForOwner(annotation, annotation.user)
+        def result =  executeCommand(new AddCommand(user: sender), null,json)
 
-        log.info "send mail to " + receiversEmail
-        try {
-            notificationService.notifyShareAnnotation(sender, receiversEmail, json, attachments, cid)
-        } catch (MiddlewareException e) {
-            if(Environment.getCurrent() == Environment.DEVELOPMENT){
-                e.printStackTrace()
-            } else {
-                throw e
+        if (result) {
+            log.info "send mail to " + receiversEmail
+            try {
+                notificationService.notifyShareAnnotation(sender, receiversEmail, json, attachments, cid)
+            } catch (MiddlewareException e) {
+                if(Environment.getCurrent() == Environment.DEVELOPMENT){
+                    e.printStackTrace()
+                } else {
+                    throw e
+                }
             }
         }
 
-
-        securityACLService.checkFullOrRestrictedForOwner(annotation, annotation.user)
-        def result =  executeCommand(new AddCommand(user: sender), null,json)
         return result
     }
 

@@ -18,11 +18,19 @@ class ParameterConstraintUrlMappings {
 
     static mappings = {
         "/api/parameter_constraint.$format"(controller: "restParameterConstraint") {
+            action = [GET: "list"]
+        }
+        "/api/parameter_constraint/$id.$format"(controller: "restParameterConstraint") {
+            action = [GET: "show"]
+        }
+
+        // currently disabled. HOW TO avoid to add or update object with expression "new File(\"/tmp/test\").createNewFile();"   ... or worse !
+        /*"/api/parameter_constraint.$format"(controller: "restParameterConstraint") {
             action = [GET: "list", POST: "add"]
         }
         "/api/parameter_constraint/$id.$format"(controller: "restParameterConstraint") {
             action = [GET: "show", PUT: "update", DELETE: "delete"]
-        }
+        }*/
     }
 
 }

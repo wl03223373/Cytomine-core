@@ -17,7 +17,7 @@
 class SoftwareParameterConstraintUrlMappings {
 
     static mappings = {
-        "/api/softwareparameter/$idParameter/constraint.$format"(controller: "restSoftwareParameterConstraint") {
+        "/api/software_parameter/$idParameter/software_parameter_constraint.$format"(controller: "restSoftwareParameterConstraint") {
             action = [GET: "listBySoftwareParameter"]
         }
         "/api/software_parameter_constraint.$format"(controller: "restSoftwareParameterConstraint") {
@@ -26,8 +26,8 @@ class SoftwareParameterConstraintUrlMappings {
         "/api/software_parameter_constraint/$id.$format"(controller: "restSoftwareParameterConstraint") {
             action = [GET: "show", PUT: "update", DELETE: "delete"]
         }
-        "/api/software_parameter_constraint/evaluate/$id/value/$value.$format"(controller: "restSoftwareParameterConstraint") {
-            action = [GET: "evaluate", POST: "evaluate"]
+        "/api/software_parameter_constraint/$id/evaluate.$format"(controller: "restSoftwareParameterConstraint") {
+            action = [GET: "evaluate"]
         }
     }
 

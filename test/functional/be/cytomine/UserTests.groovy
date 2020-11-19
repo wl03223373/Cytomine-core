@@ -26,6 +26,7 @@ import be.cytomine.test.http.UserAPI
 import be.cytomine.utils.UpdateData
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONArray
+import org.codehaus.groovy.grails.web.json.JSONElement
 import org.codehaus.groovy.grails.web.json.JSONObject
 
 /**
@@ -202,6 +203,55 @@ class UserTests  {
 
     }
 
+    void testAddUserInvalidPassword() {
+        def userToAdd = BasicInstanceBuilder.getUserNotExist()
+        JSONElement jsonWithPassword = JSON.parse(userToAdd.encodeAsJSON())
+        jsonWithPassword.password = "123456"
+
+        def result = UserAPI.create(jsonWithPassword.toString(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 400 == result.code
+
+        userToAdd = BasicInstanceBuilder.getUserNotExist()
+        jsonWithPassword = JSON.parse(userToAdd.encodeAsJSON())
+        jsonWithPassword.password = "12345678"
+
+        result = UserAPI.create(jsonWithPassword.toString(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+
+        result = UserAPI.checkPassword("12345678",userToAdd.username,"12345678")
+        assert 200 == result .code
+    }
+
+    void testAddUserInvalidUsername() {
+        def userToAdd = BasicInstanceBuilder.getUserNotExist()
+        userToAdd.username = " invalid "
+        def result = UserAPI.create(userToAdd.encodeAsJSON(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 400 == result.code
+
+        userToAdd.username = "invalid "
+        result = UserAPI.create(userToAdd.encodeAsJSON(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 400 == result.code
+
+        userToAdd.username = " invalid"
+        result = UserAPI.create(userToAdd.encodeAsJSON(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 400 == result.code
+
+        userToAdd.username = "is valid"
+        result = UserAPI.create(userToAdd.encodeAsJSON(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+
+        userToAdd.username = "valid.92_06"
+        result = UserAPI.create(userToAdd.encodeAsJSON(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+
+        userToAdd.username = "ù%Ôë.ã6."
+        result = UserAPI.create(userToAdd.encodeAsJSON(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+
+        userToAdd.username = "Jean-Charles-Marc-Édouard"
+        result = UserAPI.create(userToAdd.encodeAsJSON(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+    }
 
     void testAddUserInvalidEmail() {
         def user = BasicInstanceBuilder.getUser()
@@ -215,11 +265,6 @@ class UserTests  {
         assert 200 == result.code
         userToAdd = BasicInstanceBuilder.getUserNotExist()
         userToAdd.email = "somperson@someschool.school"
-        result = UserAPI.create(userToAdd.encodeAsJSON(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-        assert 200 == result.code
-
-        userToAdd = BasicInstanceBuilder.getUserNotExist()
-        userToAdd.email = "vandana.bunwaree@llb.school"
         result = UserAPI.create(userToAdd.encodeAsJSON(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
     }
@@ -549,12 +594,6 @@ class UserTests  {
         assert 401 == UserAPI.signature(user.username,"unauthpassword").code
         assert 200 == UserAPI.signature(user.username,"newpassword").code
     }
-
-//    void testLDAP() {
-//        def result = UserAPI.isInLDAP("u212435",Infos.SUPERADMINLOGIN,Infos.SUPERADMINPASSWORD)
-//        assert 200 == result.code
-//        assert true == JSON.parse(result.data).result
-//    }
 
     void testListUsersWithLastActivity(){
         def connection = BasicInstanceBuilder.getProjectConnection(true)

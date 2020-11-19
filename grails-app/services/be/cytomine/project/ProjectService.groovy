@@ -69,6 +69,7 @@ class ProjectService extends ModelService {
     def secRoleService
     def notificationService
     def projectRepresentativeUserService
+    def ontologyService
 
     def currentDomain() {
         Project
@@ -216,7 +217,7 @@ class ProjectService extends ModelService {
             where = "WHERE aclSid.sid like '"+user.username+"' and p.deleted is null "
         }
         else {
-            select = "SELECT  p.* "
+            select = "SELECT DISTINCT(p.id), p.* "
             from = "FROM project p "
             where = "WHERE p.deleted is null "
         }
@@ -393,7 +394,6 @@ class ProjectService extends ModelService {
 
 
     def listByCreator(User user) {
-        securityACLService.checkIsSameUser(user,cytomineService.currentUser)
         def data = []
         def sql = new Sql(dataSource)
          sql.eachRow("select * from creator_project where user_id = ?",[user.id]) {
@@ -404,7 +404,6 @@ class ProjectService extends ModelService {
     }
 
     def listByAdmin(User user) {
-        securityACLService.checkIsSameUser(user,cytomineService.currentUser)
         def data = []
         def sql = new Sql(dataSource)
         sql.eachRow("select * from admin_project where user_id = ?",[user.id]) {
@@ -415,7 +414,6 @@ class ProjectService extends ModelService {
     }
 
     def listByUser(User user) {
-        securityACLService.checkIsSameUser(user,cytomineService.currentUser)
         def data = []
         def sql = new Sql(dataSource)
         sql.eachRow("select * from user_project where user_id = ?",[user.id]) {
@@ -493,8 +491,9 @@ class ProjectService extends ModelService {
         taskService.updateTask(task,5,"Start editing project ${project.name}")
         SecUser currentUser = cytomineService.getCurrentUser()
         securityACLService.check(project.container(),WRITE)
+        Ontology ontology = project.ontology
 
-        if(project.ontology?.id != jsonNewData.ontology){
+        if(ontology?.id != jsonNewData.ontology){
             boolean deleteTerms = jsonNewData.forceOntologyUpdate
             long associatedTermsCount
             long userAssociatedTermsCount = 0L
@@ -593,6 +592,10 @@ class ProjectService extends ModelService {
                 projectRepresentativeUserService.delete(repr)
             }
         }
+        if(ontology?.id != jsonNewData.ontology){
+            if(ontology) ontologyService.determineRightsForUsers(ontology, secUserService.listUsers(project))
+            if(project.ontology) ontologyService.determineRightsForUsers(project.ontology, secUserService.listUsers(project))
+        }
         return result
     }
 
@@ -646,7 +649,7 @@ class ProjectService extends ModelService {
         def group2 = [$group : [_id : '$_id.project', "users" :[$sum:1]]]
         def result;
 
-        result = db.persistentConnection.aggregate(
+        result = db.lastConnection.aggregate(
                 match,
                 group1,
                 group2
@@ -747,10 +750,10 @@ class ProjectService extends ModelService {
 
 
     protected def beforeUpdate(Project domain) {
-        domain.countAnnotations = UserAnnotation.countByProjectAndDeletedIsNotNull(domain)
-        domain.countImages = ImageInstance.countByProjectAndDeletedIsNotNull(domain)
-        domain.countJobAnnotations = AlgoAnnotation.countByProjectAndDeletedIsNotNull(domain)
-        domain.countReviewedAnnotations = ReviewedAnnotation.countByProjectAndDeletedIsNotNull(domain)
+        domain.countAnnotations = UserAnnotation.countByProjectAndDeletedIsNull(domain)
+        domain.countImages = ImageInstance.countByProjectAndDeletedIsNull(domain)
+        domain.countJobAnnotations = AlgoAnnotation.countByProjectAndDeletedIsNull(domain)
+        domain.countReviewedAnnotations = ReviewedAnnotation.countByProjectAndDeletedIsNull(domain)
     }
 
     protected def beforeDelete(Project domain) {
@@ -924,13 +927,6 @@ class ProjectService extends ModelService {
 //        ImageGroup.findAllByProject(project).each {
 //            imageSequenceService.delete(it,transaction,null,false)
 //        }
-//    }
-//
-//    def deleteDependentProperty(Project project, Transaction transaction, Task task = null) {
-//        Property.findAllByDomainIdent(project.id).each {
-//            propertyService.delete(it,transaction,null,false)
-//        }
-//
 //    }
 //
 //    def deleteDependentNestedImageInstance(Project project, Transaction transaction,Task task=null) {

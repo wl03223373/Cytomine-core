@@ -24,7 +24,8 @@ import be.cytomine.security.UserJob
 import grails.converters.JSON
 import grails.util.Holders
 import groovy.json.JsonBuilder
-import org.json.JSONObject
+import org.codehaus.groovy.grails.web.json.JSONArray
+import org.codehaus.groovy.grails.web.json.JSONObject
 
 class JobRuntimeService {
 
@@ -160,9 +161,16 @@ class JobRuntimeService {
         JSONObject jsonObject = new JSONObject()
         jsonObject.put("requestType", "execute")
         jsonObject.put("jobId", job.id)
-        jsonObject.put("command", getCommandJobWithArgs(job))
+
+        JSONArray command = new JSONArray()
+        getCommandJobWithArgs(job).each {command.put(it)}
+        jsonObject.put("command", command)
+
         jsonObject.put("pullingCommand", job.software.pullingCommand)
-        jsonObject.put("serverParameters", getServerParameters(job))
+
+        JSONObject serverParameters = new JSONObject()
+        getServerParameters(job).each {serverParameters.put(it.key, it.value)}
+        jsonObject.put("serverParameters", serverParameters)
 
         log.info("JOB REQUEST : ${jsonObject}")
 

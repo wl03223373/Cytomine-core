@@ -83,26 +83,26 @@ class DescriptionTests {
 
   void testUpdateDescriptionCorrect() {
       def description = BasicInstanceBuilder.getDescriptionNotExist(BasicInstanceBuilder.getProjectNotExist(true),true)
-      def data = UpdateData.createUpdateSet(description,[data: ["OLDdata","NEWdata"]])
+      def data = UpdateData.createUpdateSet(description,[data: [description.data,"NEWdata"]])
       def result = DescriptionAPI.update(description.domainIdent, description.domainClassName,data.postData,Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
       assert 200 == result.code
       def json = JSON.parse(result.data)
       assert json instanceof JSONObject
       int idDescription = json.description.id
 
-      def showResult =  DescriptionAPI.show(description.domainIdent,description.domainClassName,Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-      json = JSON.parse(showResult.data)
+      result =  DescriptionAPI.show(description.domainIdent,description.domainClassName,Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+      json = JSON.parse(result.data)
       BasicInstanceBuilder.compare(data.mapNew, json)
 
-      showResult = DescriptionAPI.undo()
+      result= DescriptionAPI.undo()
       assert 200 == result.code
-      showResult =  DescriptionAPI.show(description.domainIdent,description.domainClassName,Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-      BasicInstanceBuilder.compare(data.mapOld, JSON.parse(showResult.data))
+      result=  DescriptionAPI.show(description.domainIdent,description.domainClassName,Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+      BasicInstanceBuilder.compare(data.mapOld, JSON.parse(result.data))
 
-      showResult = DescriptionAPI.redo()
+      result = DescriptionAPI.redo()
       assert 200 == result.code
-      showResult =  DescriptionAPI.show(description.domainIdent,description.domainClassName,Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-      BasicInstanceBuilder.compare(data.mapNew, JSON.parse(showResult.data))
+      result =  DescriptionAPI.show(description.domainIdent,description.domainClassName,Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+      BasicInstanceBuilder.compare(data.mapNew, JSON.parse(result.data))
   }
 
 

@@ -65,7 +65,7 @@ class SecUser extends CytomineDomain implements Serializable {
     static transients = ["newPassword", "currentTransaction", "nextTransaction"]
 
     static constraints = {
-        username blank: false
+        username (blank: false, matches: "^[^\\ ].*[^\\ ]\$")
         password blank: false
         newPassword(nullable : true, blank : false)
         publicKey nullable : true, blank : false, unique: true
@@ -177,7 +177,8 @@ class SecUser extends CytomineDomain implements Serializable {
 
     protected void encodePassword() {
         log.info "encodePassword for user="+username
-        if(password.size()<4) throw new WrongArgumentException("Your password must have at least 4 characters!")
+        byte minLength = 8
+        if(password.size()<minLength) throw new WrongArgumentException("Your password must have at least $minLength characters!")
         password = springSecurityService.encodePassword(password)
     }
 

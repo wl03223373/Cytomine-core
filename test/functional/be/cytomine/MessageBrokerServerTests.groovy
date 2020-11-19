@@ -93,27 +93,27 @@ class MessageBrokerServerTests {
 
     void testUpdateMessageBrokerServerCorrect() {
 
-        MessageBrokerServer messageBrokerServer = BasicInstanceBuilder.getMessageBrokerServer()
-        def data = UpdateData.createUpdateSet(messageBrokerServer, [name: ["OLDNAME","NEWNAME"]])
+        MessageBrokerServer messageBrokerServer = BasicInstanceBuilder.getMessageBrokerServerNotExist(true)
+        def data = UpdateData.createUpdateSet(messageBrokerServer, [name: [messageBrokerServer.name,"NEWNAME"]])
         def result = MessageBrokerServerAPI.update(messageBrokerServer.id, data.postData, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
         def json = JSON.parse(result.data)
         assert json instanceof JSONObject
         int idMessageBrokerServer = json.messagebrokerserver.id
 
-        def showResult = MessageBrokerServerAPI.show(idMessageBrokerServer, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-        json = JSON.parse(showResult.data)
+        result = MessageBrokerServerAPI.show(idMessageBrokerServer, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        json = JSON.parse(result.data)
         BasicInstanceBuilder.compare(data.mapNew, json)
 
-        showResult = MessageBrokerServerAPI.undo()
+        result = MessageBrokerServerAPI.undo()
         assert 200 == result.code
-        showResult = MessageBrokerServerAPI.show(idMessageBrokerServer, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-        BasicInstanceBuilder.compare(data.mapOld, JSON.parse(showResult.data))
+        result = MessageBrokerServerAPI.show(idMessageBrokerServer, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        BasicInstanceBuilder.compare(data.mapOld, JSON.parse(result.data))
 
-        showResult = MessageBrokerServerAPI.redo()
+        result = MessageBrokerServerAPI.redo()
         assert 200 == result.code
-        showResult = MessageBrokerServerAPI.show(idMessageBrokerServer, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-        BasicInstanceBuilder.compare(data.mapNew, JSON.parse(showResult.data))
+        result = MessageBrokerServerAPI.show(idMessageBrokerServer, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        BasicInstanceBuilder.compare(data.mapNew, JSON.parse(result.data))
     }
 
     void testUpdateMessageBrokerServerNotExist() {
@@ -131,7 +131,7 @@ class MessageBrokerServerTests {
     }
 
     void testDeleteMessageBrokerServer() {
-        def messageBrokerServerToDelete = BasicInstanceBuilder.getMessageBrokerServer()
+        def messageBrokerServerToDelete = BasicInstanceBuilder.getMessageBrokerServerNotExist()
         assert messageBrokerServerToDelete.save(flush: true)!= null
         def id = messageBrokerServerToDelete.id
         def result = MessageBrokerServerAPI.delete(id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)

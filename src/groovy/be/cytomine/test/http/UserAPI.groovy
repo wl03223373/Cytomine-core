@@ -170,7 +170,7 @@ class UserAPI extends DomainAPI {
     static def create(String json, String username, String password) {
         JSONElement jsonWithPassword = JSON.parse(json)
         if(jsonWithPassword.password==null || jsonWithPassword.password.toString()=="null") {
-            jsonWithPassword.password = "toto"
+            jsonWithPassword.password = "defaultPassword"
             jsonWithPassword.oldPassword = password
         }
         String URL = Infos.CYTOMINEURL + "api/user.json"
@@ -231,11 +231,6 @@ class UserAPI extends DomainAPI {
 //        String URL = Infos.CYTOMINEURL + "custom-ui/project/${idProject}/flag.json"
 //        return doGET(URL,username, password)
 //    }
-
-    static def isInLDAP(String usernameToAsk,String username, String password) {
-        String URL = Infos.CYTOMINEURL + "api/ldap/${usernameToAsk}/user.json"
-        return doGET(URL, username, password)
-    }
 
     static def listUsersWithLastActivity(Long idProject, Long max = 0, Long offset = 0, String username, String password) {
         String URL = Infos.CYTOMINEURL + "api/project/${idProject}/usersActivity.json?max=$max&offset=$offset"

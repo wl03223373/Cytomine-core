@@ -33,13 +33,6 @@ import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 
-/**
- * Created by IntelliJ IDEA.
- * User: lrollus
- * Date: 16/03/11
- * Time: 16:12
- * To change this template use File | Settings | File Templates.
- */
 class JobTests  {
 
     void testListJobWithCredential() {
@@ -161,6 +154,20 @@ class JobTests  {
         assert 404 == result.code
     }
 
+    void testGetLog() {
+        def job =  BasicInstanceBuilder.getJob()
+        def result = JobAPI.getLog(0L, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 404 == result.code
+        result = JobAPI.getLog(job.id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 404 == result.code
+        def log = BasicInstanceBuilder.getAttachedFileNotExist()
+        log.domainClassName = job.class.name
+        log.domainIdent = job.id
+        log.filename = "log.out"
+        log.save(flush: true)
+        result = JobAPI.getLog(job.id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+    }
 
     void testListJobData() {
         Job job = BasicInstanceBuilder.getJob()

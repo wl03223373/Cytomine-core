@@ -26,7 +26,8 @@ environments {
     }
     development {
         // Update the file path so that it matches the generated configuration file in your bootstrap
-        grails.config.locations = ["file:${userHome}/Cytomine-ULiege/Cytomine-bootstrap/configs/core/cytomineconfig.groovy"]
+        //grails.config.locations = ["file:${userHome}/Cytomine/Cytomine-bootstrap/configs/core/cytomineconfig.groovy"]
+        grails.config.locations = ["file:${userHome}/.grails/cytomineconfig.groovy"]
     }
 }
 println "External configuration file : ${grails.config.locations}"
@@ -194,50 +195,18 @@ grails.plugin.springsecurity.interceptUrlMap = [
  * CAS config
  ******************************************************************************/
 
-/* Read CAS/LDAP config. A bad thing with Grails external config is that all config data from config properties file
-   is set AFTER ldap/cas config. So we read config data from file directly and we force flag (active)
-   def flag = readFromConfigFile()
-   if(flag) grails.config.flag = true
- */
+//allow an admin to connect as a other user
+grails.plugin.springsecurity.useSwitchUserFilter = true
 
-boolean cas = false
-if(configFile.exists()) {
-    config = new ConfigSlurper().parse(configFile.text)
-    cas = config.grails.plugin.springsecurity.cas.active
-}
 
-if(cas) {
-    println("enable CAS")
-    grails.plugin.springsecurity.cas.useSingleSignout = true
-    grails.plugin.springsecurity.cas.active = true
-    grails.plugin.springsecurity.ldap.active = true
-    grails.plugin.springsecurity.logout.afterLogoutUrl =''
-
-} else {
-    println("disable CAS")
-    grails.plugin.springsecurity.cas.useSingleSignout = false
-    grails.plugin.springsecurity.cas.active = false
-    grails.plugin.springsecurity.ldap.active = false
-    grails.plugin.springsecurity.interceptUrlMap.remove('/*')
-}
-grails.plugin.springsecurity.cas.loginUri = '/login'
-grails.plugin.springsecurity.cas.serverUrlPrefix = ''
-grails.plugin.springsecurity.cas.serviceUrl = 'http://localhost:8080/j_spring_cas_security_check'
-
-/******************************************************************************
- * LDAP config
- ******************************************************************************/
-grails.plugin.springsecurity.auth.loginFormUrl = '/'
-grails.plugin.springsecurity.ldap.search.base = ''
-grails.plugin.springsecurity.ldap.context.managerDn = ''
-grails.plugin.springsecurity.ldap.context.managerPassword = ''
-grails.plugin.springsecurity.ldap.context.server = ''
-grails.plugin.springsecurity.ldap.authorities.groupSearchBase = ''
-grails.plugin.springsecurity.ldap.authorities.ignorePartialResultException = true
-grails.plugin.springsecurity.ldap.authorities.retrieveDatabaseRoles = true
-grails.plugin.springsecurity.ldap.context.anonymousReadOnly = true
-grails.plugin.springsecurity.ldap.mapper.usePassword= true
-grails.plugin.springsecurity.ldap.mapper.userDetailsClass= 'inetOrgPerson'// 'org.springframework.security.ldap.userdetails.InetOrgPerson'
+// Added by the Spring Security Core plugin:
+grails.plugin.springsecurity.userLookup.userDomainClassName = 'be.cytomine.security.SecUser'
+grails.plugin.springsecurity.userLookup.passwordPropertyName = 'password'
+grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'be.cytomine.security.SecUserSecRole'
+grails.plugin.springsecurity.authority.className = 'be.cytomine.security.SecRole'
+grails.plugin.springsecurity.authority.nameField = 'authority'
+grails.plugin.springsecurity.projectClass = 'be.cytomine.project.Project'
+grails.plugin.springsecurity.rememberMe.parameter = 'remember_me'
 
 grails.plugins.dynamicController.mixins = [
     'com.burtbeckwith.grails.plugins.appinfo.IndexControllerMixin':'com.burtbeckwith.appinfo_test.AdminManageController',
@@ -259,7 +228,7 @@ grails.doc.license="Apache2"
 grails.doc.copyright="University of liège"
 grails.doc.footer="www.cytomine.org"
 grails.plugins.restapidoc.docVersion = "0.1"
-grails.plugins.restapidoc.basePath = "http://demo.cytomine.coop"
+grails.plugins.restapidoc.basePath = grails.serverURL
 grails.plugins.restapidoc.customClassName = "be.cytomine.api.doc.CustomResponseDoc"
 grails.plugins.restapidoc.controllerPrefix = "Rest"
 grails.plugins.restapidoc.grailsDomainDefaultType = "long"
@@ -336,7 +305,7 @@ environments {
         grails.plugin.springsecurity.basic.realmName = "Cytomine log"
         grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*']
 
-        grails.adminPassword="admin"
+        grails.adminPassword="cytomine"
         grails.ImageServerPrivateKey="ABC"
         grails.ImageServerPublicKey="DEF"
         grails.adminPrivateKey="GHI"
@@ -395,6 +364,7 @@ cytomine.customUI.project = [
         "project-explore-annotation-description":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
         "project-explore-annotation-panel":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
         "project-explore-annotation-terms":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
+        "project-explore-annotation-tags":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
         "project-explore-annotation-attached-files":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
         "project-explore-annotation-creation-info":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
         "project-explore-annotation-tracks":["ADMIN_PROJECT":true, "CONTRIBUTOR_PROJECT":true],

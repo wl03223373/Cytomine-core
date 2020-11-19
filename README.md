@@ -2,11 +2,6 @@
 
 > [Cytomine](http://cytomine.org) is, to the best of our knowledge, the first open-source rich internet application to enable highly collaborative and multidisciplinary analysis of multi-gigapixel imaging data.
 
-[![Build Status](https://travis-ci.com/Cytomine-ULiege/Cytomine-core.svg?branch=master)](https://travis-ci.com/Cytomine-ULiege/Cytomine-core)
-[![GitHub release](https://img.shields.io/github/release/Cytomine-ULiege/Cytomine-core.svg)](https://github.com/Cytomine-ULiege/Cytomine-core/releases)
-[![Docker Build Status](https://img.shields.io/docker/build/cytomineuliege/core.svg)](https://hub.docker.com/r/cytomineuliege/core/tags/)
-[![GitHub](https://img.shields.io/github/license/Cytomine-ULiege/Cytomine-core.svg)](https://github.com/Cytomine-ULiege/Cytomine-core/blob/master/LICENSE)
-
 
 ## Overview
 
@@ -25,9 +20,7 @@ Full documentation can be found [online](http://doc.cytomine.be).
 
 ## Install
 
-**To install *official* release of Cytomine-Core, see @cytomine. Follow this guide to install forked version by ULiege.** 
-
-It is automatically installed with the [Cytomine-bootstrap](https://github.com/Cytomine-ULiege/Cytomine-bootstrap) procedure using Docker. See [Cytomine installation documentation](http://doc.cytomine.be/pages/viewpage.action?pageId=10715266) for more details.
+See our [Cytomine-bootstrap](https://github.com/cytomine/Cytomine-bootstrap) project to install it with Docker
 
 ## Develop
 Check [how to install a development environment for Cytomine](http://doc.cytomine.be/display/DEVDOC/How+to+install+a+development+environment+for+Cytomine+ULiege+with+Docker).
@@ -45,3 +38,7 @@ When using our software, we kindly ask you to cite our website url and related p
 ## License
 
 Apache 2.0
+
+## Code of Conduct
+
+We subscribe to the [Contributor Convenant Code of Conduct](https://documentation.cytomine.org/Code-of-Conduct) for a respectful community.

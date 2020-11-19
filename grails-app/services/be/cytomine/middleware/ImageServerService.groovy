@@ -25,7 +25,6 @@ import be.cytomine.image.CompanionFile
 import be.cytomine.image.ImageInstance
 import be.cytomine.image.SliceInstance
 import be.cytomine.image.UploadedFile
-import be.cytomine.image.server.ImageServer
 import be.cytomine.utils.GeometryUtils
 import be.cytomine.utils.ModelService
 import com.vividsolutions.jts.geom.Geometry

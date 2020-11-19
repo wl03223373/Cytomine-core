@@ -165,7 +165,8 @@ class User extends SecUser {
         GREEK("EL"),
         ENGLISH("EN"),
         FRENCH("FR"),
-        DUTCH("NL")
+        DUTCH("NL"),
+        SPANISH("ES")
 
         private final String code
 

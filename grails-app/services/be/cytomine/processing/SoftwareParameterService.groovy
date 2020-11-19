@@ -42,7 +42,6 @@ class SoftwareParameterService extends ModelService {
 
     def read(def id) {
         def softParam = SoftwareParameter.read(id)
-        securityACLService.check(softParam.software, READ)
         softParam
     }
 
@@ -63,9 +62,9 @@ class SoftwareParameterService extends ModelService {
      * @return Response structure (created domain data,..)
      */
     def add(def json) throws CytomineException {
-       if(!json.software) throw new InvalidRequestException("software not set")
-
+        if(!json.software) throw new InvalidRequestException("software not set")
         securityACLService.check(json.software, Software, READ)
+
         SecUser currentUser = cytomineService.getCurrentUser()
         json.user = currentUser.id
         return executeCommand(new AddCommand(user: currentUser), null, json)

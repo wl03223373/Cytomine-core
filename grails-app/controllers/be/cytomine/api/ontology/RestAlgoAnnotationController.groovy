@@ -25,6 +25,14 @@ import be.cytomine.ontology.Term
 import be.cytomine.project.Project
 import be.cytomine.security.SecUser
 import grails.converters.JSON
+import org.apache.commons.io.IOUtils
+import org.apache.http.HttpResponse
+import org.apache.http.NameValuePair
+import org.apache.http.client.HttpClient
+import org.apache.http.client.entity.UrlEncodedFormEntity
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.impl.client.DefaultHttpClient
+import org.apache.http.message.BasicNameValuePair
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.restapidoc.annotation.*

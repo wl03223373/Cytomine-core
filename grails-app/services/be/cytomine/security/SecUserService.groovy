@@ -43,6 +43,7 @@ import grails.plugin.springsecurity.acl.AclSid
 import groovy.sql.GroovyResultSet
 import groovy.sql.Sql
 import org.apache.commons.collections.ListUtils
+import org.codehaus.groovy.grails.web.json.JSONElement
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.util.ReflectionUtils
 
@@ -77,6 +78,7 @@ class SecUserService extends ModelService {
     def storageService
     def projectRepresentativeUserService
     def imageConsultationService
+    def projectService
     def projectConnectionService
 
     def currentDomain() {
@@ -162,7 +164,7 @@ class SecUserService extends ModelService {
         if(multiSearch) {
             String value = ((String) multiSearch.values).toLowerCase()
             value = "%$value%"
-            where += " and (u.firstname ILIKE :name OR u.lastname ILIKE :name OR u.email ILIKE :name) "
+            where += " and (u.firstname ILIKE :name OR u.lastname ILIKE :name OR u.email ILIKE :name OR u.username ILIKE :name) "
             mapParams.put("name", value)
         }
         if(extended.withRoles){
@@ -249,14 +251,21 @@ class SecUserService extends ModelService {
     def lock(SecUser user){
         securityACLService.checkAdmin(cytomineService.currentUser)
         if(!user.enabled) throw new InvalidRequestException("User already locked !")
-        user.enabled = false
-        user.save(failOnError: true)
+        def json = user.encodeAsJSON()
+        json = new JSONObject(json)
+        json.enabled = false
+
+        return executeCommand(new EditCommand(user: cytomineService.currentUser),user, json)
+
     }
     def unlock(SecUser user){
         securityACLService.checkAdmin(cytomineService.currentUser)
         if(user.enabled) throw new InvalidRequestException("User already unlocked !")
-        user.enabled = true
-        user.save(failOnError: true)
+        def json = user.encodeAsJSON()
+        json = new JSONObject(json)
+        json.enabled = true
+
+        return executeCommand(new EditCommand(user: cytomineService.currentUser),user, json)
     }
 
     def listWithRoles() {
@@ -421,6 +430,7 @@ class SecUserService extends ModelService {
                 "and secUser.class = 'be.cytomine.security.User' "
         String groupBy = ""
         String order = ""
+        String having = ""
 
         if(multiSearch) {
             String value = ((String) multiSearch.values).toLowerCase()
@@ -433,7 +443,13 @@ class SecUserService extends ModelService {
 
             where += " and secUser.id in ("+getAllOnlineUserIds(project).join(",")+") "
         }
-        if(projectRoleSearch && projectRoleSearch.values == "manager") where +=" and aclEntry.mask = 16 "
+
+        if (withProjectRole && projectRoleSearch) {
+            def roles = (projectRoleSearch?.values instanceof String) ? [projectRoleSearch?.values] : projectRoleSearch?.values
+            having += " HAVING MAX(CASE WHEN r.id IS NOT NULL THEN 'representative' " +
+                    "WHEN aclEntry.mask = 16 THEN 'manager' " +
+                    "ELSE 'contributor' END) IN (" + roles.collect { it -> "'$it'"}?.join(',') + ")"
+        }
 
         //for (def t : searchParameters) {
             // TODO parameters to HQL constraints
@@ -456,7 +472,7 @@ class SecUserService extends ModelService {
         }
         order = "order by $sortColumn $sortDirection "
 
-        String request = select + from + where + groupBy + order
+        String request = select + from + where + groupBy + having + order
 
         def users = User.executeQuery(request, [offset:offset, max:max])
 
@@ -485,8 +501,8 @@ class SecUserService extends ModelService {
 
     def listUsers(Project project, boolean showUserJob = false) {
         securityACLService.check(project,READ)
-        List<SecUser> users = SecUser.executeQuery("select distinct secUser " +
-                "from AclObjectIdentity as aclObjectId, AclEntry as aclEntry, AclSid as aclSid, SecUser as secUser "+
+        List<User> users = User.executeQuery("select distinct secUser " +
+                "from AclObjectIdentity as aclObjectId, AclEntry as aclEntry, AclSid as aclSid, User as secUser "+
                 "where aclObjectId.objectId = "+project.id+" " +
                 "and aclEntry.aclObjectIdentity = aclObjectId.id " +
                 "and aclEntry.sid = aclSid.id " +
@@ -586,7 +602,7 @@ class SecUserService extends ModelService {
 
         String request = "SELECT DISTINCT u.id as id, u.username as username, " +
                 "s.name as softwareName, s.software_version as softwareVersion, " +
-                "j.created as created, u.job_id as job, j.favorite as favorite " +
+                "j.created as created, u.job_id as job " +
                 "FROM annotation_index ai " +
                 "RIGHT JOIN slice_instance si ON ai.slice_id = si.id " + 
                 "RIGHT JOIN sec_user u ON ai.user_id = u.id " +
@@ -606,7 +622,6 @@ class SecUserService extends ModelService {
 
             item.created = it.created
             item.algo = true
-            item.favorite = it.favorite
             item.job = it.job
             data << item
         }
@@ -788,6 +803,9 @@ class SecUserService extends ModelService {
                 if(project.ontology) {
                     log.info "addUserToProject ontology=" + project.ontology + " username=" + user?.username + " ADMIN=" + admin
                     permissionService.addPermission(project.ontology, user.username, READ)
+                    if (admin) {
+                        permissionService.addPermission(project.ontology, user.username, ADMINISTRATION)
+                    }
                 }
             }
         }
@@ -808,7 +826,7 @@ class SecUserService extends ModelService {
         if (project) {
             log.info "deleteUserFromProject project=" + project?.id + " username=" + user?.username + " ADMIN=" + admin
             if(project.ontology) {
-                removeOntologyRightIfNecessary(project, user)
+                removeOntologyRightIfNecessary(project, user, admin)
             }
             if(admin) {
                 permissionService.deletePermission(project, user.username, ADMINISTRATION)
@@ -824,14 +842,20 @@ class SecUserService extends ModelService {
         [data: [message: "OK"], status: 201]
     }
 
-    private void removeOntologyRightIfNecessary(Project project, User user) {
+    private void removeOntologyRightIfNecessary(Project project, User user, boolean admin = false) {
         //we remove the right ONLY if user has no other project with this ontology
         List<Project> projects = securityACLService.getProjectList(user,project.ontology)
         List<Project> otherProjects = projects.findAll{it.id!=project.id}
 
         if(otherProjects.isEmpty()) {
             //user has no other project with this ontology, remove the right!
-            //permissionService.deletePermission(project.ontology,user.username,READ)
+            permissionService.deletePermission(project.ontology,user.username,READ)
+            permissionService.deletePermission(project.ontology,user.username,ADMINISTRATION)
+        } else if(admin) {
+            def managedProjectList = projectService.listByAdmin(user).collect { it.id }
+            if (!otherProjects.any { managedProjectList.contains(it.id) }) {
+                permissionService.deletePermission(project.ontology, user.username, ADMINISTRATION)
+            }
         }
 
     }

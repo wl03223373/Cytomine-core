@@ -21,11 +21,6 @@ import be.cytomine.security.UserJob
 import be.cytomine.test.Infos
 import grails.converters.JSON
 
-/**
- * User: lrollus
- * Date: 6/12/11
- * This class implement all method to easily get/create/update/delete/manage Job to Cytomine with HTTP request during functional test
- */
 class JobAPI extends DomainAPI {
 
     static def show(Long id, String username, String password) {
@@ -126,6 +121,11 @@ class JobAPI extends DomainAPI {
     static def execute(def id,String username,String password) {
         String URL = Infos.CYTOMINEURL + "/api/job/$id/execute.json"
         return doPOST(URL,"", username, password)
+    }
+
+    static def getLog(def id,String username,String password) {
+        String URL = Infos.CYTOMINEURL + "/api/job/$id/log.json"
+        return doGET(URL, username, password)
     }
 
     static def showUserJob(Long id,String username,String password) {

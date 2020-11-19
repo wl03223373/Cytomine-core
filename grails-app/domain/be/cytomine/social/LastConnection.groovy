@@ -44,6 +44,6 @@ class LastConnection extends CytomineDomain{
     static mapping = {
         id(generator: 'assigned', unique: true)
         sort "id"
-        compoundIndex date:1, indexAttributes:['expireAfterSeconds':60]
+        compoundIndex date:2, indexAttributes:['expireAfterSeconds':300]
     }
 }

@@ -31,12 +31,14 @@ class ProjectSearchTests {
         Project p1 = BasicInstanceBuilder.getProjectNotExist(true)
         Project p2 = BasicInstanceBuilder.getProjectNotExist(true)
         BasicInstanceBuilder.getUserAnnotationNotExist(p1, true)
-        User user = BasicInstanceBuilder.getAdmin(Infos.ADMINLOGIN, Infos.ADMINPASSWORD)
+        String login = BasicInstanceBuilder.getRandomString()
+        String pwd = BasicInstanceBuilder.getRandomString()
+        User user = BasicInstanceBuilder.getAdmin(login, pwd)
         ProjectAPI.addUserProject(p1.id, user.id,Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         ProjectAPI.addUserProject(p2.id, user.id,Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         p1 = p1.refresh()
 
-        def result = ProjectAPI.getBounds(Infos.ADMINLOGIN, Infos.ADMINPASSWORD)
+        def result = ProjectAPI.getBounds(login, pwd)
         assert 200 == result.code
         def json = JSON.parse(result.data)
 
@@ -212,6 +214,13 @@ class ProjectSearchTests {
         assert json.collection instanceof JSONArray
         long size = json.size
         assert size > 1
+
+        result = ProjectAPI.list(2,0,Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+        json = JSON.parse(result.data)
+        assert json.collection instanceof JSONArray
+        assert json.size == size
+        assert json.collection.size() == 2
         Long id1 = json.collection[0].id
         Long id2 = json.collection[1].id
 

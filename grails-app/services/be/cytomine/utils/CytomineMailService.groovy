@@ -73,6 +73,7 @@ class CytomineMailService {
             sender.send(mail)
         } catch (AuthenticationFailedException | MessagingException | MailAuthenticationException e) {
             log.error "can't send email $mail (MessagingException)"
+            e.printStackTrace()
             throw new MiddlewareException(e.getMessage())
         }
     }

@@ -42,6 +42,7 @@ class SoftwareUserRepository extends CytomineDomain {
         provider(nullable: false, blank: false)
         username(nullable: false, blank: false)
         dockerUsername(nullable: false, blank: false)
+        prefix(nullable: true)
     }
 
     static mapping = {
@@ -52,11 +53,9 @@ class SoftwareUserRepository extends CytomineDomain {
     @Override
     void checkAlreadyExist() {
         SoftwareUserRepository.withNewSession {
-            if (provider && username && dockerUsername && prefix) {
-                SoftwareUserRepository softwareUserRepository = SoftwareUserRepository.findByProviderAndUsernameAndDockerUsernameAndPrefix(provider, username, dockerUsername, prefix)
-                if (softwareUserRepository != null && softwareUserRepository.id != id) {
-                    throw new AlreadyExistException("The software user repository ${softwareUserRepository.username} already exists !")
-                }
+            SoftwareUserRepository softwareUserRepository = SoftwareUserRepository.findByProviderAndUsernameAndDockerUsernameAndPrefix(provider, username, dockerUsername, prefix)
+            if (softwareUserRepository != null && softwareUserRepository.id != id) {
+                throw new AlreadyExistException("The software user repository ${softwareUserRepository.username} already exists !")
             }
         }
     }

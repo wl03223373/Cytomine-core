@@ -133,19 +133,19 @@ class RoiAnnotationTests {
         assert json instanceof JSONObject
         int idAnnotation = json.roiannotation.id
 
-        def showResult = RoiAnnotationAPI.show(idAnnotation, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-        json = JSON.parse(showResult.data)
+        result = RoiAnnotationAPI.show(idAnnotation, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        json = JSON.parse(result.data)
         BasicInstanceBuilder.compare(data.mapNew, json)
 
-        showResult = RoiAnnotationAPI.undo()
+        result = RoiAnnotationAPI.undo()
         assert 200 == result.code
-        showResult = RoiAnnotationAPI.show(idAnnotation, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-        BasicInstanceBuilder.compare(data.mapOld, JSON.parse(showResult.data))
+        result = RoiAnnotationAPI.show(idAnnotation, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        BasicInstanceBuilder.compare(data.mapOld, JSON.parse(result.data))
 
-        showResult = RoiAnnotationAPI.redo()
+        result = RoiAnnotationAPI.redo()
         assert 200 == result.code
-        showResult = RoiAnnotationAPI.show(idAnnotation, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-        BasicInstanceBuilder.compare(data.mapNew, JSON.parse(showResult.data))
+        result = RoiAnnotationAPI.show(idAnnotation, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        BasicInstanceBuilder.compare(data.mapNew, JSON.parse(result.data))
     }
 
     void testEditRoiAnnotationNotExist() {

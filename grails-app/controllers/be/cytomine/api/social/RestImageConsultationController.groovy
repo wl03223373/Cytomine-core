@@ -19,6 +19,7 @@ import be.cytomine.project.Project
 import be.cytomine.Exception.CytomineException
 import be.cytomine.api.RestController
 import org.restapidoc.annotation.RestApi
+import be.cytomine.security.SecUser
 import org.restapidoc.annotation.RestApiMethod
 import org.restapidoc.annotation.RestApiParam
 import org.restapidoc.annotation.RestApiParams
@@ -53,7 +54,7 @@ class RestImageConsultationController extends RestController {
     @RestApiParams(params=[
             @RestApiParam(name="project", type="long", paramType = RestApiParamType.PATH, description = "The project id")
     ])
-    def lastImageOfUsersByProject() {
+        def lastImageOfUsersByProject() {
         Project project = projectService.read(params.project)
         responseSuccess(imageConsultationService.lastImageOfUsersByProject(project))
     }

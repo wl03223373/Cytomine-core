@@ -18,7 +18,6 @@ package be.cytomine.processing
 
 import be.cytomine.CytomineDomain
 import be.cytomine.Exception.AlreadyExistException
-import be.cytomine.Exception.WrongArgumentException
 import be.cytomine.utils.JSONUtils
 import org.restapidoc.annotation.RestApiObject
 import org.restapidoc.annotation.RestApiObjectField
@@ -32,8 +31,6 @@ import org.springframework.security.acls.model.Permission
  */
 @RestApiObject(name = "Software", description = "Software is an application that can read/add/update/delete data from cytomine. Each time a software is launch, we create a job instance")
 class Software extends CytomineDomain {
-
-    def softwareParameterService
 
     /**
      * Application name
@@ -69,6 +66,9 @@ class Software extends CytomineDomain {
     @RestApiObjectField(description = "The version")
     String softwareVersion
 
+    @RestApiObjectField(description = "The path of the source files of the software")
+    String sourcePath
+
     @RestApiObjectFields(params=[
         @RestApiObjectField(apiFieldName = "fullName", description = "Full name, including version.", allowedType = "string", useForCreation = false),
         @RestApiObjectField(apiFieldName = "executable", description = "True if it can be executed by Cytomine", allowedType = "boolean", useForCreation = false),
@@ -96,6 +96,7 @@ class Software extends CytomineDomain {
         deprecated(nullable: true)
         pullingCommand(nullable: true)
         softwareUserRepository(nullable: true)
+        sourcePath(nullable: true)
     }
 
     static mapping = {
@@ -145,6 +146,7 @@ class Software extends CytomineDomain {
         domain.pullingCommand = JSONUtils.getJSONAttrStr(json, 'pullingCommand')
         domain.deprecated = JSONUtils.getJSONAttrBoolean(json, 'deprecated', false)
         domain.softwareVersion = JSONUtils.getJSONAttrStr(json, 'softwareVersion')
+        domain.sourcePath= JSONUtils.getJSONAttrStr(json, 'sourcePath')
         return domain
     }
 
@@ -163,6 +165,7 @@ class Software extends CytomineDomain {
         returnArray['pullingCommand'] = domain?.pullingCommand
         returnArray['deprecated'] = domain?.deprecated
         returnArray['softwareVersion'] = domain?.softwareVersion
+        returnArray['sourcePath'] = domain?.sourcePath
         returnArray['fullName'] = domain?.fullName()
         returnArray['executable'] = domain?.executable()
         try {

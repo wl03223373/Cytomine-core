@@ -61,7 +61,7 @@ class RestProjectConnectionController extends RestController {
         responseSuccess(projectConnectionService.lastConnectionInProject(project, null));
     }
 
-    @RestApiMethod(description = "List the last user connections in a project for a given user")
+    @RestApiMethod(description = "Get the last user connections in a project for a given user")
     @RestApiParams(params=[
             @RestApiParam(name="project", type="long", paramType = RestApiParamType.PATH, description = "The project id"),
             @RestApiParam(name="user", type="long", paramType = RestApiParamType.PATH, description = "The user id"),
@@ -108,7 +108,7 @@ class RestProjectConnectionController extends RestController {
         }
     }
 
-    @RestApiMethod(description = "Get the number of connection by project")
+    @RestApiMethod(description = "Get the number of connection by project and user")
     @RestApiParams(params=[
             @RestApiParam(name="project", type="long", paramType = RestApiParamType.PATH, description = "The project id"),
             @RestApiParam(name="user", type="long", paramType = RestApiParamType.PATH, description = "The user id"),
@@ -136,23 +136,7 @@ class RestProjectConnectionController extends RestController {
             @RestApiParam(name="afterThan", type="date", paramType = RestApiParamType.QUERY, description = "The date when counting starts"),
             @RestApiParam(name="period", type="string", paramType = RestApiParamType.QUERY, description = "The period of connections (hour : by hours, day : by days, week : by weeks)"),
     ])
-    
-    def countByProject() {
-        Project project = projectService.read(params.project)
-        securityACLService.check(project, READ)
 
-        Long startDate = params.long("startDate")
-        Long endDate = params.long("endDate")
-
-        responseSuccess(projectConnectionService.countByProject(project, startDate, endDate))
-    }
-
-    @RestApiMethod(description="Get the number of connections in the specified project")
-    @RestApiParams(params=[
-            @RestApiParam(name="project", type="long", paramType = RestApiParamType.PATH, description = "The identifier of the project"),
-            @RestApiParam(name="startDate", type="long", paramType = RestApiParamType.QUERY, description = "Only connections after this date will be counted (optional)"),
-            @RestApiParam(name="endDate", type="long", paramType = RestApiParamType.QUERY, description = "Only connections before this date will be counted (optional)"),
-    ])
     def numberOfProjectConnections() {
         securityACLService.checkAdmin(cytomineService.getCurrentUser())
         Long beforeThan = params.long("beforeThan")
@@ -163,6 +147,22 @@ class RestProjectConnectionController extends RestController {
         } else {
             response([success: false, message: "Mandatory parameter 'period' not found. Parameters are : "+params], 400)
         }
+    }
+
+    @RestApiMethod(description="Get the number of connections in the specified project")
+    @RestApiParams(params=[
+            @RestApiParam(name="project", type="long", paramType = RestApiParamType.PATH, description = "The identifier of the project"),
+            @RestApiParam(name="startDate", type="long", paramType = RestApiParamType.QUERY, description = "Only connections after this date will be counted (optional)"),
+            @RestApiParam(name="endDate", type="long", paramType = RestApiParamType.QUERY, description = "Only connections before this date will be counted (optional)"),
+    ])
+    def countByProject() {
+        Project project = projectService.read(params.project)
+        securityACLService.check(project, READ)
+
+        Long startDate = params.long("startDate")
+        Long endDate = params.long("endDate")
+
+        responseSuccess(projectConnectionService.countByProject(project, startDate, endDate))
     }
 
     @RestApiMethod(description="Get the average project connections on Cytomine.")

@@ -356,7 +356,7 @@ class RestUserController extends RestController {
     ])
     def lock() {
         SecUser user = SecUser.get(params.id)
-        response(secUserService.lock(user))
+        responseResult(secUserService.lock(user))
     }
 
     @RestApiMethod(description="Unlock an user")
@@ -365,7 +365,7 @@ class RestUserController extends RestController {
     ])
     def unlock() {
         SecUser user = SecUser.get(params.id)
-        response(secUserService.unlock(user))
+        responseResult(secUserService.unlock(user))
     }
 
 
@@ -844,9 +844,8 @@ class RestUserController extends RestController {
             def image = index >= 0 ? images[index]:null
 
 
-            boolean ldap = CASLdapUserDetailsService.isInLdap(user.username)
             def userInfo = [id : user.id, username : user.username, firstname : user.firstname, lastname : user.lastname, email: user.email,
-                        LDAP : ldap,lastImageId : image?.image, lastImageName : image?.imageName,
+                        lastImageId : image?.image, lastImageName : image?.imageName,
                         lastConnection : connection?.created, frequency : frequency?.frequency?: 0]
             results << userInfo
         }
@@ -856,8 +855,6 @@ class RestUserController extends RestController {
             results.sort { a,b->
                 if(field.equals("lastconnection")) {
                     (order)*(a.lastConnection <=>b.lastConnection)
-                } else if(field.equals("ldap")) {
-                    (order)*(a.ldap <=>b.ldap )
                 } else if(field.equals("frequency")) {
                     (order)*(a.frequency <=>b.frequency )
                 } else {
@@ -874,31 +871,6 @@ class RestUserController extends RestController {
         }
 
         responseSuccess(results)
-    }
-
-    def CASLdapUserDetailsService
-
-    @RestApiMethod(description="Add an user from the LDAP", listing = true)
-    @RestApiParams(params=[
-        @RestApiParam(name="username", type="long", paramType = RestApiParamType.QUERY, description = "The username in LDAP"),
-    ])
-    def addFromLDAP() {
-        log.info  "username = " + params.username  + " role = " + params.role
-        CASLdapUserDetailsService.loadUserByUsername(params.username)
-        def resp = SecUser.findByUsername(params.username)
-        log.info resp
-        responseSuccess(resp)
-    }
-
-    @RestApiMethod(description="Check if an user is in the LDAP", listing = true)
-    @RestApiParams(params=[
-            @RestApiParam(name="username", type="long", paramType = RestApiParamType.QUERY, description = "The username in LDAP"),
-    ])
-    def isInLdap() {
-        def result = CASLdapUserDetailsService.isInLdap(params.username)
-        def returnArray = [:]
-        returnArray["result"] = result
-        responseSuccess(returnArray)
     }
 
     @RestApiMethod(description="Download a report (pdf, xls,...) with user listing from a specific project")

@@ -58,13 +58,13 @@ class ProcessingServer extends CytomineDomain {
 
     // Most of parameters must be nullable to accept rename of old ProcessingServer to ImagingServer
     static constraints = {
-        name(nullable: true, blank: false, unique: true)
+        name(nullable: false, blank: false, unique: true)
         host(blank: false)
-        username(blank: false, nullable: true)
+        username(blank: false, nullable: false)
         port(nullable: false)
+        type(nullable: true)
         processingMethodName(blank: false, nullable: true)
         amqpQueue(nullable: true)
-        type(nullable: true)
         persistentDirectory(blank: true, nullable: true)
         workingDirectory(blank: true, nullable: true)
     }
@@ -101,12 +101,12 @@ class ProcessingServer extends CytomineDomain {
         domain.host = JSONUtils.getJSONAttrStr(json, 'host', true)
         domain.username = JSONUtils.getJSONAttrStr(json, 'username', true)
         domain.port = JSONUtils.getJSONAttrInteger(json, 'port', null)
-        domain.type = JSONUtils.getJSONAttrStr(json, 'type', true)
-        domain.processingMethodName = JSONUtils.getJSONAttrStr(json, 'processingMethodName', true)
+        domain.type = JSONUtils.getJSONAttrStr(json, 'type', false)
+        domain.processingMethodName = JSONUtils.getJSONAttrStr(json, 'processingMethodName', false)
         domain.amqpQueue = JSONUtils.getJSONAttrDomain(json, 'amqpQueue', new AmqpQueue(), false)
-        domain.type = JSONUtils.getJSONAttrStr(json, 'persistentDirectory', false)
-        domain.type = JSONUtils.getJSONAttrStr(json, 'workingDirectory', false)
-        domain.type = JSONUtils.getJSONAttrInteger(json, 'index', 10)
+        domain.persistentDirectory = JSONUtils.getJSONAttrStr(json, 'persistentDirectory', false)
+        domain.workingDirectory = JSONUtils.getJSONAttrStr(json, 'workingDirectory', false)
+        domain.index = JSONUtils.getJSONAttrInteger(json, 'index', 10)
         return domain
     }
 

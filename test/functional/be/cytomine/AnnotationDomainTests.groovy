@@ -24,6 +24,7 @@ import be.cytomine.test.Infos
 import be.cytomine.test.http.AnnotationDomainAPI
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
+import be.cytomine.security.*
 
 
 class AnnotationDomainTests {
@@ -98,7 +99,7 @@ class AnnotationDomainTests {
 
         ArrayList<Long> images = new ArrayList<>()
         images.add(userAnnotation.image.id)
-        result = AnnotationDomainAPI.listByImagesAndUsersByPOST(images,users, false, Infos.SUPERADMINLOGIN,Infos.SUPERADMINPASSWORD)
+        result = AnnotationDomainAPI.listByImagesAndUsersByPOST(images,users, false, false, false, null, null, Infos.SUPERADMINLOGIN,Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
         json = JSON.parse(result.data)
         assert json instanceof JSONObject
@@ -118,12 +119,23 @@ class AnnotationDomainTests {
         result = AnnotationDomainAPI.delete(userAnnotation.id, Infos.SUPERADMINLOGIN,Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
 
-        result = AnnotationDomainAPI.listByImagesAndUsersByPOST(images,users, false, Infos.SUPERADMINLOGIN,Infos.SUPERADMINPASSWORD)
+        result = AnnotationDomainAPI.listByImagesAndUsersByPOST(images,users, false, false, false, null, null, Infos.SUPERADMINLOGIN,Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
         json = JSON.parse(result.data)
         assert json instanceof JSONObject
 
         assert json.collection.size() == 1
+
+        //reviewed
+        def user = User.findByUsername(Infos.SUPERADMINLOGIN)
+        String reviewUsers = "${user.id},${user.id}"
+        result = AnnotationDomainAPI.listByImagesAndUsersByPOST(images,users, false, true, true, reviewUsers, "0", Infos.SUPERADMINLOGIN,Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+        json = JSON.parse(result.data)
+        assert json instanceof JSONObject
+
+        assert json.collection.size() == 0
+
 
     }
 

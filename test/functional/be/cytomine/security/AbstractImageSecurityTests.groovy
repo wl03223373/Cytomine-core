@@ -57,7 +57,7 @@ class AbstractImageSecurityTests extends SecurityTestsAbstract{
       assert 200 == result.code
       Project project = result.data
 
-      result = AbstractImageAPI.list(true,project.id,SecurityTestsAbstract.USERNAMEADMIN,SecurityTestsAbstract.PASSWORDADMIN)
+      result = AbstractImageAPI.list(SecurityTestsAbstract.USERNAMEADMIN,SecurityTestsAbstract.PASSWORDADMIN)
       assert 200 == result.code
       def json = JSON.parse(result.data)
       assert 2<=json.collection.size() //may be more image because all images are available for admin (images from previous test)
@@ -72,12 +72,9 @@ class AbstractImageSecurityTests extends SecurityTestsAbstract{
       result = ImageInstanceAPI.create(image.encodeAsJSON(),SecurityTestsAbstract.USERNAMEADMIN,SecurityTestsAbstract.PASSWORDADMIN)
       assert 200 == result.code
 
-      result = AbstractImageAPI.list(true,project.id,SecurityTestsAbstract.USERNAMEADMIN,SecurityTestsAbstract.PASSWORDADMIN)
-      assert 200 == result.code
-      assert 2<=JSON.parse(result.data).collection.size()
-
       result = AbstractImageAPI.list(SecurityTestsAbstract.USERNAMEADMIN, SecurityTestsAbstract.PASSWORDADMIN)
       assert 200 == result.code
+      assert 2<=JSON.parse(result.data).collection.size()
       assert (true ==AbstractImageAPI.containsInJSONList(image1.id,json))
 
       assert 200 == AbstractImageAPI.show(image1.id,Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD).code
@@ -115,7 +112,7 @@ class AbstractImageSecurityTests extends SecurityTestsAbstract{
         assert 200 == result.code
         Project project = result.data
 
-        result = AbstractImageAPI.list(true,project.id,user1.username,SecurityTestsAbstract.PASSWORD1)
+        result = AbstractImageAPI.list(user1.username,SecurityTestsAbstract.PASSWORD1)
         assert 200 == result.code
         def json = JSON.parse(result.data)
         assert 1==json.collection.size()

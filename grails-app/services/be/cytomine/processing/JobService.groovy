@@ -20,6 +20,7 @@ import be.cytomine.Exception.CytomineMethodNotYetImplementedException
 import be.cytomine.Exception.InvalidRequestException
 import be.cytomine.Exception.WrongArgumentException
 import be.cytomine.command.*
+import be.cytomine.meta.AttachedFile
 import be.cytomine.project.Project
 import be.cytomine.security.SecUser
 import be.cytomine.security.SecUserSecRole
@@ -47,7 +48,6 @@ class JobService extends ModelService {
     def transactionService
     def jobParameterService
     def springSecurityService
-    def backgroundService
     def jobDataService
     def secUserService
     def annotationListingService
@@ -130,6 +130,7 @@ class JobService extends ModelService {
             select +=", ${softwareAlias}.name as software_name, ${softwareAlias}.software_version as software_version "
             from += "JOIN software $softwareAlias ON ${softwareAlias}.id = ${jobAlias}.software_id "
         }
+
         def usernameParams = [:]
         if(extended.withUser) {
             select +=", $userAlias.*, uj.id as user_job_id "
@@ -146,6 +147,7 @@ class JobService extends ModelService {
                 }
                 where += "AND ${userAlias}.username IN ("+ placeholders.collect{ ":$it" }.join(",") +") "
             }
+
         }
 
 
@@ -182,6 +184,7 @@ class JobService extends ModelService {
         def sql = new Sql(dataSource)
         def data = []
         def mapParams = sqlSearchConditions.parameters
+        if(usernameParams.size() > 0) mapParams += usernameParams
 
         // https://stackoverflow.com/a/42080302
         if (mapParams.isEmpty() && usernameParams.isEmpty()) {
@@ -228,7 +231,6 @@ class JobService extends ModelService {
                 line.putAt('userJob', map.userJobId)
             }
             data << line
-
         }
 
         if(extended.withJobParameters){
@@ -335,12 +337,6 @@ class JobService extends ModelService {
         def ret = AttachedFile.getDataFromDomain(log)
         ret['data'] = new String(log.data);
         return ret
-    }
-
-    def markAsFavorite(Job job, boolean favorite) {
-        new Sql(dataSource).executeUpdate("UPDATE job SET favorite = ${favorite} WHERE id = ${job.id}");
-        job.favorite = favorite
-        return job
     }
 
     List<UserJob> getAllLastUserJob(Project project, Software software) {

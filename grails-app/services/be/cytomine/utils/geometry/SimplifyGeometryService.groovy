@@ -161,7 +161,6 @@ class SimplifyGeometryService {
         return reducer.reduce(geometry)
     }
 
-
     def simplifyPolygonTextSize(String location) {
         String result = location
         //limit the size (text) for the geometry (url max lenght)

@@ -22,13 +22,6 @@ import be.cytomine.test.Infos
 import be.cytomine.test.http.SoftwareAPI
 import grails.converters.JSON
 
-/**
- * Created by IntelliJ IDEA.
- * User: lrollus
- * Date: 2/03/11
- * Time: 11:08
- * To change this template use File | Settings | File Templates.
- */
 class SoftwareSecurityTests extends SecurityTestsAbstract {
     
   void testSoftwareSecurityForCytomineAdmin() {
@@ -68,26 +61,48 @@ class SoftwareSecurityTests extends SecurityTestsAbstract {
       assert (200 == SoftwareAPI.delete(software.id,USERNAME1,PASSWORD1).code)
   }
 
-  void testSoftwareSecurityForSimpleUser() {
+    void testSoftwareSecurityForSimpleUser() {
 
-      //Get user1
-      User user1 = BasicInstanceBuilder.getUser(USERNAME1,PASSWORD1)
-      //Get user2
-      User user2 = BasicInstanceBuilder.getUser(USERNAME2,PASSWORD2)
+        //Get user1
+        User user1 = BasicInstanceBuilder.getUser(USERNAME1,PASSWORD1)
+        //Get user2
+        User user2 = BasicInstanceBuilder.getUser(USERNAME2,PASSWORD2)
 
-      //Create new Software (user1)
-      def result = SoftwareAPI.create(BasicInstanceBuilder.getSoftwareNotExist().encodeAsJSON(),USERNAME1,PASSWORD1)
-      assert 200 == result.code
-      Software software = result.data
-      Infos.printRight(software)
-      //check if user 2 cannot access/update/delete
-      assert (200 == SoftwareAPI.show(software.id,USERNAME2,PASSWORD2).code)
-      assert (403 == SoftwareAPI.update(software.id,software.encodeAsJSON(),USERNAME2,PASSWORD2).code)
-      assert (403 == SoftwareAPI.delete(software.id,USERNAME2,PASSWORD2).code)
+        //Create new Software (user1)
+        def result = SoftwareAPI.create(BasicInstanceBuilder.getSoftwareNotExist().encodeAsJSON(),USERNAME1,PASSWORD1)
+        assert 200 == result.code
+        Software software = result.data
+        Infos.printRight(software)
+        //check if user 2 cannot access/update/delete
+        assert (200 == SoftwareAPI.show(software.id,USERNAME2,PASSWORD2).code)
+        assert (403 == SoftwareAPI.update(software.id,software.encodeAsJSON(),USERNAME2,PASSWORD2).code)
+        assert (403 == SoftwareAPI.delete(software.id,USERNAME2,PASSWORD2).code)
 
-  }
+    }
 
-  void testSoftwareSecurityForAnonymous() {
+    void testSoftwareSecurityForGuest() {
+
+        //Get user1
+        User user = BasicInstanceBuilder.getUser(USERNAME1,PASSWORD1)
+        //Get user2
+        User ghest = BasicInstanceBuilder.getGhest(GUEST1,GPASSWORD1)
+
+        //Create new Software (ghest)
+        def result = SoftwareAPI.create(BasicInstanceBuilder.getSoftwareNotExist().encodeAsJSON(),GUEST1,GPASSWORD1)
+        assert 403 == result.code
+        //Create new Software (user)
+        result = SoftwareAPI.create(BasicInstanceBuilder.getSoftwareNotExist().encodeAsJSON(),USERNAME1,PASSWORD1)
+        assert 200 == result.code
+        Software software = result.data
+        Infos.printRight(software)
+        //check if user 2 cannot access/update/delete
+        assert (200 == SoftwareAPI.show(software.id,GUEST1,GPASSWORD1).code)
+        assert (403 == SoftwareAPI.update(software.id,software.encodeAsJSON(),GUEST1,GPASSWORD1).code)
+        assert (403 == SoftwareAPI.delete(software.id,GUEST1,GPASSWORD1).code)
+
+    }
+
+    void testSoftwareSecurityForAnonymous() {
 
       //Get user1
       User user1 = BasicInstanceBuilder.getUser(USERNAME1,PASSWORD1)

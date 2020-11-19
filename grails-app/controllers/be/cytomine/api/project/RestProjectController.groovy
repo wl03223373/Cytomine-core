@@ -243,6 +243,7 @@ class RestProjectController extends RestController {
         boolean creator = params.getBoolean('creator')
         boolean admins = params.getBoolean('admin')
         boolean users = params.getBoolean('user')
+        securityACLService.checkIsSameUser(user,cytomineService.currentUser)
         if(!user) {
             responseNotFound("User", params.id)
         } else if(creator) {

@@ -20,6 +20,7 @@ import be.cytomine.meta.Description
 * limitations under the License.
 */
 
+import be.cytomine.CytomineDomain
 import be.cytomine.image.*
 import be.cytomine.image.server.*
 import be.cytomine.laboratory.*
@@ -28,6 +29,7 @@ import be.cytomine.processing.*
 import be.cytomine.project.*
 import be.cytomine.search.*
 import be.cytomine.security.*
+import be.cytomine.test.BasicInstanceBuilder
 import be.cytomine.test.Infos
 import be.cytomine.test.http.DomainAPI
 import grails.converters.JSON
@@ -38,7 +40,7 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 * */
 class RestUrlTests {
 
-    def classes = [
+    def lowercase = [
             [clazz:Storage, filters : []],
             [clazz:AbstractImage, filters : []],
             [clazz:UploadedFile, filters : []],
@@ -52,10 +54,12 @@ class RestUrlTests {
             [clazz:ImageFilter, filters : []],
             [clazz:ImageFilterProject, filters : []],
             [clazz:Job, filters : []],
+            //[clazz:Job, filters : [Project]],
+            //[clazz:Job, filters : [Software]],
             [clazz:JobData, filters : []],
             [clazz:JobParameter, filters : []],
+            //[clazz:JobParameter, filters : [Job]],
             [clazz:Software, filters : []],
-            [clazz:SoftwareParameter, filters : []],
             [clazz:SoftwareProject, filters : []],
             [clazz:Discipline, filters : []],
             [clazz:Project, filters : []],
@@ -67,17 +71,57 @@ class RestUrlTests {
             [clazz:Description, filters: []],
             [clazz:News, filters : []]
     ]
+    def snake_case = [
+            [clazz:SoftwareParameter, filters : []],
+            [clazz:SoftwareUserRepository, filters : []],
+            [clazz:ParameterConstraint, filters : []],
+            [clazz:SoftwareParameterConstraint, filters : [SoftwareParameter]],
+    ]
 
-    public void testUrl() {
-        classes.each {
-            String URL = Infos.CYTOMINEURL + "api/"+it.clazz.simpleName.toLowerCase()+".json"
-            println "URL is $URL"
-            def result = DomainAPI.doGET(URL, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-            assert 200 == result.code
-            def json = JSON.parse(result.data)
-            assert json.collection instanceof JSONArray
+
+    public void testMain() {
+        lowercase.each {
+            String URL = getLowerCaseURL(it)
+            testUrl(URL)
         }
-
+        snake_case.each {
+            String URL = getSnakeCaseURL(it)
+            testUrl(URL)
+        }
     }
 
+    private String getLowerCaseURL(def testCase){
+        String URL = testCase.clazz.simpleName.toLowerCase()
+        if(!testCase.filters.isEmpty()){
+            // only 1 filter is currently tested
+            assert testCase.filters.size() == 1
+            CytomineDomain domain = BasicInstanceBuilder."get${testCase.filters[0].simpleName}NotExist"(true)
+            URL = testCase.filters[0].simpleName.toLowerCase() +"/" + domain.id + "/" + URL
+        }
+        URL = Infos.CYTOMINEURL + "api/" + URL +".json"
+
+        println "URL is $URL"
+        return URL
+    }
+
+    private String getSnakeCaseURL(def testCase){
+        String URL = testCase.clazz.simpleName.replaceAll( /([A-Z])/, /_$1/ ).toLowerCase().replaceAll( /^_/, '' )
+        if(!testCase.filters.isEmpty()){
+            // only 1 filter is currently tested
+            assert testCase.filters.size() == 1
+            CytomineDomain domain = BasicInstanceBuilder."get${testCase.filters[0].simpleName}NotExist"(true)
+            URL = testCase.filters[0].simpleName.replaceAll( /([A-Z])/, /_$1/ ).toLowerCase().replaceAll( /^_/, '' ) +"/" + domain.id + "/" + URL
+        }
+        URL = Infos.CYTOMINEURL + "api/" + URL +".json"
+
+        println "URL is $URL"
+        return URL
+    }
+
+    private void testUrl(String URL){
+        def result = DomainAPI.doGET(URL, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+        def json = JSON.parse(result.data)
+        assert json.collection instanceof JSONArray
+    }
 }

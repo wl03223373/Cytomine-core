@@ -204,64 +204,21 @@ class RestJobController extends RestController {
         return responseSuccess(job)
     }
 
-    //TODO:APIDOC
-    def preview() {
-        long idJob = params.long("id")
-        Job job = Job.read(idJob)
-        if (!job.software.service.previewAvailable()) {
-            throw new CytomineMethodNotYetImplementedException("Preview is not available for $job.software" )
-        }
-        securityACLService.check(job.container(),READ)
-        UserJob userJob = UserJob.findByJob(job)
-        job.software.service.init(job, userJob)
-        job.software.service.execute(job, userJob, true)
-        responseSuccess(job)
-    }
-
-    //TODO:APIDOC
-    def getPreviewRoi() {
-        Job job = jobService.read(params.long('id'))
-        byte[] data = job.software.service.getPreviewROI(job)
-        if (data) {
-            response.setHeader "Content-disposition", "inline"
-            response.outputStream << data
-            response.outputStream.flush()
-        } else {
-            responseNotFound("JobData", "getPreviewRoi")
-        }
-    }
-
-    //TODO:APIDOC
-    def getPreview() {
-        Job job = jobService.read(params.long('id'))
-        byte[] data = job.software.service.getPreview(job)
-        if (data) {
-            response.setHeader "Content-disposition", "inline"
-            response.outputStream << data
-            response.outputStream.flush()
-        } else {
-            responseNotFound("JobData", "getPreview")
-        }
-    }
-
-    def setFavorite() {
-        Job job = jobService.read(params.long('id'))
-        securityACLService.checkisNotReadOnly(job.container())
-        if (job) {
-            def favorite = JSONUtils.getJSONAttrBoolean(request.JSON, 'favorite', false)
-            responseSuccess(jobService.markAsFavorite(job, favorite))
-        } else {
-            responseNotFound("Job", params.id)
-        }
-    }
-
+    @RestApiMethod(description="Get the execution log of a job")
+    @RestApiParams(params=[
+            @RestApiParam(name="id", type="long", paramType = RestApiParamType.PATH,description = "The job id")
+    ])
     def getLog() {
         Job job = jobService.read(params.long('id'))
-        def data = jobService.getLog(job)
-        if (data) {
-            responseSuccess(data)
+        if(!job){
+            responseNotFound("Job", params.id)
         } else {
-            responseNotFound("Job log", params.id)
+            def data = jobService.getLog(job)
+            if (data) {
+                responseSuccess(data)
+            } else {
+                responseNotFound("Logs of Job", params.id)
+            }
         }
     }
 

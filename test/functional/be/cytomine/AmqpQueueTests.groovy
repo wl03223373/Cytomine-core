@@ -133,7 +133,7 @@ class AmqpQueueTests {
 
 
     void testDeleteAmqpQueue() {
-        def amqpQueueToDelete = BasicInstanceBuilder.getAmqpQueue()
+        def amqpQueueToDelete = BasicInstanceBuilder.getAmqpQueueNotExist()
         assert amqpQueueToDelete.save(flush: true)!= null
         def idAmqpQueue = amqpQueueToDelete.id
         def result = AmqpQueueAPI.delete(idAmqpQueue, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)

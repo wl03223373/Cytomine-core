@@ -301,9 +301,11 @@ class ImageInstanceSearchTests {
         BasicInstanceBuilder.getUserAnnotationNotExist(img1.project, img1, true)
         BasicInstanceBuilder.getImageInstanceNotExist(project, true)
 
-        ProjectAPI.addAdminProject(project.id, BasicInstanceBuilder.getUser1().id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        def user = BasicInstanceBuilder.getUser(BasicInstanceBuilder.getRandomString(), BasicInstanceBuilder.getRandomString())
 
-        def result = ImageInstanceAPI.listByUser(BasicInstanceBuilder.getUser1().id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        ProjectAPI.addAdminProject(project.id, user.id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+
+        def result = ImageInstanceAPI.listByUser(user.id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
         def json = JSON.parse(result.data)
         assert json.collection instanceof JSONArray
@@ -311,7 +313,7 @@ class ImageInstanceSearchTests {
 
         def searchParameters = [[operator : "lte", field : "width", value:500], [operator : "lte", field : "numberOfAnnotations", value:1000]]
 
-        result = ImageInstanceAPI.listByUser(BasicInstanceBuilder.getUser1().id, searchParameters, 0, 0, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        result = ImageInstanceAPI.listByUser(user.id, searchParameters, 0, 0, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
         json = JSON.parse(result.data)
         assert json.collection instanceof JSONArray
@@ -320,7 +322,7 @@ class ImageInstanceSearchTests {
 
         searchParameters = [[operator : "gte", field : "numberOfAnnotations", value:1]]
 
-        result = ImageInstanceAPI.listByUser(BasicInstanceBuilder.getUser1().id, searchParameters, 0, 0, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        result = ImageInstanceAPI.listByUser(user.id, searchParameters, 0, 0, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
         json = JSON.parse(result.data)
         assert json.collection instanceof JSONArray
@@ -330,18 +332,19 @@ class ImageInstanceSearchTests {
 
         searchParameters = [[operator : "ilike", field : "name", value:img1.getInstanceFilename()]]
 
-        result = ImageInstanceAPI.listByUser(BasicInstanceBuilder.getUser1().id, searchParameters, 0, 0, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        result = ImageInstanceAPI.listByUser(user.id, searchParameters, 0, 0, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
         json = JSON.parse(result.data)
         assert json.collection instanceof JSONArray
         assert json.collection.size() == 1
         assert ImageInstanceAPI.containsInJSONList(img1.id,json)
 
-        ProjectAPI.addUserProject(project.id, BasicInstanceBuilder.getUser2().id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        def user2 = BasicInstanceBuilder.getUser(BasicInstanceBuilder.getRandomString(), BasicInstanceBuilder.getRandomString())
+        ProjectAPI.addUserProject(project.id, user2.id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
 
         searchParameters = [[operator : "ilike", field : "name", value:img1.getInstanceFilename()]]
 
-        result = ImageInstanceAPI.listByUser(BasicInstanceBuilder.getUser2().id, searchParameters, 0, 0, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        result = ImageInstanceAPI.listByUser(user2.id, searchParameters, 0, 0, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
         json = JSON.parse(result.data)
         assert json.collection instanceof JSONArray
@@ -354,13 +357,13 @@ class ImageInstanceSearchTests {
 
         searchParameters = [[operator : "ilike", field : "name", value:img1.getInstanceFilename()]]
 
-        result = ImageInstanceAPI.listByUser(BasicInstanceBuilder.getUser2().id, searchParameters, 0, 0, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        result = ImageInstanceAPI.listByUser(user2.id, searchParameters, 0, 0, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
         json = JSON.parse(result.data)
         assert json.collection instanceof JSONArray
         assert !ImageInstanceAPI.containsInJSONList(img1.id,json)
 
-        result = ImageInstanceAPI.listByUser(BasicInstanceBuilder.getUser1().id, searchParameters, 0, 0, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        result = ImageInstanceAPI.listByUser(user.id, searchParameters, 0, 0, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
         json = JSON.parse(result.data)
         assert json.collection instanceof JSONArray
@@ -368,7 +371,7 @@ class ImageInstanceSearchTests {
 
         searchParameters = [[operator : "ilike", field : "name", value:img1.getBlindInstanceFilename()]]
 
-        result = ImageInstanceAPI.listByUser(BasicInstanceBuilder.getUser2().id, searchParameters, 0, 0, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        result = ImageInstanceAPI.listByUser(user2.id, searchParameters, 0, 0, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
         json = JSON.parse(result.data)
         assert json.collection instanceof JSONArray

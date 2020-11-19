@@ -36,7 +36,7 @@ import org.restapidoc.pojo.RestApiParamType
 import static org.springframework.security.acls.domain.BasePermission.READ
 import static org.springframework.security.acls.domain.BasePermission.WRITE
 
-@RestApi(name = "Ontology | property services", description = "Methods for managing properties")
+@RestApi(name = "Metadata | property services", description = "Methods for managing properties")
 class RestPropertyController extends RestController {
 
     def propertyService
@@ -105,7 +105,7 @@ class RestPropertyController extends RestController {
         if(domain) {
             responseSuccess(propertyService.list(domain))
         } else {
-            responseNotFound("ImageInstance",params.idImageInstance)
+            responseNotFound("Cytomine domain "+params.get("domainClassName"),params.long('domainIdent'))
         }
     }
 

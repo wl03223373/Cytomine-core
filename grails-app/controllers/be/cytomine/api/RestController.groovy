@@ -352,6 +352,23 @@ class RestController {
         }
     }
 
+    protected def responseFile(String name, File f) {
+        response.setContentType "application/octet-stream"
+        response.setHeader "Content-disposition", "attachment; filename=${name}"
+
+        BufferedInputStream bufferedInputStream = f.newInputStream()
+        response.outputStream << bufferedInputStream
+        response.outputStream.flush()
+        bufferedInputStream.close()
+    }
+
+    protected def responseFile(String name, byte[] array) {
+        response.setContentType "application/octet-stream"
+        response.setHeader "Content-disposition", "attachment; filename=${name}"
+        response.outputStream << array
+        response.outputStream.flush()
+    }
+
     private static String SEARCH_PARAM_EQUALS = "equals"
     private static String SEARCH_PARAM_LIKE = "like"
     private static String SEARCH_PARAM_ILIKE = "ilike"

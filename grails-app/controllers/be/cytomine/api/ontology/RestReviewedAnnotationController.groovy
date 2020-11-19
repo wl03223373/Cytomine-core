@@ -30,6 +30,14 @@ import be.cytomine.project.Project
 import be.cytomine.security.SecUser
 import be.cytomine.utils.Task
 import grails.converters.JSON
+import org.apache.commons.io.IOUtils
+import org.apache.http.HttpResponse
+import org.apache.http.NameValuePair
+import org.apache.http.client.HttpClient
+import org.apache.http.client.entity.UrlEncodedFormEntity
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.impl.client.DefaultHttpClient
+import org.apache.http.message.BasicNameValuePair
 import org.restapidoc.annotation.*
 import org.restapidoc.pojo.RestApiParamType
 import static org.springframework.security.acls.domain.BasePermission.READ
@@ -554,7 +562,6 @@ class RestReviewedAnnotationController extends RestController {
         } else {
             responseNotFound("ReviewedAnnotation", params.id)
         }
-
     }
 
     @RestApiMethod(description="Get a binary mask of a reviewed annotation (image area framing annotation). Equivalent to crop with 'mask' type.", extensions=["png", "jpg", "tiff"])

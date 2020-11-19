@@ -16,13 +16,8 @@ package be.cytomine.utils.database.mongodb
 * limitations under the License.
 */
 
-/**
- * Created by IntelliJ IDEA.
- * User: lrollus
- * Date: 7/07/11
- * Time: 15:16
- * Service used to create index at the application begining
- */
+import com.mongodb.CommandFailureException
+
 class NoSQLCollectionService {
 
     def sessionFactory
@@ -52,5 +47,14 @@ class NoSQLCollectionService {
         db.persistentUserPosition.drop()
     }
 
+    public def dropIndex(String collection, String name) {
+        log.info "Drop index $name from $collection collection"
+        def db = mongo.getDB(getDatabaseName())
+        try {
+            db."${collection}".dropIndex(name)
+        } catch(CommandFailureException e){
+            log.error (collection+" : "+e.message)
+        }
+    }
 
 }

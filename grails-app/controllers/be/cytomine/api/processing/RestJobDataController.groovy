@@ -174,10 +174,7 @@ class RestJobDataController extends RestController {
         if(!jobData) {
             responseNotFound("JobData", params.id)
         } else {
-            response.setContentType "application/octet-stream"
-            response.setHeader "Content-disposition", "attachment; filename=${jobData.filename}"
-            response.outputStream << jobDataService.read(jobData)
-            response.outputStream.flush()
+            responseFile(jobData.filename, jobDataService.read(jobData))
         }
     }
 

@@ -20,8 +20,10 @@ import be.cytomine.image.AbstractSlice
 import be.cytomine.middleware.ImageServer
 import be.cytomine.utils.CytomineMailService
 import be.cytomine.image.multidim.ImageGroupHDF5Service
+import be.cytomine.image.ImagePropertiesService
 import be.cytomine.middleware.ImageServerService
 import be.cytomine.processing.ImageRetrievalService
+import be.cytomine.image.AbstractImage
 import be.cytomine.security.SecUser
 import be.cytomine.test.Infos
 import be.cytomine.utils.Version
@@ -116,12 +118,7 @@ class BootStrap {
 
         if(Version.count()==0) {
             log.info "Version was not set, set to last version"
-            Version.setCurrentVersion(Long.parseLong(grailsApplication.metadata.'app.versionDate'),grailsApplication.metadata.'app.version')
-        }
-
-        // TODO : delete this sql in v2.1
-        if (!bootstrapUtilsService.checkSqlColumnExistence("sec_user", "origin")) {
-            new Sql(dataSource).executeUpdate("ALTER TABLE sec_user ADD COLUMN origin VARCHAR;")
+            Version.setCurrentVersion(grailsApplication.metadata.'app.version')
         }
 
         if (!bootstrapUtilsService.checkSqlColumnExistence("sec_user", "language")) {
@@ -153,14 +150,15 @@ class BootStrap {
         log.info "init retrieve errors hack..."
         retrieveErrorsService.initMethods()
 
-        // Initialize RabbitMQ server
-        bootstrapUtilsService.initRabbitMq()
-
         /* Fill data just in test environment*/
         log.info "fill with data..."
+        log.info grailsApplication.config.grails.adminPassword
         if (Environment.getCurrent() == Environment.TEST) {
             bootstrapDataService.initData()
             noSQLCollectionService.cleanActivityDB()
+            println "grailsApplication.config.grails"
+            println grailsApplication.config.grails
+            println grailsApplication.config.grails.adminPassword
             def usersSamples = [
                     [username : Infos.ANOTHERLOGIN, firstname : 'Just another', lastname : 'User', email : grailsApplication.config.grails.admin.email, group : [[name : "Cytomine"]], password : grailsApplication.config.grails.adminPassword, color : "#FF0000", roles : ["ROLE_USER", "ROLE_ADMIN","ROLE_SUPER_ADMIN"]]
             ]
@@ -191,27 +189,22 @@ class BootStrap {
             }
         }
 
-        log.info "init change for old version..."
-        // TODO : delete this sql in v2.1
-        def exists = new Sql(dataSource).rows("SELECT column_name " +
-                "FROM information_schema.columns " +
-                "WHERE table_name='version' and column_name='major';").size() == 1;
-        if (!exists) {
-            new Sql(dataSource).executeUpdate("ALTER TABLE version ADD COLUMN major integer;")
-            new Sql(dataSource).executeUpdate("ALTER TABLE version ADD COLUMN minor integer;")
-            new Sql(dataSource).executeUpdate("ALTER TABLE version ADD COLUMN patch integer;")
-        }
+        def softwareSourceDirectory = new File(grailsApplication.config.cytomine.software.path.softwareSources as String)
+        if (!softwareSourceDirectory.exists() && !softwareSourceDirectory.mkdirs()) log.error "Software Sources folder doesn't exist"
 
+
+        log.info "init change for old version..."
         bootstrapOldVersionService.execChangeForOldVersion()
+
+        // Initialize RabbitMQ server
+        bootstrapUtilsService.initRabbitMq()
 
         log.info "create multiple IS and Retrieval..."
         bootstrapUtilsService.createMultipleIS()
-        bootstrapUtilsService.createMultipleRetrieval()
+        bootstrapUtilsService.updateDefaultProcessingServer()
 
         bootstrapUtilsService.fillProjectConnections();
         bootstrapUtilsService.fillImageConsultations();
-
-        bootstrapUtilsService.initProcessingServerQueues()
 
         fixPlugins()
     }
@@ -241,6 +234,10 @@ class BootStrap {
         //mock mail service
         CytomineMailService.metaClass.send = {
             String from, String[] to, String cc, String subject, String message, def attachment -> println "\n\n mocked mail send \n\n";
+        }
+
+        ImagePropertiesService.metaClass.extractUseful = {
+            AbstractImage abstractImage -> println "\n\n mocked extractUseful \n\n"; return null
         }
     }
 

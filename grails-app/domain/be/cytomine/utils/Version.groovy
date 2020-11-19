@@ -24,7 +24,6 @@ import groovy.util.logging.Log
 @Log
 class Version {
 
-    Long number
     Date deployed
     Integer major
     Integer minor
@@ -41,44 +40,33 @@ class Version {
         patch (nullable: true)
     }
 
-    static Version setCurrentVersion(Long version) {
+    static Version setCurrentVersion(String semantic) {
         Version actual = getLastVersion()
-        log.info "Last version was ${actual}. Actual version will be $version"
-        if(actual && actual.number>=version) {
-            log.info "version $actual don't need to be saved"
-            return actual
-        } else {
-            log.info "New version detected"
-            actual = new Version(number:version,deployed: new Date())
-            actual.save(flush:true,failOnError: true)
-            return actual
-        }
-    }
 
-    static Version setCurrentVersion(Long version, String semantic) {
-        Version actual = getLastVersion()
+        Integer major = Integer.parseInt(semantic.split("\\.")[0])
+        Integer minor = Integer.parseInt(semantic.split("\\.")[1])
+        Integer patch = Integer.parseInt(semantic.split("\\.")[2])
+        Version version = new Version(deployed: new Date(), major:major, minor:minor, patch:patch)
+
         log.info "Last version was ${actual}. Actual version will be $semantic ($version)"
-        if(actual && actual.number>=version) {
-            log.info "version $actual don't need to be saved"
+
+        if(actual && !isOlderVersion(version)) {
+            log.info "version $version don't need to be saved"
             return actual
         } else {
             log.info "New version detected"
 
-            Integer major = Integer.parseInt(semantic.split("\\.")[0])
-            Integer minor = Integer.parseInt(semantic.split("\\.")[1])
-            Integer patch = Integer.parseInt(semantic.split("\\.")[2])
-            
-            actual = new Version(number:version,deployed: new Date(), major:major, minor:minor, patch:patch)
-            actual.save(flush:true,failOnError: true)
-            return actual
+            version.save(flush:true,failOnError: true)
+            return version
         }
     }
 
-    static boolean isOlderVersion(Long version) {
+    static boolean isOlderVersion(Version version) {
         Version actual = getLastVersion()
-        log.info "Check is older $actual=actual and compared=$version (${actual.number<version})"
+        log.info "Check is older $actual=actual and compared=$version"
         if(actual) {
-            return actual.number<version
+            return (actual.major < version.major || (actual.major == version.major && actual.minor < version.minor)
+                    || (actual.major == version.major && actual.minor == version.minor && actual.patch <= version.patch))
         } else return true
     }
 
@@ -88,6 +76,6 @@ class Version {
     }
 
     String toString() {
-        return "version ${number} (deployed ${deployed})"
+        return "version ${major}.${minor}.${patch} (deployed ${deployed})"
     }
 }

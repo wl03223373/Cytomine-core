@@ -28,34 +28,34 @@ import grails.converters.JSON
 class SoftwareParameterAPI extends DomainAPI {
 
     static def show(Long id, String username, String password) {
-        String URL = Infos.CYTOMINEURL + "api/softwareparameter/" + id + ".json"
+        String URL = Infos.CYTOMINEURL + "api/software_parameter/" + id + ".json"
         return doGET(URL, username, password)
     }
 
     static def list(String username, String password) {
-        String URL = Infos.CYTOMINEURL + "api/softwareparameter.json"
+        String URL = Infos.CYTOMINEURL + "api/software_parameter.json"
         return doGET(URL, username, password)
     }
 
     static def listBySoftware(Long id, String username, String password) {
-        String URL = Infos.CYTOMINEURL + "api/software/$id/parameter.json"
+        String URL = Infos.CYTOMINEURL + "api/software/$id/software_parameter.json"
         return doGET(URL, username, password)
     }
 
     static def create(String json, String username, String password) {
-        String URL = Infos.CYTOMINEURL + "api/softwareparameter.json"
+        String URL = Infos.CYTOMINEURL + "api/software_parameter.json"
         def result = doPOST(URL,json,username,password)
         result.data = SoftwareParameter.get(JSON.parse(result.data)?.softwareparameter?.id)
         return result
     }
 
     static def update(def id, def jsonSoftwareParameter, String username, String password) {
-        String URL = Infos.CYTOMINEURL + "api/softwareparameter/" + id + ".json"
+        String URL = Infos.CYTOMINEURL + "api/software_parameter/" + id + ".json"
         return doPUT(URL,jsonSoftwareParameter,username,password)
     }
 
     static def delete(def id, String username, String password) {
-        String URL = Infos.CYTOMINEURL + "api/softwareparameter/" + id + ".json"
+        String URL = Infos.CYTOMINEURL + "api/software_parameter/" + id + ".json"
         return doDELETE(URL,username,password)
     }
 }

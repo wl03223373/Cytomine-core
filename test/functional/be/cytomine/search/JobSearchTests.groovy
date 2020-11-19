@@ -108,6 +108,15 @@ class JobSearchTests {
         assert json.size == 1
         assert JobAPI.containsInJSONList(j1.id,json)
 
+
+        searchParameters = [[operator : "in", field : "username", value:"admin,admin"]]
+
+        result = JobAPI.listBySoftwareAndProject(j1.software.id,j1.project.id, 0, 0, searchParameters, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+        json = JSON.parse(result.data)
+        assert json.collection instanceof JSONArray
+        assert json.size == 1
+        assert JobAPI.containsInJSONList(j1.id,json)
     }
 
 

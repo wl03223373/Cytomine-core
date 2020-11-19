@@ -85,30 +85,34 @@ class AmqpQueueConfigInstanceTests {
         assert json instanceof JSONObject
         int idAmqpQueueConfigInstance = json.amqpqueueconfiginstance.id
 
-        def showResult = AmqpQueueConfigInstanceAPI.show(idAmqpQueueConfigInstance, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-        json = JSON.parse(showResult.data)
+        result = AmqpQueueConfigInstanceAPI.show(idAmqpQueueConfigInstance, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        json = JSON.parse(result.data)
         BasicInstanceBuilder.compare(data.mapNew, json)
 
-        showResult = AmqpQueueConfigInstanceAPI.undo()
+        result = AmqpQueueConfigInstanceAPI.undo()
         assert 200 == result.code
-        showResult = AmqpQueueConfigInstanceAPI.show(idAmqpQueueConfigInstance, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-        BasicInstanceBuilder.compare(data.mapOld, JSON.parse(showResult.data))
+        result = AmqpQueueConfigInstanceAPI.show(idAmqpQueueConfigInstance, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        BasicInstanceBuilder.compare(data.mapOld, JSON.parse(result.data))
 
-        showResult = AmqpQueueConfigInstanceAPI.redo()
+        result = AmqpQueueConfigInstanceAPI.redo()
         assert 200 == result.code
-        showResult = AmqpQueueConfigInstanceAPI.show(idAmqpQueueConfigInstance, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-        BasicInstanceBuilder.compare(data.mapNew, JSON.parse(showResult.data))
+        result = AmqpQueueConfigInstanceAPI.show(idAmqpQueueConfigInstance, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        BasicInstanceBuilder.compare(data.mapNew, JSON.parse(result.data))
     }
 
     void testDeleteAmqpQueueConfigInstance() {
-        def amqpQueueConfigInstanceToDelete = BasicInstanceBuilder.getAmqpQueueConfigInstance()
+        def amqpQueueConfigInstanceToDelete = BasicInstanceBuilder.getAmqpQueueConfigInstanceNotExist(
+                BasicInstanceBuilder.getAmqpQueue(),
+                BasicInstanceBuilder.getAmqpQueueConfigNotExist(true),
+                true)
+
         assert amqpQueueConfigInstanceToDelete.save(flush: true)!= null
         def id = amqpQueueConfigInstanceToDelete.id
         def result = AmqpQueueConfigInstanceAPI.delete(id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
 
-        def showResult = AmqpQueueConfigInstanceAPI.show(id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-        assert 404 == showResult.code
+        result = AmqpQueueConfigInstanceAPI.show(id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 404 == result.code
 
 
         result = AmqpQueueConfigInstanceAPI.undo()

@@ -113,9 +113,10 @@ class RelationTermSecurityTests extends SecurityTestsAbstract {
       resAddUser = ProjectAPI.addUserProject(project.id,user2.id,Infos.SUPERADMINLOGIN,Infos.SUPERADMINPASSWORD)
       assert 200 == resAddUser.code
       Infos.printRight(relationterm)
-      //check if user 2 can access/update/delete
+      //check if user 2 can access
       assert (200 == RelationTermAPI.show(relationterm.relation.id, relationterm.term1.id, relationterm.term2.id,USERNAME2,PASSWORD2).code)
       assert (true ==RelationTermAPI.containsInJSONList(relationterm.id,JSON.parse(RelationTermAPI.listByTermAll(relationterm.term1.id,USERNAME2,PASSWORD2).data)))
+      assert (403 == RelationTermAPI.delete(relationterm.relation.id, relationterm.term1.id, relationterm.term2.id,USERNAME2,PASSWORD2).code)
 
 
       //remove right to user2
@@ -124,8 +125,8 @@ class RelationTermSecurityTests extends SecurityTestsAbstract {
 
       Infos.printRight(relationterm)
       //check if user 2 can access
-      assert (200 == RelationTermAPI.show(relationterm.relation.id, relationterm.term1.id, relationterm.term2.id,USERNAME2,PASSWORD2).code)
-      //TODO check if user 2 cannot access/update/delete
+      assert (403 == RelationTermAPI.show(relationterm.relation.id, relationterm.term1.id, relationterm.term2.id,USERNAME2,PASSWORD2).code)
+      assert (403 == RelationTermAPI.delete(relationterm.relation.id, relationterm.term1.id, relationterm.term2.id,USERNAME2,PASSWORD2).code)
 
       //delete project because we will try to delete relationterm
       def resDelProj = ProjectAPI.delete(project.id,Infos.SUPERADMINLOGIN,Infos.SUPERADMINPASSWORD)

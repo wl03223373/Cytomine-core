@@ -102,19 +102,19 @@ class AmqpQueueConfigTests {
         assert json instanceof JSONObject
         int idAmqpQueueConfig = json.amqpqueueconfig.id
 
-        def showResult = AmqpQueueConfigAPI.show(idAmqpQueueConfig, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-        json = JSON.parse(showResult.data)
+        result = AmqpQueueConfigAPI.show(idAmqpQueueConfig, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        json = JSON.parse(result.data)
         BasicInstanceBuilder.compare(data.mapNew, json)
 
-        showResult = AmqpQueueConfigAPI.undo()
+        result = AmqpQueueConfigAPI.undo()
         assert 200 == result.code
-        showResult = AmqpQueueConfigAPI.show(idAmqpQueueConfig, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-        BasicInstanceBuilder.compare(data.mapOld, JSON.parse(showResult.data))
+        result = AmqpQueueConfigAPI.show(idAmqpQueueConfig, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        BasicInstanceBuilder.compare(data.mapOld, JSON.parse(result.data))
 
-        showResult = AmqpQueueConfigAPI.redo()
+        result = AmqpQueueConfigAPI.redo()
         assert 200 == result.code
-        showResult = AmqpQueueConfigAPI.show(idAmqpQueueConfig, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
-        BasicInstanceBuilder.compare(data.mapNew, JSON.parse(showResult.data))
+        result = AmqpQueueConfigAPI.show(idAmqpQueueConfig, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        BasicInstanceBuilder.compare(data.mapNew, JSON.parse(result.data))
     }
 
 

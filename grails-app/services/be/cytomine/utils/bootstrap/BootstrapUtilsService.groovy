@@ -41,12 +41,6 @@ import grails.util.Holders
 import groovy.json.JsonBuilder
 import groovy.sql.Sql
 
-/**
- * Cytomine
- * User: stevben
- * Date: 13/03/13
- * Time: 11:59
- */
 class BootstrapUtilsService {
 
     def cytomineService
@@ -222,8 +216,6 @@ class BootstrapUtilsService {
 
         if(!update) configs << new Configuration(key: "WELCOME", value: "<p>Welcome to the Cytomine software.</p><p>This software is supported by the <a href='https://cytomine.coop'>Cytomine company</a></p>", readingRole: allUsers)
 
-        configs << new Configuration(key: "retrieval.enabled", value: grailsApplication.config.grails.retrieval.enabled, readingRole: allUsers)
-
         configs << new Configuration(key: "admin_email", value: grailsApplication.config.grails.admin.email, readingRole: adminRole)
 
         //SMTP values
@@ -235,16 +227,6 @@ class BootstrapUtilsService {
 
         //Default project values
         //configs << new Configuration(key: , value: , readingRole: )
-
-        //LDAP values
-        configs << new Configuration(key: "ldap_active", value: grailsApplication.config.grails.plugin.springsecurity.ldap.active, readingRole: allUsers)
-        if(grailsApplication.config.grails.plugin.springsecurity.ldap.active) {
-            configs << new Configuration(key: "ldap_context_server", value: grailsApplication.config.grails.plugin.springsecurity.ldap.context.server, readingRole: adminRole)
-            configs << new Configuration(key: "ldap_search_base", value: grailsApplication.config.grails.plugin.springsecurity.ldap.search.base, readingRole: adminRole)
-            configs << new Configuration(key: "ldap_context_managerDn", value: grailsApplication.config.grails.plugin.springsecurity.ldap.context.managerDn, readingRole: adminRole)
-            configs << new Configuration(key: "ldap_context_managerPassword", value: grailsApplication.config.grails.plugin.springsecurity.ldap.context.managerPassword, readingRole: adminRole)
-            //grails.plugin.springsecurity.ldap.authorities.groupSearchBase = ''
-        }
 
 
         configs.each { config ->
@@ -269,50 +251,33 @@ class BootstrapUtilsService {
         }
     }
 
-    def createMultipleRetrieval() {
-//        Configuration retrieval = Configuration.findByKey("retrieval.enabled")
-//        if(retrieval && retrieval.value.equals("false")){
-        if (!grailsApplication.config.grails.retrieval.enabled) {
-            RetrievalServer.list().each { server ->
-                server.delete()
+    /*def createMessageBrokerServer() {
+        MessageBrokerServer.list().each { messageBroker ->
+            if(!grailsApplication.config.grails.messageBrokerServerURL.contains(messageBroker.host)) {
+                log.info messageBroker.host + " is not in config, drop it"
+                log.info "delete Message Broker Server " + messageBroker.host
+                def queues = AmqpQueue.findAllByHost(messageBroker.host)
+                AmqpQueueConfigInstance.deleteAll(AmqpQueueConfigInstance.findAllByQueueInList(queues))
+                AmqpQueue.deleteAll(queues)
+                messageBroker.delete()
             }
-            return
         }
 
-        RetrievalServer.list().each { server ->
-            if(!grailsApplication.config.grails.retrievalServerURL.contains(server.url)) {
-                log.info server.url + " is not in config, drop it"
-                log.info "delete Retrieval $server"
-                server.delete()
-            }
+        String messageBrokerURL = grailsApplication.config.grails.messageBrokerServerURL
+        def splittedURL = messageBrokerURL.split(':')
 
-        }
-
-        if (Environment.getCurrent() != Environment.TEST) {
-
-            grailsApplication.config.grails.retrievalServerURL.eachWithIndex { it, index ->
-
-                if (!RetrievalServer.findByUrl(it)) {
-                    RetrievalServer server =
-                            new RetrievalServer(
-                                    description: "retrieval $index",
-                                    url: "${it}",
-                                    path: '/retrieval-web/api/resource.json',
-                                    username: grailsApplication.config.grails.retrievalUsername,
-                                    password: grailsApplication.config.grails.retrievalPassword
-                            )
-                    if (server.validate()) {
-                        server.save()
-                    } else {
-                        server.errors?.each {
-                            log.info it
-                        }
-                    }
+        if(!MessageBrokerServer.findByHost(splittedURL[0])) {
+            MessageBrokerServer mbs = new MessageBrokerServer(name: "MessageBrokerServer", host: splittedURL[0], port: splittedURL[1].toInteger())
+            if (mbs.validate()) {
+                mbs.save()
+            } else {
+                mbs.errors?.each {
+                    log.info it
                 }
-
             }
         }
-    }
+        MessageBrokerServer.findByHost(splittedURL[0])
+    }*/
 
     def createMultipleIS() {
         ImageServer.list().each { server ->
@@ -367,6 +332,14 @@ class BootstrapUtilsService {
         return imagingServer
     }
 
+    def updateDefaultProcessingServer() {
+        def ps = ProcessingServer.findByName("local-server")
+        if (ps) {
+            ps.persistentDirectory = grailsApplication.config.cytomine.software.path.softwareImages
+            ps.save(flush: true)
+        }
+    }
+
     void convertMimeTypes(){
         SpringSecurityUtils.doWithAuth("admin", {
 
@@ -382,6 +355,16 @@ class BootstrapUtilsService {
                 it.save();
             }
         })
+    }
+
+    private void updateProcessingServerRabbitQueues() {
+        ProcessingServer.list().each {
+
+            String processingServerName = it.name.capitalize()
+            String queueName = amqpQueueService.queuePrefixProcessingServer + processingServerName
+
+            amqpQueueService.createAmqpQueueDefault(it.amqpQueue)
+        }
     }
 
     void initRabbitMq() {
@@ -436,37 +419,11 @@ class BootstrapUtilsService {
             amqpQueueService.createAmqpQueueDefault(queueCommunication)
         }
 
+        updateProcessingServerRabbitQueues()
+
         //Inserting a MessageBrokerServer for testing purpose
         if (Environment.getCurrent() == Environment.TEST) {
             rabbitConnectionService.getRabbitConnection(mbs)
-        }
-    }
-
-    void initProcessingServerQueues() {
-        log.info "init RabbitMQ connection for processing servers..."
-        MessageBrokerServer mbs = MessageBrokerServer.first()
-        ProcessingServer.list().each {
-            if (it.name != null) {
-                String queueName = amqpQueueService.queuePrefixProcessingServer + ((it as ProcessingServer).name).capitalize()
-                if(!amqpQueueService.checkAmqpQueueDomainExists(queueName)) {
-                    String exchangeName = amqpQueueService.exchangePrefixProcessingServer + ((it as ProcessingServer).name).capitalize()
-                    String brokerServerURL = (MessageBrokerServer.findByName("MessageBrokerServer")).host
-                    AmqpQueue aq = new AmqpQueue(name: queueName, host: brokerServerURL, exchange: exchangeName)
-                    aq.save(failOnError: true)
-                }
-                if(!amqpQueueService.checkRabbitQueueExists(queueName,mbs)) {
-                    AmqpQueue aq = amqpQueueService.read(queueName)
-
-                    // Creates the queue on the rabbit server
-                    amqpQueueService.createAmqpQueueDefault(aq)
-
-                    // Notify the queueCommunication that a software has been added
-                    def mapInfosQueue = [name: aq.name, host: aq.host, exchange: aq.exchange]
-                    JsonBuilder builder = new JsonBuilder()
-                    builder(mapInfosQueue)
-                    amqpQueueService.publishMessage(AmqpQueue.findByName("queueCommunication"), builder.toString())
-                }
-            }
         }
     }
 

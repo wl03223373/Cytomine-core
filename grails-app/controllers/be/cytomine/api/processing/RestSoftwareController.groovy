@@ -1,5 +1,7 @@
 package be.cytomine.api.processing
 
+import be.cytomine.Exception.CytomineException
+
 /*
 * Copyright (c) 2009-2020. Authors: see NOTICE file.
 *
@@ -17,13 +19,23 @@ package be.cytomine.api.processing
 */
 
 import be.cytomine.api.RestController
+import be.cytomine.Exception.ForbiddenException
+import be.cytomine.Exception.ObjectNotFoundException
+import be.cytomine.Exception.WrongArgumentException
+import be.cytomine.middleware.AmqpQueue
 import be.cytomine.processing.Job
 import be.cytomine.processing.Software
 import be.cytomine.processing.SoftwareUserRepository
 import be.cytomine.project.Project
 import grails.converters.JSON
+import groovy.json.JsonBuilder
+import org.codehaus.groovy.grails.web.json.JSONObject
 import org.restapidoc.annotation.*
 import org.restapidoc.pojo.RestApiParamType
+import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.multipart.support.AbstractMultipartHttpServletRequest
+
+import static org.springframework.security.acls.domain.BasePermission.WRITE
 
 /**
  * Controller for software: application that can be launch (job)
@@ -32,6 +44,8 @@ import org.restapidoc.pojo.RestApiParamType
 class RestSoftwareController extends RestController {
 
     def softwareService
+    def securityACLService
+    def amqpQueueService
 
     /**
      * List all software available in cytomine
@@ -120,6 +134,97 @@ class RestSoftwareController extends RestController {
     ])
     def delete() {
         delete(softwareService, JSON.parse("{id : $params.id}"),null)
+    }
+
+    @RestApiMethod(description="Upload the sources of a software")
+    def upload() {
+        log.info "Upload software source"
+
+        params.remove("controller")
+        params.remove("files[]")
+        params.remove("action")
+
+        try{
+            def result = softwareService.add(new JSONObject(params))
+
+            Software software = result.object
+
+            // check if software has not softwareUserRepository && software has not already been uploaded
+            if(software.softwareUserRepository != null || software.sourcePath != null) {
+                responseError(new ForbiddenException("This software has already source files. You cannot upload new sources"))
+            }
+            else {
+                if(request instanceof AbstractMultipartHttpServletRequest) {
+                    MultipartFile f = ((AbstractMultipartHttpServletRequest) request).getFile('files[]')
+
+                    String filename = ((AbstractMultipartHttpServletRequest) request).getParameter('filename')
+                    if(!filename) filename = f.originalFilename
+
+                    String sourcePath = software.id+"/"+filename
+                    File source = new File((grailsApplication.config.cytomine.software.path.softwareSources as String)+"/"+sourcePath)
+                    if(!source.parentFile.exists()) source.parentFile.mkdir()
+                    f.transferTo(source)
+
+                    log.info "Upload $filename for domain software $software.name at ${source.path}"
+                    log.info "File size = ${f.size}"
+
+                    def json = software.encodeAsJSON()
+                    json = new JSONObject(json)
+                    json.sourcePath = sourcePath
+
+                    softwareService.update(software, json)
+
+                    // Sends a message on the communication queue to warn the software router a new queue has been created
+                    def message = [requestType: "addSoftware",
+                                   //exchange: amqpQueue.exchange,
+                                   SoftwareId: software.id]
+
+                    JsonBuilder jsonBuilder = new JsonBuilder()
+                    jsonBuilder(message)
+                    amqpQueueService.publishMessage(AmqpQueue.findByName("queueCommunication"), jsonBuilder.toString())
+
+                    result.data.software.sourcePath = sourcePath
+
+                    responseSuccess(result)
+                } else {
+                    responseError(new WrongArgumentException("No File attached"))
+                }
+            }
+        } catch (CytomineException e) {
+            log.error("add error:" + e.msg)
+            log.error(e)
+            response([success: false, errors: e.msg], e.code)
+        }
+    }
+
+    @RestApiMethod(description="Download a software source files.", listing = true)
+    @RestApiParams(params=[
+            @RestApiParam(name="id", type="long", paramType = RestApiParamType.PATH, description = "The software id")
+    ])
+    def download() {
+        log.info "Download source files for software = " + params.getLong('id')
+        Software software = softwareService.read(params.getLong('id'))
+        if(software.sourcePath == null) {
+            responseError(new ObjectNotFoundException("Source files not found"))
+        } else {
+
+            final URI u = new URI(software.sourcePath);
+
+            if(u.isAbsolute()) {
+                redirect (url : u)
+            } else {
+                String globalFilePath = grailsApplication.config.cytomine.software.path.softwareSources
+                String softwaresPath = globalFilePath+"/"+software.sourcePath
+
+                File f = new File(softwaresPath)
+
+                if(!f.exists()) {
+                    responseError(new ObjectNotFoundException("Source files not found"))
+                } else {
+                    responseFile(software.name, f)
+                }
+            }
+        }
     }
 
     /**

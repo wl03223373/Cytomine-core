@@ -33,8 +33,6 @@ class GroupService extends ModelService {
     def userGroupService
     def transactionService
     def securityACLService
-    def ldapSearchService
-    def CASLdapUserDetailsService
     def dataSource
 
     def currentDomain() {
@@ -145,86 +143,6 @@ class GroupService extends ModelService {
         securityACLService.checkAdmin(currentUser)
         Command c = new DeleteCommand(user: currentUser,transaction:transaction)
         return executeCommand(c,domain,null)
-    }
-
-
-    public boolean isInLdap(Long id) {
-        SecUser currentUser = cytomineService.getCurrentUser()
-        securityACLService.checkGuest(currentUser)
-        def group = Group.get(id)
-        return !ldapSearchService.searchByUid(group.gid, "cn", "uid").isEmpty();
-    }
-
-    def createFromLDAP(def json) {
-
-        SecUser currentUser = cytomineService.getCurrentUser()
-        securityACLService.checkGuest(currentUser)
-
-        def map = ldapSearchService.searchByCn(json.name, "uid", "member");
-
-        if (map.isEmpty()) throw new ObjectNotFoundException("Object with cn="+json.name+"not found in LDAP");
-
-        Group result = new Group();
-        result.name = json.name
-        result.gid = map.get("uid")[0]
-
-        // create group here
-        result.discard()
-        def reponse = add(JSON.parse(result.encodeAsJSON()))
-
-        result = Group.get(reponse.data.group.id)
-
-
-        def usernames = map.get("member").collect {it.split(",")[0].split("=")[1]}
-
-        def users = usernames.collect {CASLdapUserDetailsService.getUserByUsername(it)}
-
-        users.each {
-            user ->
-                //for each user, create a user Group
-                UserGroup userGroup = new UserGroup(user:user, group:result)
-                userGroup.save()
-        }
-        return reponse;
-    }
-
-    def resetFromLDAP(Long id) {
-
-        SecUser currentUser = cytomineService.getCurrentUser()
-        securityACLService.checkGuest(currentUser)
-
-        def group = Group.get(id)
-
-        def map = ldapSearchService.searchByUid(group.gid, "cn", "uid", "member");
-
-        if (map.isEmpty()) throw new ObjectNotFoundException("Object with id="+group.gid+"not found in LDAP");
-
-        def json = JSON.parse(group.encodeAsJSON());
-        json["cn"] = map.get("cn")[0]
-        json["uid"] = map.get("uid")[0]
-
-        update(group, json)
-
-        group = Group.get(id)
-
-        // delete all the previous user and add the users as described in LDAP
-        def users = UserGroup.findAllByGroup(group)
-        users.each {
-            it.delete()
-        }
-
-        def usernames = map.get("member").collect {it.split(",")[0].split("=")[1]}
-
-        users = usernames.collect {CASLdapUserDetailsService.getUserByUsername(it)}
-
-        users.each {
-            user ->
-                //for each user, create a user Group
-                UserGroup userGroup = new UserGroup(user:user, group:group)
-                userGroup.save()
-        }
-
-        return group
     }
 
 

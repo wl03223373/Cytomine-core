@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 public class CustomSavedRequestAwareAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     protected final Log logger = LogFactory.getLog(this.getClass());
     private RequestCache requestCache = new HttpSessionRequestCache();
+    private boolean useReferer = false;
 
     public CustomSavedRequestAwareAuthenticationSuccessHandler() {}
 

@@ -38,6 +38,9 @@ class OntologyService extends ModelService {
     def transactionService
     def termService
     def securityACLService
+    def projectService
+    def secUserService
+    def permissionService
 
     def currentDomain() {
         return Ontology
@@ -119,6 +122,17 @@ class OntologyService extends ModelService {
         Command c = new EditCommand(user: currentUser, transaction: transaction)
         c.delete = true
         return executeCommand(c,domain,jsonNewData)
+    }
+
+    def determineRightsForUsers(Ontology ontology, def users) {
+        users.each{determineRightsForUser(ontology, it)}
+    }
+    def determineRightsForUser(Ontology ontology, SecUser user) {
+        List<Project> projects = projectService.listByOntology(ontology)
+        if(projects.any{secUserService.listAdmins(it).contains(user)}) permissionService.addPermission(ontology, user.username, BasePermission.ADMINISTRATION)
+        else permissionService.deletePermission(ontology, user.username, BasePermission.ADMINISTRATION)
+        if(projects.any{secUserService.listUsers(it).contains(user)}) permissionService.addPermission(ontology, user.username, BasePermission.READ)
+        else permissionService.deletePermission(ontology, user.username, BasePermission.READ)
     }
 
     def getStringParamsI18n(def domain) {

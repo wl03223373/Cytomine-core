@@ -168,7 +168,6 @@ class AlgoAnnotation extends AnnotationDomain implements Serializable {
         if (!domain.location) {
             throw new WrongArgumentException("Geometry is null: 0 points")
         }
-
         if (domain.location.getNumPoints() < 1) {
             throw new WrongArgumentException("Geometry is empty:" + domain.location.getNumPoints() + " points")
         }
