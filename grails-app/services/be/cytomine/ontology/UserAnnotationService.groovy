@@ -33,6 +33,7 @@ import be.cytomine.security.User
 import be.cytomine.security.UserJob
 import be.cytomine.sql.AnnotationListing
 import be.cytomine.sql.UserAnnotationListing
+import be.cytomine.utils.GeometryUtils
 import be.cytomine.utils.JSONUtils
 import be.cytomine.utils.ModelService
 import be.cytomine.utils.Task
@@ -289,6 +290,11 @@ class UserAnnotationService extends ModelService {
             double maxY = Math.min(annotationShape.getEnvelopeInternal().maxY, image.baseImage.height)
             Geometry insideBounds = new WKTReader().read("POLYGON((0 0,0 $maxY,$maxX $maxY,$maxX 0,0 0))")
             annotationShape = annotationShape.intersection(insideBounds)
+        }
+
+        def boundaries = GeometryUtils.getGeometryBoundaries(annotationForm)
+        if(boundaries.width == 0 || boundaries.height == 0){
+            throw new WrongArgumentException("Annotation dimension not valid")
         }
 
         //simplify annotation

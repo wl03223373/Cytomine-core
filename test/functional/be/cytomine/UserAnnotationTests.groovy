@@ -120,6 +120,23 @@ class UserAnnotationTests  {
         result = UserAnnotationAPI.show(idAnnotation, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
     }
+    void testAddTooLittleUserAnnotation() {
+        def annotationToAdd = BasicInstanceBuilder.getUserAnnotation()
+        def updateAnnotation = JSON.parse((String)annotationToAdd.encodeAsJSON())
+        updateAnnotation.location = "POLYGON ((225.73582220103702 306.89723126347087, 225.73582220103702 307.93556995227914, 226.08028300710947 307.93556995227914, 226.08028300710947 306.89723126347087, 225.73582220103702 306.89723126347087))"
+
+        def result = UserAnnotationAPI.create(updateAnnotation.toString(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 400 == result.code
+    }
+    void testAddUserAnnotationMultiLine() {
+        def annotationToAdd = BasicInstanceBuilder.getUserAnnotation()
+        def updateAnnotation = JSON.parse((String)annotationToAdd.encodeAsJSON())
+        updateAnnotation.location = "LINESTRING(181.05636403199998 324.87936288,208.31216076799996 303.464094016)"
+
+        def result = UserAnnotationAPI.create(updateAnnotation.toString(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+    }
+
     void testAddUserAnnotationCorrect() {
         def annotationToAdd = BasicInstanceBuilder.getUserAnnotation()
         def result = UserAnnotationAPI.create(annotationToAdd.encodeAsJSON(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)

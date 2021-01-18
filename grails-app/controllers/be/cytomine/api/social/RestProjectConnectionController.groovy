@@ -102,7 +102,7 @@ class RestProjectConnectionController extends RestController {
         if(params.boolean('heatmap')) {
             responseSuccess(projectConnectionService.numberOfConnectionsByProjectOrderedByHourAndDays(project, afterThan, null))
         }else if(period) {
-            responseSuccess(projectConnectionService.numberOfProjectConnections(period, afterThan,null, project))
+            responseSuccess(projectConnectionService.numberOfProjectConnections(period, afterThan, null, project))
         } else {
             responseSuccess(projectConnectionService.numberOfConnectionsByProjectAndUser(project, null))
         }

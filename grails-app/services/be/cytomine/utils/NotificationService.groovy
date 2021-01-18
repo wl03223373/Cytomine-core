@@ -126,7 +126,7 @@ class NotificationService {
                 to: request.to,
                 comment: request.comment,
                 annotationURL: request.annotationURL,
-                shareAnnotationURL: request.shareAnnotationURL,
+                shareAnnotationURL : request.shareAnnotationURL,
                 cid : cid,
                 by: grailsApplication.config.grails.serverURL,
                 website: grailsApplication.config.grails.instanceHostWebsite,
