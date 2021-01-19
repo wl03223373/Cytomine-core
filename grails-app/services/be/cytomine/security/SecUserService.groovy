@@ -740,13 +740,15 @@ class SecUserService extends ModelService {
      * @return Response structure (created domain data,..)
      */
     def add(JSONObject json) {
-        SecUser currentUser = cytomineService.getCurrentUser()
-        securityACLService.checkUser(currentUser)
-        if(json.user == null) {
-            json.user = cytomineService.getCurrentUser().id
-            json.origin = "ADMINISTRATOR"
+        synchronized (this.getClass()) {
+            SecUser currentUser = cytomineService.getCurrentUser()
+            securityACLService.checkUser(currentUser)
+            if (json.user == null) {
+                json.user = cytomineService.getCurrentUser().id
+                json.origin = "ADMINISTRATOR"
+            }
+            return executeCommand(new AddCommand(user: currentUser), null, json)
         }
-        return executeCommand(new AddCommand(user: currentUser),null,json)
     }
 
     /**
