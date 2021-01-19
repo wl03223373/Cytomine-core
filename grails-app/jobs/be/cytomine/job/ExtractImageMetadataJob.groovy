@@ -29,7 +29,7 @@ class ExtractImageMetadataJob {
     }
 
     def execute() {
-        Collection<AbstractImage> abstractImages = AbstractImage.findAllByWidthIsNullOrWidthLike(-1)
+        Collection<AbstractImage> abstractImages = AbstractImage.findAllByWidthOrWidthIsNull(-1)
         abstractImages.each { image ->
             imagePropertiesService.extractUseful(image)
         }
