@@ -218,6 +218,7 @@ class UserAnnotation extends AnnotationDomain implements Serializable {
         returnArray['url'] = UrlApi.getUserAnnotationCropWithAnnotationId(domain?.id)
         returnArray['imageURL'] = UrlApi.getAnnotationURL(imageinstance?.project?.id, imageinstance?.id, domain?.id) //TODO: slice
         returnArray['reviewed'] = domain?.hasReviewedAnnotation()
+        returnArray['track'] = domain?.tracksId()
         return returnArray
     }
 
