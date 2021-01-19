@@ -286,13 +286,13 @@ class UserAnnotationService extends ModelService {
                 envelope.minY < 0 ||
                 envelope.maxX > image.baseImage.width ||
                 envelope.maxY > image.baseImage.height) {
-            double maxX = Math.min(annotationShape.getEnvelopeInternal().maxX, image.baseImage.width)
-            double maxY = Math.min(annotationShape.getEnvelopeInternal().maxY, image.baseImage.height)
+            double maxX = Math.min(envelope.maxX, image.baseImage.width)
+            double maxY = Math.min(envelope.maxY, image.baseImage.height)
             Geometry insideBounds = new WKTReader().read("POLYGON((0 0,0 $maxY,$maxX $maxY,$maxX 0,0 0))")
             annotationShape = annotationShape.intersection(insideBounds)
         }
 
-        def boundaries = GeometryUtils.getGeometryBoundaries(annotationForm)
+        def boundaries = GeometryUtils.getGeometryBoundaries(annotationShape)
         if(boundaries.width == 0 || boundaries.height == 0){
             throw new WrongArgumentException("Annotation dimension not valid")
         }
