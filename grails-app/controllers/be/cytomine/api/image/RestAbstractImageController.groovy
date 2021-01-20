@@ -40,6 +40,7 @@ class RestAbstractImageController extends RestController {
     def uploadedFileService
     def imageSequenceService
     def securityACLService
+    def imagePropertiesService
 
     @RestApiMethod(description="Get all image available for the current user", listing = true)
     @RestApiParams(params=[
