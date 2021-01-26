@@ -138,10 +138,6 @@ class AbstractImageService extends ModelService {
         transactionService.start()
         SecUser currentUser = cytomineService.getCurrentUser()
         securityACLService.checkUser(currentUser)
-        Command c = new AddCommand(user: currentUser)
-        def res = executeCommand(c,null,json)
-        //AbstractImage abstractImage = retrieve(res.data.abstractimage)
-        AbstractImage abstractImage = res.object
 
         if (json.uploadedFile) {
             UploadedFile uploadedFile = uploadedFileService.read(json.uploadedFile as Long)
