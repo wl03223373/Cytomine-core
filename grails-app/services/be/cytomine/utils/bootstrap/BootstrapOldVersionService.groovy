@@ -16,19 +16,21 @@ package be.cytomine.utils.bootstrap
 * limitations under the License.
 */
 
-import be.cytomine.image.server.Storage
-import be.cytomine.image.server.StorageAbstractImage
-import be.cytomine.image.UploadedFile
-import be.cytomine.middleware.AmqpQueue
-import be.cytomine.ontology.AnnotationTrack
-import be.cytomine.meta.Property
+import be.cytomine.image.AbstractImage
+import be.cytomine.image.AbstractSlice
+import be.cytomine.image.CompanionFile
+import be.cytomine.image.ImageInstance
+import be.cytomine.image.Mime
+import be.cytomine.image.SliceInstance
+import be.cytomine.image.multidim.ImageGroup
+import be.cytomine.image.multidim.ImageGroupHDF5
+import be.cytomine.image.multidim.ImageSequence
+import be.cytomine.middleware.ImageServer
 import be.cytomine.ontology.Track
-import be.cytomine.processing.ImageFilter
 import be.cytomine.middleware.AmqpQueue
 import be.cytomine.image.server.Storage
 import be.cytomine.image.UploadedFile
 import be.cytomine.processing.ImageFilter
-import be.cytomine.meta.Property
 import be.cytomine.project.Project
 import be.cytomine.security.SecRole
 import be.cytomine.security.SecUser
@@ -36,10 +38,8 @@ import be.cytomine.security.SecUserSecRole
 import be.cytomine.security.User
 import be.cytomine.meta.Configuration
 import be.cytomine.utils.Version
-import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityUtils
 import groovy.sql.Sql
-import org.apache.commons.io.FilenameUtils
 import org.springframework.security.acls.domain.BasePermission
 
 /**
@@ -67,7 +67,6 @@ class BootstrapOldVersionService {
     def tableService
     def mongo
     def noSQLCollectionService
-    def executorService
 
     void execChangeForOldVersion() {
         def methods = this.metaClass.methods*.name.sort().unique()
@@ -94,71 +93,36 @@ class BootstrapOldVersionService {
     }
 
 
-    /*def initv2_0_0() {
-        log.info "Migration to V2.0.0"
+    def initv3_1_0() {
+        log.info "Migration to V3.1.0"
         def sql = new Sql(dataSource)
 
         /****** USERS ******/
-        /*log.info "Migration of users"
+        log.info "Migration of users"
 
         log.info "Users: Add new column isDeveloper"
         sql.executeUpdate("UPDATE sec_user SET is_developer = FALSE WHERE is_developer IS NULL;")
         bootstrapUtilsService.updateSqlColumnConstraint("sec_user", "is_developer", "SET DEFAULT FALSE")
 
-        log.info "Users: Add new column language"
-        sql.executeUpdate("UPDATE sec_user SET language = 'ENGLISH' WHERE language IS NULL;")
-        bootstrapUtilsService.updateSqlColumnConstraint("sec_user", "language", "SET DEFAULT 'ENGLISH'")
-//        bootstrapUtilsService.updateSqlColumnConstraint("sec_user", "language", "SET NOT NULL")
-
-        log.info "Users: Add new column origin"
-        def systemUsers = ['ImageServer1', 'superadmin', 'admin', 'rabbitmq', 'monitoring']
-        User.findAllByUsernameInList(systemUsers).each { systemUser ->
-            systemUser.origin = "SYSTEM"
-            systemUser.save()
-        }
-        sql.executeUpdate("UPDATE sec_user SET origin = 'BOOTSTRAP' WHERE origin IS NULL;")
-
-        log.info "Users: Remove no more used columns"
-        bootstrapUtilsService.dropSqlColumn("sec_user", "skype_account")
-        bootstrapUtilsService.dropSqlColumn("sec_user", "sip_account")
-
-
-        /******* PROJECT ******/
-        /*log.info "Migration of projects"
-
-        log.info "Projects: Allow projects without ontology"
-        bootstrapUtilsService.updateSqlColumnConstraint("project", "ontology_id", "DROP NOT NULL")
-
-
         /******* SOFTWARE ******/
-        /*log.info "Migration of software"
-        bootstrapUtilsService.dropSqlColumnUniqueConstraint("software")
+        //log.info "Migration of software"
+        //bootstrapUtilsService.dropSqlColumnUniqueConstraint("software")
 
 
         /******* JOB ******/
-        /*log.info "Migration of jobs"
+        log.info "Migration of jobs"
 
-        log.info "Jobs: Add new column favorite"
+        /*log.info "Jobs: Add new column favorite"
         sql.executeUpdate("UPDATE job SET favorite = FALSE WHERE favorite IS NULL;")
-        bootstrapUtilsService.updateSqlColumnConstraint("job", "favorite", "SET DEFAULT FALSE")
+        bootstrapUtilsService.updateSqlColumnConstraint("job", "favorite", "SET DEFAULT FALSE")*/
 
         log.info("Jobs: Update attached files names of job logs to be displayed in webUI")
         sql.executeUpdate("UPDATE attached_file SET filename = 'log.out' " +
                 "WHERE domain_class_name = 'be.cytomine.processing.Job' AND filename LIKE '%.out';")
 
 
-        /****** CONFIGURATIONS ******/
-        /*log.info "Migration of configurations"
-        List<Configuration> configurations = Configuration.findAllByKeyLike("%.%")
-        for(int i = 0; i<configurations.size(); i++){
-            configurations[i].key = configurations[i].key.replace(".","_")
-            configurations[i].save()
-        }
-        bootstrapUtilsService.createConfigurations(true)
-
-
         /****** STORAGE ******/
-        /*log.info "Migration of storages"
+        log.info "Migration of storages"
 
         // Move old Long[] storages to one storage (only first one is kept)
         if (bootstrapUtilsService.checkSqlColumnExistence('uploaded_file', 'storages')) {
@@ -178,7 +142,7 @@ class BootstrapOldVersionService {
 
 
         /****** IMAGE SERVER ******/
-        /*log.info "Migration of image servers"
+        log.info "Migration of image servers"
 
         log.info "Image server: Update image server reference in uploaded_file"
         //TODO: use old ImageServerStorage and StorageAbstractImage
@@ -197,7 +161,7 @@ class BootstrapOldVersionService {
 
 
         /****** UPLOADED FILE (1) ******/
-        /*if (bootstrapUtilsService.checkSqlColumnExistence('uploaded_file', 'image_id')) {
+        if (bootstrapUtilsService.checkSqlColumnExistence('uploaded_file', 'image_id')) {
             log.info "Migration of uploaded files (1)"
 
             log.info "Set uploaded files with valid images and status to 'uploaded' as 'deployed'"
@@ -210,7 +174,7 @@ class BootstrapOldVersionService {
 
 
         /****** ABSTRACT SLICE ******/
-        /*if (AbstractSlice.count() == 0) {
+        if (AbstractSlice.count() == 0) {
             log.info "Migration of abstract slice"
 
             log.info "Abstract slice: Add (0,0,0) abstract slice for all abstract images"
@@ -244,7 +208,7 @@ class BootstrapOldVersionService {
 
 
         /****** SLICE INSTANCE ******/
-        /*if (SliceInstance.count() == 0) {
+        if (SliceInstance.count() == 0) {
             log.info "Migration of slice instances"
 
             log.info "Slice instance: Add (0,0,0) slice instance for all image instances which are not in an image group"
@@ -279,7 +243,7 @@ class BootstrapOldVersionService {
 
 
         /****** ABSTRACT IMAGE ******/
-        /*log.info "Migration of abstract images"
+        log.info "Migration of abstract images"
 
         if (bootstrapUtilsService.checkSqlColumnExistence("abstract_image", "physical_sizex")) {
             new Sql(dataSource).executeUpdate("UPDATE abstract_image SET physical_size_x = physical_sizex;")
@@ -306,7 +270,7 @@ class BootstrapOldVersionService {
 
 
         /****** IMAGE INSTANCE ******/
-        /*if (bootstrapUtilsService.checkSqlColumnExistence("image_instance", "physical_sizex")) {
+        if (bootstrapUtilsService.checkSqlColumnExistence("image_instance", "physical_sizex")) {
             log.info "Migration of image instances"
             new Sql(dataSource).executeUpdate("UPDATE image_instance SET physical_size_x = physical_sizex;")
             new Sql(dataSource).executeUpdate("UPDATE image_instance SET physical_size_y = physical_sizey;")
@@ -318,7 +282,7 @@ class BootstrapOldVersionService {
 
 
         /****** IMAGE GROUP ******/
-        /*def imageInstancesFromImageGroupToSlices = [:]
+        def imageInstancesFromImageGroupToSlices = [:]
         def abstractImagesFromImageGroupToSlices = [:]
         def imageGroupsToImageInstances = [:]
 
@@ -401,7 +365,7 @@ class BootstrapOldVersionService {
 
 
         /****** UPLOADED FILE ******/
-        /*log.info "Migration of uploaded files (2)"
+        log.info "Migration of uploaded files (2)"
         if (bootstrapUtilsService.checkSqlColumnExistence('uploaded_file', 'image_id')) {
             log.info("Uploaded file: Change direction of UF - AI relation and use the root as AI uploaded file")
             sql.executeUpdate("update abstract_image " +
@@ -432,7 +396,7 @@ class BootstrapOldVersionService {
 
 
         /****** ANNOTATIONS ******/
-        /*log.info "Migration of annotations"
+        log.info "Migration of annotations"
         imageInstancesFromImageGroupToSlices.each { o, n ->
             log.info "Update annotation references to slices for old image instance $o that was linked to image group"
             sql.executeUpdate("update algo_annotation set image_id = ${n.image}, slice_id = ${n.slice} where image_id = ${o};")
@@ -472,7 +436,7 @@ class BootstrapOldVersionService {
 
 
         /****** ANNOTATION INDEX ******/
-        /*if (bootstrapUtilsService.checkSqlColumnExistence('annotation_index', 'image_id')) {
+        if (bootstrapUtilsService.checkSqlColumnExistence('annotation_index', 'image_id')) {
             log.info "Migration of annotation indexes"
             sql.executeUpdate("update annotation_index " +
                     "set slice_id = slice.id " +
@@ -486,7 +450,7 @@ class BootstrapOldVersionService {
 
 
         /****** MIME ******/
-        /*log.info "Migration of mime types"
+        log.info "Migration of mime types"
 
         log.info "Mime type: Update mime reference"
         def pyrTiffMime = Mime.findByMimeType("image/pyrtiff")
@@ -502,7 +466,7 @@ class BootstrapOldVersionService {
 
 
         /****** CLEANING ******/
-        /*log.info "Cleaning: Remove no more used files"
+        log.info "Cleaning: Remove no more used files"
 
         if (imageInstancesFromImageGroupToSlices.size() > 0) {
             log.info "Cleaning: Delete old image instances used in image groups"
@@ -522,7 +486,7 @@ class BootstrapOldVersionService {
         sql.executeUpdate("UPDATE abstract_image ai SET deleted = NOW() WHERE NOT EXISTS(SELECT 1 FROM abstract_slice asl WHERE asl.image_id = ai.id);")
 
         /****** COUNTERS ******/
-        /*log.info "Migration of counters"
+        log.info "Migration of counters"
 
         log.info "Counters: recompute project counters"
         sql.executeUpdate("UPDATE project p SET " +
@@ -539,7 +503,7 @@ class BootstrapOldVersionService {
 
 
         /****** TRACKS *******/
-        /*if (Track.count() == 0) {
+        if (Track.count() == 0) {
             log.info "Migration of tracks"
 
             def lastImageId = 0
@@ -579,16 +543,13 @@ class BootstrapOldVersionService {
 
 
         /****** VIEWS ******/
-        /*log.info "Regeneration of DB views"
+        log.info "Regeneration of DB views"
         sql.executeUpdate("DROP VIEW user_image;")
         tableService.initTable()
 
         sql.close()
     }
 
-    def imagePropertiesService
-
-    */
 
     void initv3_0_2() {
         log.info "3.0.2"
@@ -610,84 +571,6 @@ class BootstrapOldVersionService {
         })
     }
 
-        /*executorService.execute({
-
-            try {
-                log.info "create new uploadedfile"
-                // recreate uploadedFile from abstractimage
-                // only for converted abstract_image
-                ufs = UploadedFile.createCriteria().list {
-                    join("image")
-                    createAlias("image", "i")
-                    neProperty("filename", "i.path")
-
-                    isNotNull("image")
-                }
-                log.info "record to update : "+ufs.size()
-
-                int i = 0;
-
-                ufs.each {
-                    def uf = new UploadedFile()
-
-                    uf.contentType = "image/pyrtiff"
-                    uf.image = it.image
-
-                    String filename = it.image.originalFilename
-                    int index = filename.lastIndexOf('.')
-                    filename = filename.substring(0, index) + "_pyr" + filename.substring(index)
-
-                    uf.originalFilename = filename
-                    uf.filename = it.image.path
-                    uf.parent = it
-                    uf.path = it.path
-                    uf.ext = FilenameUtils.getExtension(it.image.path)
-                    uf.status = 2 //UploadedFile.DEPLOYED
-                    uf.user = it.user
-                    uf.storages = StorageAbstractImage.findAllByAbstractImage(it.image).collect { it.storage.id }
-                    uf.size = 0L
-
-                    uf.save(failOnError: true)
-
-                    it.image = null
-                    it.status = 1 //UploadedFile.CONVERTED
-                    it.save()
-
-                    if (i % 100 == 0) log.info("done : " + i + "/" + ufs.size())
-                    i++
-                }
-            } catch (Exception e) {
-                log.info "Error during migration. Exit application"
-                e.printStackTrace()
-                System.exit(1)
-            }
-        } as Runnable)
-
-        /*ImageGroup.findAll().each {
-            if (it.id.toString() == it.name) {
-                def sequence = ImageSequence.findByImageGroup(it)
-
-                List<UploadedFile> files = UploadedFile.findAllByImage(sequence.image.baseImage)
-                UploadedFile file = files.size() == 1 ? files[0] : files.find{it.parent!=null}
-                while(file.parent) {
-                    file = file.parent
-                }
-
-                it.setName(file.originalFilename)
-                it.save(flush: true)
-            }
-        }
-    }
-//        List<AbstractImage> abstractImages = AbstractImage.findAllByDeletedIsNullAndBitDepthIsNull()
-//        log.info "${abstractImages.size()} image to populate"
-//        abstractImages.eachWithIndex { image, index ->
-//            if(index%100==0) {
-//                log.info "Populate image properties: ${(index/abstractImages.size())*100}"
-//            }
-//            imagePropertiesService.populate(image)
-//            imagePropertiesService.extractUseful(image)
-//        }
-*/
 
     void initv3_0_0() {
         log.info "3.0.0"

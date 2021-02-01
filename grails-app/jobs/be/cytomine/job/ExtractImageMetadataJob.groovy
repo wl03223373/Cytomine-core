@@ -18,6 +18,7 @@ package be.cytomine.job
 
 import be.cytomine.image.AbstractImage
 import be.cytomine.image.UploadedFile
+import grails.validation.ValidationException
 
 class ExtractImageMetadataJob {
 
@@ -29,9 +30,14 @@ class ExtractImageMetadataJob {
     }
 
     def execute() {
-        Collection<AbstractImage> abstractImages = AbstractImage.findAllByWidthOrWidthIsNull(-1)
+        Collection<AbstractImage> abstractImages = AbstractImage.findAllByWidthInListOrWidthIsNull([-1,0])
         abstractImages.each { image ->
-            imagePropertiesService.extractUseful(image)
+            try {
+                imagePropertiesService.extractUseful(image)
+            } catch (ValidationException e) {
+                log.error "$image cannot be saved"
+                log.error e.getMessage()
+            }
         }
         //TODO activate when bitPerSample is implemented
         /*Collection<AbstractImage> abstractImages = AbstractImage.findAllBySamplePerPixelIsNullOrWidthIsNullOrWidth(-1, [max: 10, sort: "created", order: "desc"])
