@@ -21,7 +21,13 @@ class SoftwareParameterUrlMappings {
         "/api/software_parameter.$format"(controller:"restSoftwareParameter"){
             action = [GET: "list",POST:"add"]
         }
+        "/api/softwareparameter.$format"(controller:"restSoftwareParameter"){
+            action = [GET: "list",POST:"add"]
+        }
         "/api/software_parameter/$id.$format"(controller:"restSoftwareParameter"){
+            action = [GET:"show",PUT:"update", DELETE:"delete"]
+        }
+        "/api/softwareparameter/$id.$format"(controller:"restSoftwareParameter"){
             action = [GET:"show",PUT:"update", DELETE:"delete"]
         }
         "/api/software/$id/software_parameter.$format"(controller:"restSoftwareParameter"){

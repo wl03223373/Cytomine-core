@@ -506,7 +506,7 @@ abstract class AnnotationListing {
     def getTermsConst() {
         if (terms) {
             addIfMissingColumn('term')
-            return "AND (at.term_id IN (${terms.join(',')})" + ((noTerm) ? " OR at.term_id IS NULL" : "") + ")\n"
+            return "AND ((at.term_id IN (${terms.join(',')}) AND at.deleted IS NULL)" + ((noTerm) ? " OR at.term_id IS NULL" : "") + ")\n"
         } else {
             return ""
         }
@@ -995,7 +995,7 @@ class AlgoAnnotationListing extends AnnotationListing {
 
         if (terms) {
             addIfMissingColumn('term')
-            return "AND (aat.term_id IN (${terms.join(',')})" + ((noTerm) ? " OR aat.term_id IS NULL" : "") + ")\n"
+            return "AND ((aat.term_id IN (${terms.join(',')}) AND aat.deleted IS NULL)" + ((noTerm) ? " OR aat.term_id IS NULL" : "") + ")\n"
         } else {
             return ""
         }
