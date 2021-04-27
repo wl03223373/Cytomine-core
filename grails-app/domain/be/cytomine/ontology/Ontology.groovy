@@ -115,11 +115,7 @@ class Ontology extends CytomineDomain implements Serializable {
             rootTerms << branch(it, relation)
         }
         rootTerms.sort { a, b ->
-            if (a.isFolder != b.isFolder) {
-                a.isFolder <=> b.isFolder
-            } else {
-                a.name <=> b.name
-            }
+            a.name <=> b.name
         }
         return rootTerms;
     }
@@ -167,9 +163,7 @@ class Ontology extends CytomineDomain implements Serializable {
             }
         }
         t.children.sort { a, b ->
-            if (a.isFolder != b.isFolder)
-                a.isFolder <=> b.isFolder
-            else a.name <=> b.name
+            a.name <=> b.name
         }
         t.isFolder = isFolder
         t.hideCheckbox = isFolder

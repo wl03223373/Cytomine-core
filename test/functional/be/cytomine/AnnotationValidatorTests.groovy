@@ -21,13 +21,6 @@ import be.cytomine.test.Infos
 import be.cytomine.test.http.UserAnnotationAPI
 import grails.converters.JSON
 
-/**
- * Created by IntelliJ IDEA.
- * User: lrollus
- * Date: 16/02/11
- * Time: 13:49
- * To change this template use File | Settings | File Templates.
- */
 class AnnotationValidatorTests {
 
    public static SELF_INTERSECT_CANNOT_MAKE_VALID = "POLYGON((13688 75041,13687 75040,13688 75041,13689 75041,13688 75041))"
@@ -106,5 +99,13 @@ class AnnotationValidatorTests {
         json.location = MULTI_LINE_STRING
         def result = UserAnnotationAPI.create(json.toString(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 400 == result.code
+    }
+
+    public void testAnnotationGeometryPoint() {
+        def annotationToAdd = BasicInstanceBuilder.getUserAnnotation()
+        def json = JSON.parse(annotationToAdd.encodeAsJSON())
+        json.location = "POINT(10 10)"
+        def result = UserAnnotationAPI.create(json.toString(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
     }
 }

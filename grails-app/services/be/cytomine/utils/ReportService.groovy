@@ -42,7 +42,7 @@ class ReportService {
     def exportService
     def secUserService
 
-    def createAnnotationDocuments(Long idProject, def termsParam, def noTerm, def multipleTerms, def usersParam, def imagesParam, Long afterThan, Long beforeThan, def format,def response, String type) {
+    def createAnnotationDocuments(Long idProject, def termsParam, boolean noTerm, boolean multipleTerms, def usersParam, def imagesParam, Long afterThan, Long beforeThan, def format,def response, String type) {
 
         Project project = projectService.read(idProject)
 

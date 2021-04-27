@@ -120,6 +120,15 @@ class ImageInstanceSearchTests {
         assert json.collection instanceof JSONArray
         assert json.size == 0
 
+        searchParameters = [[operator : "equals", field : "baseImage", value:img1.getBaseImage().id]]
+
+        result = ImageInstanceAPI.listByProject(project.id, 0,0, searchParameters, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+        json = JSON.parse(result.data)
+        assert json.collection instanceof JSONArray
+        assert json.size > 0
+        assert json.collection.collect{it.baseImage}.every{it == img1.getBaseImage().id}
+
         searchParameters = [[operator : "ilike", field : "name", value:img1.getInstanceFilename()]]
 
         result = ImageInstanceAPI.listByProject(project.id, 0,0, searchParameters, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
@@ -379,8 +388,6 @@ class ImageInstanceSearchTests {
         assert ImageInstanceAPI.containsInJSONList(img1.id,json)
 
         assert json.collection[0].blindedName == json.collection[0].baseImage.toString()
-
-
     }
 
 

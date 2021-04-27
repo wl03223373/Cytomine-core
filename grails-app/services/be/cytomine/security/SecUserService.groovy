@@ -100,7 +100,7 @@ class SecUserService extends ModelService {
     def findByUsername(def username) {
         if(!username) return null
         securityACLService.checkGuest(cytomineService.currentUser)
-        SecUser.findByUsername(username)
+        SecUser.findByUsernameIlike(username)
     }
 
     def findByEmail(def email) {

@@ -57,14 +57,57 @@ class OntologyTests  {
         def json = JSON.parse(result.data)
         assert json.collection instanceof JSONArray
     }
-  
+
     void testShowOntologyWithCredential() {
         def result = OntologyAPI.show(BasicInstanceBuilder.getOntology().id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
         def json = JSON.parse(result.data)
         assert json instanceof JSONObject
     }
-  
+
+    void testShowOntologyWithChildrenTree() {
+        Ontology ontology = BasicInstanceBuilder.getOntologyNotExist()
+        ontology = BasicInstanceBuilder.saveDomain(ontology)
+
+        Term a = BasicInstanceBuilder.getTermNotExist(ontology)
+        a.name = "a"
+        BasicInstanceBuilder.saveDomain(a)
+        Term b = BasicInstanceBuilder.getTermNotExist(ontology, true)
+        b.name = "b"
+        BasicInstanceBuilder.saveDomain(b)
+        Term c = BasicInstanceBuilder.getTermNotExist(ontology, true)
+        c.name = "c"
+        BasicInstanceBuilder.saveDomain(c)
+
+        Term aa = BasicInstanceBuilder.getTermNotExist(ontology)
+        aa.name = "aa"
+        BasicInstanceBuilder.saveDomain(aa)
+        BasicInstanceBuilder.getParentRelationTerm(a, aa)
+        Term ab = BasicInstanceBuilder.getTermNotExist(ontology, true)
+        ab.name = "ab"
+        BasicInstanceBuilder.saveDomain(ab)
+        BasicInstanceBuilder.getParentRelationTerm(a, ab)
+        Term aaa = BasicInstanceBuilder.getTermNotExist(ontology, true)
+        aaa.name = "aaa"
+        BasicInstanceBuilder.saveDomain(aaa)
+        BasicInstanceBuilder.getParentRelationTerm(aa, aaa)
+
+
+        def result = OntologyAPI.show(ontology.id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+        def json = JSON.parse(result.data)
+        assert json instanceof JSONObject
+
+        assert json.children.size() == 3
+        assert json.children.collect{it.name} == ["a", "b", "c"]
+
+        assert json.children.find{it.name == "a"}.children.size() == 2
+        assert json.children.find{it.name == "a"}.children.collect{it.name} == ["aa", "ab"]
+
+        assert json.children.find{it.name == "a"}.children.find{it.name == "aa"}.children.size() == 1
+        assert json.children.find{it.name == "a"}.children.find{it.name == "aa"}.children[0].name == "aaa"
+    }
+
     void testAddOntologyCorrect() {
         def ontologyToAdd = BasicInstanceBuilder.getOntologyNotExist()
         def result = OntologyAPI.create(ontologyToAdd.encodeAsJSON(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)

@@ -196,7 +196,7 @@ class LoginController extends RestController {
     def loginWithToken() {
         String username = params.username
         String tokenKey = params.tokenKey
-        User user = User.findByUsername(username) //we are not logged, we bypass the service
+        User user = User.findByUsernameIlike(username) //we are not logged, we bypass the service
 
 
         AuthWithToken authToken = AuthWithToken.findByTokenKeyAndUser(tokenKey, user)
@@ -230,7 +230,7 @@ class LoginController extends RestController {
     def buildToken() {
         String username = params.username
         Double validityMin = params.double('validity',60d)
-        User user = User.findByUsername(username)
+        User user = User.findByUsernameIlike(username)
 
         if(currentRoleServiceProxy.isAdminByNow(cytomineService.currentUser)) {
             String tokenKey = UUID.randomUUID().toString()
@@ -249,7 +249,7 @@ class LoginController extends RestController {
     def forgotPassword () {
         String username = params.j_username
         if (username) {
-            User user = User.findByUsername(username) //we are not logged, so we bypass the service
+            User user = User.findByUsernameIlike(username) //we are not logged, so we bypass the service
             if (user) {
                 String tokenKey = UUID.randomUUID().toString()
                 ForgotPasswordToken forgotPasswordToken = new ForgotPasswordToken(

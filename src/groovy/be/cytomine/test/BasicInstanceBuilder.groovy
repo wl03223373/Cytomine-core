@@ -1211,6 +1211,21 @@ class BasicInstanceBuilder {
         relationTerm
     }
 
+    static RelationTerm getParentRelationTerm(Term parent, Term child) {
+        def relation = Relation.findByName(RelationTerm.names.PARENT)
+        if (!relation) {
+            relation = new Relation(name: RelationTerm.names.PARENT)
+            BasicInstanceBuilder.saveDomain(relation)
+        }
+
+        def relationTerm = RelationTerm.findWhere('relation': relation, 'term1': parent, 'term2': child)
+        if (!relationTerm) {
+            relationTerm = new RelationTerm(relation:relation, term1:parent, term2:child)
+            saveDomain(relationTerm)
+        }
+        relationTerm
+    }
+
     static RelationTerm getRelationTermNotExist() {
         def relation = saveDomain(getRelationNotExist())
         def term1 = saveDomain(getTermNotExist())

@@ -99,7 +99,7 @@ class BootstrapUtilsService {
 
         def usersCreated = []
         usersSamples.each { item ->
-            User user = User.findByUsername(item.username)
+            User user = User.findByUsernameIlike(item.username)
             if (user)  return
             user = new User(
                     username: item.username,

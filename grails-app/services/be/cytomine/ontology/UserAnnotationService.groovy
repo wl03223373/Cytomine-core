@@ -292,9 +292,11 @@ class UserAnnotationService extends ModelService {
             annotationShape = annotationShape.intersection(insideBounds)
         }
 
-        def boundaries = GeometryUtils.getGeometryBoundaries(annotationShape)
-        if(boundaries.width == 0 || boundaries.height == 0){
-            throw new WrongArgumentException("Annotation dimension not valid")
+        if(!(annotationShape.geometryType.equals("LineString"))) {
+            def boundaries = GeometryUtils.getGeometryBoundaries(annotationShape)
+            if (boundaries == null || boundaries.width == 0 || boundaries.height == 0) {
+                throw new WrongArgumentException("Annotation dimension not valid")
+            }
         }
 
         //simplify annotation

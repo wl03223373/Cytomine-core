@@ -175,13 +175,13 @@ class BootStrap {
         //keys regenerated at each deployment with Docker
         //if keys deleted from external config files for security, keep old keys
         if(grailsApplication.config.grails.ImageServerPrivateKey && grailsApplication.config.grails.ImageServerPublicKey) {
-            SecUser imageServerUser = SecUser.findByUsername("ImageServer1")
+            SecUser imageServerUser = SecUser.findByUsernameIlike("ImageServer1")
             imageServerUser.setPrivateKey(grailsApplication.config.grails.ImageServerPrivateKey)
             imageServerUser.setPublicKey(grailsApplication.config.grails.ImageServerPublicKey)
             imageServerUser.save(flush : true)
         }
         if(grailsApplication.config.grails.rabbitMQPrivateKey && grailsApplication.config.grails.rabbitMQPublicKey) {
-            SecUser rabbitMQUser = SecUser.findByUsername("rabbitmq")
+            SecUser rabbitMQUser = SecUser.findByUsernameIlike("rabbitmq")
             if(rabbitMQUser) {
                 rabbitMQUser.setPrivateKey(grailsApplication.config.grails.rabbitMQPrivateKey)
                 rabbitMQUser.setPublicKey(grailsApplication.config.grails.rabbitMQPublicKey)
