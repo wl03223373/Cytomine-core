@@ -32,6 +32,7 @@ import com.vividsolutions.jts.io.WKTReader
 import grails.converters.JSON
 import groovyx.net.http.ContentType
 import groovyx.net.http.HTTPBuilder
+import groovyx.net.http.HttpResponseException
 import org.apache.http.HttpEntity
 import org.apache.http.util.EntityUtils
 
@@ -332,30 +333,37 @@ class ImageServerService extends ModelService {
         return "$server$uri?$query"
     }
 
-    private static byte[] makeRequest(def uri, def server, def parameters, def httpMethod=null) {
+    private byte[] makeRequest(def uri, def server, def parameters, def httpMethod=null) {
         def final GET_URL_MAX_LENGTH = 512
         parameters = filterParameters(parameters)
         def url = makeGetUrl(uri, server, parameters)
+
         def http = new HTTPBuilder(server)
-        if ((url.size() < GET_URL_MAX_LENGTH && httpMethod == null) || httpMethod == "GET") {
-            (byte[]) http.get(path: uri, requestContentType: ContentType.URLENC, query: parameters) { response ->
-                HttpEntity entity = response.getEntity()
-                if (entity != null) {
-                    return EntityUtils.toByteArray(entity)
+        try{
+            if ((url.size() < GET_URL_MAX_LENGTH && httpMethod == null) || httpMethod == "GET") {
+                (byte[]) http.get(path: uri, requestContentType: ContentType.URLENC, query: parameters) { response ->
+                    HttpEntity entity = response.getEntity()
+                    if (entity != null) {
+                        return EntityUtils.toByteArray(entity)
+                    }
+                    else
+                        return null
                 }
-                else
-                    return null
             }
-        }
-        else {
-            (byte[]) http.post(path: uri, requestContentType: ContentType.URLENC, body: parameters) { response ->
-                HttpEntity entity = response.getEntity()
-                if (entity != null) {
-                    return EntityUtils.toByteArray(entity)
+            else {
+                (byte[]) http.post(path: uri, requestContentType: ContentType.URLENC, body: parameters) { response ->
+                    HttpEntity entity = response.getEntity()
+                    if (entity != null) {
+                        return EntityUtils.toByteArray(entity)
+                    }
+                    else
+                        return null
                 }
-                else
-                    return null
             }
+        } catch(HttpResponseException e){
+            log.error("Error for url : $url")
+            log.error(e.message)
+            e.printStackTrace()
         }
     }
 
