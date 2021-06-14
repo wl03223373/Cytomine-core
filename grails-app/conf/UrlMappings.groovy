@@ -36,7 +36,7 @@ class UrlMappings {
         "/adminManage/$action?.$format"(controller: "errors", action: "error500")
 
         /* Home */
-        "/"(view:"/index")
+        "/"(controller: "server", action: "ping")
 
         /* Errors */
 //        "/500" (view:'/error')

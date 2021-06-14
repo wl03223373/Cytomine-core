@@ -51,6 +51,7 @@ class SecurityACLService {
     }
 
     void checkAtLeastOne(def id, String className, String method, Permission permission) {
+        if(currentRoleServiceProxy.isAdminByNow(cytomineService.currentUser)) return;
         def simpleObject =  Class.forName(className, false, Thread.currentThread().contextClassLoader).read(id)
         if (simpleObject) {
             def containerObjects = simpleObject."$method"()

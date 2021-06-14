@@ -18,6 +18,7 @@ package be.cytomine.meta
 
 import be.cytomine.AnnotationDomain
 import be.cytomine.CytomineDomain
+import be.cytomine.Exception.InvalidRequestException
 import be.cytomine.command.*
 import be.cytomine.meta.Property
 import be.cytomine.image.ImageInstance
@@ -139,6 +140,10 @@ class PropertyService extends ModelService {
     def add(def json, def transaction = null) {
         def domainClass = json.domainClassName
         CytomineDomain domain
+
+        if(!domainClass || !json.domainIdent){
+            throw new InvalidRequestException("Property has no associated domain")
+        }
 
         if(domainClass.contains("AnnotationDomain")) {
             domain = AnnotationDomain.getAnnotationDomain(json.domainIdent)

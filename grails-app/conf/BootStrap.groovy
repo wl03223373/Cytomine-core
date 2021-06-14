@@ -101,7 +101,6 @@ class BootStrap {
 
         [
             "Environment" : Environment.getCurrent().name,
-            "Client": grailsApplication.config.grails.client,
             "Server URL": grailsApplication.config.grails.serverURL,
             "Current directory": new File( './' ).absolutePath,
             "HeadLess: ": java.awt.GraphicsEnvironment.isHeadless(),

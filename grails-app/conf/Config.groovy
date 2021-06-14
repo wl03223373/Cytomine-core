@@ -325,7 +325,6 @@ cytomine.customUI.global = [
         storage : ["ROLE_USER","ROLE_ADMIN"],
         software : ["ROLE_USER", "ROLE_ADMIN"],
         activity : ["ALL"],
-        explore : ["ROLE_USER","ROLE_ADMIN"],
         admin : ["ROLE_ADMIN"],
         help : ["ALL"]
 ]
@@ -338,6 +337,21 @@ cytomine.customUI.project = [
         "project-activities-tab":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":false],
         "project-information-tab":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
         "project-configuration-tab":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":false],
+
+        //image details
+        "project-explore-image-overview":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
+        //"project-explore-image-status":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
+        "project-explore-image-description":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
+        "project-explore-image-tags":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
+        "project-explore-image-properties":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
+        "project-explore-image-attached-files":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
+        "project-explore-image-slide-preview":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
+        "project-explore-image-original-filename":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
+        /*"project-explore-image-format":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
+        "project-explore-image-vendor":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
+        "project-explore-image-size":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
+        "project-explore-image-resolution":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
+        "project-explore-image-magnification":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],*/
 
         //explore
         "project-explore-hide-tools":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
@@ -408,8 +422,6 @@ cytomine.customUI.project = [
         "project-users-heatmap-graph":["ADMIN_PROJECT":true,"CONTRIBUTOR_PROJECT":true],
 ]
 
-grails.client = "NO"
-
 storage_path="/data/images" //default path for image locations
 fast_data_path="/data/images" //default path for HDF5 files location (for ex: a SSD)
 cytomine.software.path.softwareImages = "/data/softwares/images"
@@ -445,3 +457,4 @@ grails.instanceHostPhoneNumber = null
 grails.defaultLanguage = "ENGLISH"
 
 grails.useHTTPInternally = true
+

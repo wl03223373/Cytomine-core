@@ -19,6 +19,7 @@ package be.cytomine
 import be.cytomine.security.User
 import be.cytomine.test.BasicInstanceBuilder
 import be.cytomine.test.Infos
+import be.cytomine.test.http.DomainAPI
 import be.cytomine.test.http.ProjectAPI
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
@@ -67,4 +68,20 @@ class LoginTests {
         assert 401 == result.code
     }
 
+    void testBuildAuthToken() {
+        User user = BasicInstanceBuilder.getUserNotExist()
+
+        String url = Infos.CYTOMINEURL + "api/token.json"
+        String data = "{username : " + user.username + ", validity : " + 1 + "}";
+
+        def result = DomainAPI.doPOST(url,data,Infos.SUPERADMINLOGIN,Infos.SUPERADMINPASSWORD)
+        assert 403 == result.code
+
+        user = BasicInstanceBuilder.getUserNotExist(true)
+        data = "{username : " + user.username + ", validity : " + 1 + "}";
+        result = DomainAPI.doPOST(url,data,Infos.SUPERADMINLOGIN,Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+        def json = JSON.parse(result.data)
+        assert json instanceof JSONObject
+    }
 }
