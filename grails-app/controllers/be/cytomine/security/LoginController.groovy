@@ -184,7 +184,7 @@ class LoginController extends RestController {
     }
 
     def forgotUsername () {
-        User user = User.findByEmail(params.j_email)
+        User user = User.findByEmailIlike(params.j_email)
         if (user) {
             notificationService.notifyForgotUsername(user)
             response([success: true, message: "Check your inbox"], 200)
