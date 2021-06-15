@@ -196,7 +196,7 @@ class LoginController extends RestController {
     def loginWithToken() {
         String username = params.username
         String tokenKey = params.tokenKey
-        User user = User.findByUsernameIlike(username) //we are not logged, we bypass the service
+        User user = User.findByUsernameIlikeAndEnabled(username, true) //we are not logged, we bypass the service
 
 
         AuthWithToken authToken = AuthWithToken.findByTokenKeyAndUser(tokenKey, user)
@@ -232,7 +232,7 @@ class LoginController extends RestController {
         Double validityMin = params.validity ? params.double('validity',60d) : Double.parseDouble(request.JSON.validity.toString())
         User user = User.findByUsernameIlike(username)
 
-        if(user && currentRoleServiceProxy.isAdminByNow(cytomineService.currentUser)) {
+        if(user && user.enabled && currentRoleServiceProxy.isAdminByNow(cytomineService.currentUser)) {
             String tokenKey = UUID.randomUUID().toString()
             AuthWithToken token = new AuthWithToken(
                     user : user,
@@ -240,8 +240,10 @@ class LoginController extends RestController {
                     tokenKey: tokenKey
             ).save(flush : true)
             response([success: true, token:token], 200)
-        } else if(user){
+        } else if(user && user.enabled ){
             response([success: false, message: "You must be an admin/superadmin!"], 403)
+        } else if(user){
+            response([success: false, message: username+" is locked"], 403)
         } else {
             response([success: false, message: username+" don't match with any user"], 403)
         }
