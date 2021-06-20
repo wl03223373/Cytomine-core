@@ -196,13 +196,15 @@ class BootstrapOldVersionService {
                 ]
             }
 
-            def batchSize = 2000
-            def fields = ["id", "created", "version", "image_id", "uploaded_file_id", "mime_id", "channel", "z_stack", "time"]
-            def groups = values.collate(batchSize)
-            groups.eachWithIndex { def vals, int i ->
-                def formatted = vals.collect { v -> "(" + fields.collect { f -> v[f] }.join(",") + ")"}
-                sql.execute('INSERT INTO abstract_slice (' + fields.join(",") + ') VALUES ' + formatted.join(",") + ';')
-                log.info "- Inserted ${i * batchSize} elements ($i / ${groups.size()})"
+            if(values.size() > 0) {
+                def batchSize = 2000
+                def fields = ["id", "created", "version", "image_id", "uploaded_file_id", "mime_id", "channel", "z_stack", "time"]
+                def groups = values.collate(batchSize)
+                groups.eachWithIndex { def vals, int i ->
+                    def formatted = vals.collect { v -> "(" + fields.collect { f -> v[f] }.join(",") + ")"}
+                    sql.execute('INSERT INTO abstract_slice (' + fields.join(",") + ') VALUES ' + formatted.join(",") + ';')
+                    log.info "- Inserted ${i * batchSize} elements ($i / ${groups.size()})"
+                }
             }
         }
 
@@ -231,13 +233,15 @@ class BootstrapOldVersionService {
                 ]
             }
 
-            def batchSize = 2000
-            def fields = ["id", "created", "version", "base_slice_id", "image_id", "project_id"]
-            def groups = values.collate(batchSize)
-            groups.eachWithIndex { def vals, int i ->
-                def formatted = vals.collect { v -> "(" + fields.collect { f -> v[f] }.join(",") + ")"}
-                sql.execute('INSERT INTO slice_instance (' + fields.join(",") + ') VALUES ' + formatted.join(",") + ';')
-                log.info "- Inserted ${i * batchSize} elements ($i / ${groups.size()})"
+            if(values.size() > 0) {
+                def batchSize = 2000
+                def fields = ["id", "created", "version", "base_slice_id", "image_id", "project_id"]
+                def groups = values.collate(batchSize)
+                groups.eachWithIndex { def vals, int i ->
+                    def formatted = vals.collect { v -> "(" + fields.collect { f -> v[f] }.join(",") + ")" }
+                    sql.execute('INSERT INTO slice_instance (' + fields.join(",") + ') VALUES ' + formatted.join(",") + ';')
+                    log.info "- Inserted ${i * batchSize} elements ($i / ${groups.size()})"
+                }
             }
         }
 
