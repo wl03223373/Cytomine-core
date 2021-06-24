@@ -76,7 +76,7 @@ grails.project.dependency.resolution = {
     }
     dependencies {
         test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
-        runtime 'org.postgresql:postgresql:42.2.2'
+        runtime 'org.postgresql:postgresql:42.2.14'
         runtime 'com.rabbitmq:amqp-client:3.4.4'
         compile "javax.validation:validation-api:1.1.0.Final"
         runtime "org.hibernate:hibernate-validator:5.0.3.Final"
@@ -85,19 +85,23 @@ grails.project.dependency.resolution = {
         compile( "commons-validator:commons-validator:1.5.0" ) {
             excludes 'xml-apis','commons-digester','commons-logging','commons-beanutils', 'commons-collections'
         }
+        compile 'org.grails:grails-datastore-gorm:3.1.4.RELEASE'
+        //compile 'org.grails:grails-datastore-gorm-plugin-support:3.1.5.RELEASE'
     }
     plugins {
-        compile ":mongodb:3.0.2"
-        runtime ':hibernate4:4.3.5.5'
+        compile ":mongodb:3.0.1" // https://stackoverflow.com/questions/25510347/cannot-install-grails-mongodb-plugin
+        runtime ':hibernate4:4.3.10'
         build ':tomcat:7.0.54'
         compile ':cache:1.1.7'
-        compile ":grails-melody:1.49.0"
+        //compile ":grails-melody:1.49.0"
         compile ":rest-api-doc:0.6"
         compile ":rest:0.8"
-        compile ':spring-security-core:2.0-RC4'
-        compile ":spring-security-acl:2.0-RC2"
-        compile ':spring-security-appinfo:2.0-RC2'
-        runtime ':export:1.6'
+        compile ':spring-security-core:2.0.0'
+        compile ":spring-security-acl:2.0.0"
+        compile ':spring-security-appinfo:2.0.0'
+        compile (':export:1.5') {
+            excludes: 'odfdom-java'
+        }
         compile ":quartz:1.0.1"
         runtime ":quartz-monitor:0.3-RC3"
         runtime ":database-migration:1.3.8"

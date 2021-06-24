@@ -22,7 +22,9 @@ import org.springframework.dao.DataAccessException
 import org.springframework.security.core.authority.GrantedAuthorityImpl
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.transaction.annotation.Transactional
 
+@Transactional
 class SimpleUserDetailsService extends GormUserDetailsService {
 
     @Override
