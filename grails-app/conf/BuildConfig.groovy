@@ -13,7 +13,6 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-
 //grails.client = "be.cytomine.integration"
 grails.servlet.version = "3.0"
 grails.reload.enabled = true
@@ -23,7 +22,6 @@ grails.project.test.reports.dir = "target/test-reports"
 grails.project.war.file = "target/${appName}.war"
 //grails.project.dependency.resolver="ivy"
 grails.project.dependency.resolver = "maven"
-
 //UNCOMMENT TO HAVE WORKING TEST
 grails.project.fork = [
         test: false,
@@ -31,7 +29,6 @@ grails.project.fork = [
         war: false,
         console: false
 ]
-
 //UNCOMMENT TO HAVE AUTO RELOADING
 /*grails.project.fork = [
         // configure settings for compilation JVM, note that if you alter the Groovy version forked compilation is required
@@ -46,8 +43,6 @@ grails.project.fork = [
         // configure settings for the Console UI JVM
         console: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256]
 ]*/
-
-
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -58,7 +53,6 @@ grails.project.dependency.resolution = {
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     checksums true // Whether to verify checksums on resolve
     legacyResolve false // whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
-
     repositories {
         grailsPlugins()
         grailsHome()
@@ -76,7 +70,7 @@ grails.project.dependency.resolution = {
     }
     dependencies {
         test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
-        runtime 'org.postgresql:postgresql:42.2.14'
+        runtime 'org.postgresql:postgresql:42.2.2'
         runtime 'com.rabbitmq:amqp-client:3.4.4'
         compile "javax.validation:validation-api:1.1.0.Final"
         runtime "org.hibernate:hibernate-validator:5.0.3.Final"
@@ -89,8 +83,8 @@ grails.project.dependency.resolution = {
         //compile 'org.grails:grails-datastore-gorm-plugin-support:3.1.5.RELEASE'
     }
     plugins {
-        compile ":mongodb:3.0.1" // https://stackoverflow.com/questions/25510347/cannot-install-grails-mongodb-plugin
-        runtime ':hibernate4:4.3.10'
+        compile ":mongodb:3.0.3" // https://stackoverflow.com/questions/25510347/cannot-install-grails-mongodb-plugin
+        runtime ':hibernate4:4.3.5.5'
         build ':tomcat:7.0.54'
         compile ':cache:1.1.7'
         //compile ":grails-melody:1.49.0"
