@@ -759,6 +759,39 @@ class BasicInstanceBuilder {
         return image
     }
 
+    static void buildStorageImageServerLinkForImage(AbstractImage abstractImage) {
+        List<ImageServerStorage> imageServersStorages = abstractImage.getImageServersStorage()
+        if (imageServersStorages.isEmpty()) {
+            Storage storage = getStorage()
+            ImageServer imageServer = getImageServer()
+            if (ImageServerStorage.findByImageServerAndStorage(imageServer, storage)==null) {
+                ImageServerStorage imageServerStorage = new ImageServerStorage(imageServer: imageServer, storage: storage)
+                saveDomain(imageServerStorage);
+            }
+            if (!MimeImageServer.findByImageServerAndMime(imageServer, abstractImage.getMime())) {
+                MimeImageServer mimeImageServer = new MimeImageServer(imageServer: imageServer, mime: abstractImage.getMime())
+                saveDomain(mimeImageServer)
+            }
+        }
+
+
+        def imageServer = ImageServer.findByName("bidon")
+        if (!imageServer) {
+            imageServer = new ImageServer(name:"bidon",url:"http://bidon.server.com/",service:"service",className:"sample",available:true)
+            saveDomain(imageServer)
+        }
+
+        def storage = getStorage()
+
+        def imageServerStorage = ImageServerStorage.findByImageServerAndStorage(imageServer, storage)
+        if (!imageServerStorage) {
+            imageServerStorage = new ImageServerStorage(imageServer: imageServer, storage : storage)
+            saveDomain(imageServerStorage)
+        }
+        imageServer
+
+    }
+
     static AbstractImage getAbstractImageNotExist(boolean save = false) {
         def image = new AbstractImage(filename: getRandomString(), scanner: getScanner(), sample: null, mime: getMime(), path: "pathpathpath", width: 16000, height: 16000)
         if(save) {
@@ -1285,7 +1318,7 @@ class BasicInstanceBuilder {
     }
 
     static Storage getStorage() {
-        def storage = Storage.findByUser(User.findByUsername(Infos.SUPERADMINLOGIN))
+        def storage = Storage.findByName("bidon")
         if(!storage) {
             storage = new Storage(name:"bidon",basePath:"storagepath",user: User.findByUsername(Infos.SUPERADMINLOGIN))
             saveDomain(storage)
@@ -1530,7 +1563,7 @@ class BasicInstanceBuilder {
     static ImageSequence getImageSequence() {
         ImageSequence imageSequence = ImageSequence.findByImageGroup(getImageGroup())
         if(!imageSequence) {
-            imageSequence = new ImageSequence(image:getImageInstanceNotExist(imageGroup.project,true),zStack:0,slice: 0, time:0,channel:0,imageGroup:imageGroup)
+            imageSequence = new ImageSequence(image:getImageInstanceNotExist(imageGroup.project,true),zStack:0,slice:0,time:0,channel:0,imageGroup:getImageGroup())
             imageSequence = saveDomain(imageSequence)
         }
         imageSequence
@@ -1552,7 +1585,7 @@ class BasicInstanceBuilder {
     static ImageGroup getImageGroup() {
         ImageGroup imageGroup = ImageGroup.findByName("imagegroupname")
         if(!imageGroup) {
-            imageGroup = new ImageGroup(project: project, name:"imagegroupname" )
+            imageGroup = new ImageGroup(project: getProject(), name:"imagegroupname" )
             imageGroup = saveDomain(imageGroup)
         }
         imageGroup
