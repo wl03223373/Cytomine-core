@@ -30,7 +30,6 @@ import javax.servlet.http.HttpServletResponse
 
 import org.springframework.transaction.annotation.Transactional
 
-@Transactional
 class APIAuthentificationFilters implements javax.servlet.Filter {
 
 
