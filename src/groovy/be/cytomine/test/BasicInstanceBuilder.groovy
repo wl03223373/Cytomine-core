@@ -50,6 +50,7 @@ import be.cytomine.meta.Configuration
 import be.cytomine.meta.Description
 import com.vividsolutions.jts.io.WKTReader
 import grails.converters.JSON
+import grails.util.Holders
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.codehaus.groovy.grails.web.json.JSONObject
@@ -65,6 +66,8 @@ import org.springframework.dao.DataRetrievalFailureException
 class BasicInstanceBuilder {
 
     def springSecurityService
+
+    def grailsApplication
 
     private static Log log = LogFactory.getLog(BasicInstanceBuilder.class)
 
@@ -1841,7 +1844,7 @@ class BasicInstanceBuilder {
         getMessageBrokerServer()
         AmqpQueue amqpQueue = AmqpQueue.findByName("BasicAmqpQueue")
         if(!amqpQueue) {
-            amqpQueue = new AmqpQueue(name: "BasicAmqpQueue", host: "localhost", exchange: "exchange"+getRandomString())
+            amqpQueue = new AmqpQueue(name: "BasicAmqpQueue", host: "rabbitmqtest", exchange: "exchange"+getRandomString())
             saveDomain(amqpQueue)
         }
         amqpQueue
@@ -1849,7 +1852,7 @@ class BasicInstanceBuilder {
 
     static AmqpQueue getAmqpQueueNotExist(boolean save = false){
         getMessageBrokerServer()
-        AmqpQueue amqpQueue = new AmqpQueue(name: getRandomString(), host: "localhost", exchange: "exchange"+getRandomString())
+        AmqpQueue amqpQueue = new AmqpQueue(name: getRandomString(), host: Holders.config.grails.messageBrokerServerURL.toString().split(":")[0], exchange: "exchange"+getRandomString())
         amqpQueue.validate(failOnError: true)
         save ? saveDomain(amqpQueue) : checkDomain(amqpQueue)
         amqpQueue
