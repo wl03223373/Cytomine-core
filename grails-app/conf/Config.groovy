@@ -85,6 +85,11 @@ cytomine.jobdata.filesystemPath = "algo/data/"
 
 // RabbitMQ server
 grails.messageBrokerServerURL = "localhost:5672"
+environments {
+    test {
+        grails.messageBrokerServerURL = "localhost:5673"
+    }
+}
 
 // set per-environment serverURL stem for creating absolute links
 environments {
