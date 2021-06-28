@@ -412,9 +412,8 @@ class UserSearchTests {
         assert 200 == result.code
         json = JSON.parse(result.data)
         assert json.collection instanceof JSONArray
-        assert json.size == totalSize
-        Long size = totalSize
-        assert json.collection.size() == size
+        assert json.size <= totalSize // totalSize - users without role (creating in test)
+        assert json.collection.size() <= totalSize // totalSize - users without role (creating in test)
         Long id1 = json.collection[0].id
         Long id2 = json.collection[-1].id
 
@@ -422,7 +421,7 @@ class UserSearchTests {
         assert 200 == result.code
         json = JSON.parse(result.data)
         assert json.collection instanceof JSONArray
-        assert json.size == size
+        assert json.size <= totalSize // totalSize - users without role (creating in test)
         assert json.collection.size() == 1
         assert json.collection[0].id == id1
 
@@ -430,7 +429,7 @@ class UserSearchTests {
         assert 200 == result.code
         json = JSON.parse(result.data)
         assert json.collection instanceof JSONArray
-        assert json.size == size
+        assert json.size <= totalSize // totalSize - users without role (creating in test)
         assert json.collection.size() == 1
         assert json.collection[0].id != id1
         assert json.collection[0].role == "ROLE_SUPER_ADMIN"
@@ -444,8 +443,7 @@ class UserSearchTests {
         json = JSON.parse(result.data)
         assert json.collection instanceof JSONArray
         assert json.size == totalSize
-        size = totalSize
-        assert json.collection.size() == size
+        assert json.collection.size() == totalSize
         id1 = json.collection[0].id
         id2 = json.collection[-1].id
 
@@ -453,7 +451,7 @@ class UserSearchTests {
         assert 200 == result.code
         json = JSON.parse(result.data)
         assert json.collection instanceof JSONArray
-        assert json.size == size
+        assert json.size == totalSize
         assert json.collection.size() == 1
         assert json.collection[0].id == id1
 
@@ -461,7 +459,7 @@ class UserSearchTests {
         assert 200 == result.code
         json = JSON.parse(result.data)
         assert json.collection instanceof JSONArray
-        assert json.size == size
+        assert json.size == totalSize
         assert json.collection.size() == 1
         assert json.collection[0].id != id1
     }
