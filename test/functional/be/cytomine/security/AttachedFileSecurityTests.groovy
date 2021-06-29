@@ -131,7 +131,8 @@ class AttachedFileSecurityTests extends SecurityTestsAbstract{
 
 
         project.mode = Project.EditingMode.CLASSIC
-        BasicInstanceBuilder.saveDomain(project)
+        project = BasicInstanceBuilder.saveDomain(project)
+        println "project mode = ${project.mode}"
 
         result = AttachedFileAPI.show(idAttachedFile,SecurityTestsAbstract.USERNAME2,SecurityTestsAbstract.PASSWORD2)
         assert 200 == result.code
