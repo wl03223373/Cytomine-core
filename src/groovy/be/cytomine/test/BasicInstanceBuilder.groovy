@@ -91,6 +91,7 @@ class BasicInstanceBuilder {
      */
     static def saveDomain(def domain) {
         domain.save(flush: true, failOnError:true)
+        domain.refresh()
         domain
     }
     static def insertDomain(def domain) {
