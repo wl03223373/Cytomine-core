@@ -210,7 +210,7 @@ log4j = {
 
     debug 'org.springframework'
     debug 'org.hibernate'
-    info 'org.hibernate.engine.Collections'
+    info 'org.hibernate.engine.internal.Collections'
 
     environments {
         production {

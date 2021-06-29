@@ -1,8 +1,5 @@
 #!/bin/bash
 
-set -o xtrace
-set -o errexit
-
 echo "************************************** Launch tests ******************************************"
 
 file='./ci/version'
