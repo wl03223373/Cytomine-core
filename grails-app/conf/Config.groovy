@@ -189,7 +189,7 @@ log4j = {
         rollingFile  name:'custom', file:'/tmp/cytomine-custom.log', maxFileSize:1024
     }
 
-    error  'org.codehaus.groovy.grails.domain',
+    debug  'org.codehaus.groovy.grails.domain',
             'org.codehaus.groovy.grails.web.servlet',  //  controllers
             'org.codehaus.groovy.grails.web.pages', //  GSP
             'org.codehaus.groovy.grails.web.sitemesh', //  layouts
@@ -198,15 +198,19 @@ log4j = {
             'org.codehaus.groovy.grails.commons', // core / classloading
             'org.codehaus.groovy.grails.plugins', // plugins
             'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
-            'org.springframework',
-            'net.sf.ehcache.hibernate',
-            'org.hibernate.engine.StatefulPersistenceContext.ProxyWarnLog'
+            'net.sf.ehcache.hibernate'
 
-    error 'org.springframework.security.web.context', 'org.hibernate.engine','net.sf.hibernate.impl.SessionImpl'
+    info 'org.codehaus.groovy.grails.orm.hibernate.GrailsHibernateTransactionManager'
 
-    error 'com.granicus.grails.plugins.cookiesession'
+    debug 'org.springframework.security.web.context','net.sf.hibernate.impl.SessionImpl'
 
-    error 'grails.plugin.springsecurity'
+    debug 'com.granicus.grails.plugins.cookiesession'
+
+    debug 'grails.plugin.springsecurity'
+
+    debug 'org.springframework'
+    debug 'org.hibernate'
+    info 'org.hibernate.engine.Collections'
 
     environments {
         production {
