@@ -11,10 +11,10 @@ node {
     sh 'mkdir -p ./ci'
 
     stage 'Compute version name'
-    sh 'scripts/ciBuildVersion.sh ${BRANCH_NAME}'
+    sh 'scriptsCI/ciBuildVersion.sh ${BRANCH_NAME}'
 
     stage 'Download and cache dependencies'
-    sh 'scripts/ciDownloadDependencies.sh'
+    sh 'scriptsCI/ciDownloadDependencies.sh'
 
     lock('cytomine-instance-test') {
         stage 'Run cytomine instance'
@@ -25,7 +25,7 @@ node {
 
         stage 'Build and test'
         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-            sh 'scripts/ciTest.sh'
+            sh 'scriptsCI/ciTest.sh'
         }
         stage 'Publish test'
         step([$class: 'JUnitResultArchiver', testResults: '**/ci/test-reports/*.xml'])
