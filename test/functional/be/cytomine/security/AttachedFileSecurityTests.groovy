@@ -79,6 +79,7 @@ class AttachedFileSecurityTests extends SecurityTestsAbstract{
         //Add job instance to project
         Job job = BasicInstanceBuilder.getJobNotExist()
         job.project = project
+        job.save(flush: true)
 
         result = JobAPI.create(job.encodeAsJSON(), SecurityTestsAbstract.USERNAME1,SecurityTestsAbstract.PASSWORD1)
         assert 200 == result.code
