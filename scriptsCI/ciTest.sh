@@ -12,9 +12,9 @@ echo "Launch tests for $VERSION_NUMBER"
 
 docker build --rm -f scriptsCI/docker/Dockerfile-test.build --build-arg VERSION_NUMBER=$VERSION_NUMBER -t  cytomine/cytomine-core-test .
 mkdir ./ci/test-reports
-containerId=$(docker create --network scriptsci_default --link postgresqltest:postgresqltest --link mongodbtest:mongodbtest --link rabbitmqtest:rabbitmqtest -v "$PWD"/ci/test-reports:/app/target/test-reports/ cytomine/cytomine-core-test )
+containerId=$(docker create --network scriptsci_default --link postgresqltest:postgresqltest --link mongodbtest:mongodbtest --link rabbitmqtest:rabbitmqtest cytomine/cytomine-core-test )
 #docker network connect scripts_default $containerId
 docker start -ai  $containerId
-
+docker cp $containerId:/app/target/test-reports/ ./ci
 
 docker rm $containerId
