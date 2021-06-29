@@ -362,7 +362,7 @@ class ImageInstanceSearchTests {
         assert json.collection[0].blindedName instanceof JSONObject.Null
 
         project.blindMode = true
-        project.save(true)
+        project = project.save(validate: true, flush: true)
 
         searchParameters = [[operator : "ilike", field : "name", value:img1.getInstanceFilename()]]
 
