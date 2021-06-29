@@ -189,6 +189,8 @@ log4j = {
         rollingFile  name:'custom', file:'/tmp/cytomine-custom.log', maxFileSize:1024
     }
 
+    debug 'be.cytomine'
+
     error  'org.codehaus.groovy.grails.domain',
             'org.codehaus.groovy.grails.web.servlet',  //  controllers
             'org.codehaus.groovy.grails.web.pages', //  GSP

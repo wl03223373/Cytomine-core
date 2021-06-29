@@ -23,8 +23,6 @@ import grails.util.GrailsNameUtils
 
 class CommandService {
 
-    static transactional = true
-
     def springSecurityService
     def grailsApplication
     def securityACLService
