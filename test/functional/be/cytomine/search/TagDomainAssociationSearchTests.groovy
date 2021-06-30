@@ -101,7 +101,7 @@ class TagDomainAssociationSearchTests {
         TagDomainAssociation tda = BasicInstanceBuilder.getTagDomainAssociationNotExist()
         tda.tag = BasicInstanceBuilder.getTagNotExist(true)
         tda.domain = i1
-        tda.save(true)
+        BasicInstanceBuilder.saveDomain(tda)
 
 
         def searchParameters = [[operator : "in", field : "tag", value:tda.tag.id]]
