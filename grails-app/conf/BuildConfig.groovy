@@ -93,8 +93,8 @@ grails.project.dependency.resolution = {
         compile ':spring-security-core:2.0.0'
         compile ":spring-security-acl:2.0.0"
         compile ':spring-security-appinfo:2.0.0'
-        compile (':export:1.5') {
-            excludes: 'odfdom-java'
+        compile (':export:1.6') {
+            excludes 'odfdom-java'
         }
         compile ":quartz:1.0.1"
         runtime ":quartz-monitor:0.3-RC3"
