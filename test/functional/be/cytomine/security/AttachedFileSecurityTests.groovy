@@ -499,7 +499,7 @@ class AttachedFileSecurityTests extends SecurityTestsAbstract{
         assert 403 == result.code
 
         project.mode = Project.EditingMode.CLASSIC
-        BasicInstanceBuilder.saveDomain(project)
+        project = BasicInstanceBuilder.saveDomain(project)
 
         result = AttachedFileAPI.upload(attachedFile.domainClassName,attachedFile.domainIdent,new File("test/functional/be/cytomine/utils/simpleFile.txt"),SecurityTestsAbstract.USERNAME2,SecurityTestsAbstract.PASSWORD2)
         assert 200 == result.code
@@ -507,7 +507,7 @@ class AttachedFileSecurityTests extends SecurityTestsAbstract{
 
         //check all by project settings until the end
         project.mode = Project.EditingMode.READ_ONLY
-        BasicInstanceBuilder.saveDomain(project)
+        project = BasicInstanceBuilder.saveDomain(project)
 
         result = AttachedFileAPI.show(idAttachedFile,SecurityTestsAbstract.USERNAME2,SecurityTestsAbstract.PASSWORD2)
         assert 200 == result.code

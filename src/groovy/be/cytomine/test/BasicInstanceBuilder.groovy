@@ -93,6 +93,7 @@ class BasicInstanceBuilder {
         domain.getClass().withTransaction {
             domain = domain.save(flush: true, failOnError:true)
         }
+        domain.refresh()
         domain
     }
     static def insertDomain(def domain) {
