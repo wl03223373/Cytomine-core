@@ -81,7 +81,7 @@ grails.project.dependency.resolution = {
         }
         compile 'org.grails:grails-datastore-gorm:3.1.4.RELEASE'
         //compile 'org.grails:grails-datastore-gorm-plugin-support:3.1.5.RELEASE'
-        implementation group: 'org.odftoolkit', name: 'odfdom-java', version: '0.8.6' //grails export plugin tries to get the 0.8.5...
+        compile group: 'org.odftoolkit', name: 'odfdom-java', version: '0.8.6' //grails export plugin tries to get the 0.8.5...
 
     }
     plugins {
