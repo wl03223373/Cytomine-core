@@ -34,6 +34,7 @@ import be.cytomine.ontology.UserAnnotation
 import be.cytomine.project.Project
 import be.cytomine.security.SecUser
 import be.cytomine.security.User
+import be.cytomine.security.UserJob
 import be.cytomine.meta.Description
 import be.cytomine.utils.JSONUtils
 import be.cytomine.utils.ModelService
