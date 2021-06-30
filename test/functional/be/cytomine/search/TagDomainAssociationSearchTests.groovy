@@ -103,6 +103,9 @@ class TagDomainAssociationSearchTests {
         tda.domain = i1
         BasicInstanceBuilder.saveDomain(tda)
 
+        ImageInstance.findAll().each {
+            println "image ${it.id} => review user ${it.reviewUser?.id}"
+        }
 
         def searchParameters = [[operator : "in", field : "tag", value:tda.tag.id]]
 
