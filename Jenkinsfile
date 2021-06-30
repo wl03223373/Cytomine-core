@@ -28,6 +28,6 @@ node {
             sh 'scriptsCI/ciTest.sh'
         }
         stage 'Publish test'
-        step([$class: 'JUnitResultArchiver', testResults: '**/ci/test-reports/*.xml'])
+        step([$class: 'JUnitResultArchiver', testResults: '**/ci/test-reports/TESTS-TestSuites.xml'])
     }
 }
