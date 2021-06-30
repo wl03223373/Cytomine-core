@@ -90,7 +90,7 @@ class SoftwareProjectSecurityTests extends SecurityTestsAbstract {
         //Get User 2
         User user2 = getUser2()
 
-        User admin = User getUserAdmin()
+        User admin = getUserAdmin()
 
         //Create project with user 1
         SoftwareProject softwareProject2 = BasicInstanceBuilder.getSoftwareProjectNotExist()
