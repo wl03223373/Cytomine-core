@@ -31,4 +31,4 @@ ENV VERSION_NUMBER_ENV=$VERSION_NUMBER
 ENV GRAILS_OPTS="-Xmx4G -Xms512m -XX:MaxPermSize=512m"
 
 WORKDIR /app
-CMD /tools/grails-2.4.4/bin/grails -Dserver.port=8090 test-app JobDataTests.testDataInDatabase functional:functional -echoOut --stacktrace -nocoverage --verbose
+CMD /tools/grails-2.4.4/bin/grails -Dserver.port=8090 test-app functional:functional -echoOut --stacktrace -nocoverage --verbose
