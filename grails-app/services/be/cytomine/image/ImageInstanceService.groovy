@@ -43,6 +43,7 @@ import groovy.sql.GroovyResultSet
 import groovy.sql.Sql
 import org.hibernate.FetchMode
 import org.restapidoc.annotation.RestApiObjectField
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.ReflectionUtils
 
 import static org.springframework.security.acls.domain.BasePermission.READ
@@ -98,6 +99,7 @@ class ImageInstanceService extends ModelService {
         return data
     }
 
+    @Transactional
     def list(User user, String sortColumn = "created", String sortDirection = "desc", def searchParameters = [], Long max = 0, Long offset = 0) {
 
         securityACLService.checkIsSameUser(user, cytomineService.currentUser)
