@@ -70,12 +70,12 @@ class ImageInstanceSearchTests {
     void testGetSearch(){
         Project project = BasicInstanceBuilder.getProjectNotExist(true)
         project.blindMode = true
-        project.save(true)
+        BasicInstanceBuilder.saveDomain(project)
 
         ImageInstance img1 = BasicInstanceBuilder.getImageInstanceNotExist(project, true)
         img1.baseImage.width = 499
         img1.setInstanceFilename("TEST")
-        img1.save(flush: true)
+        BasicInstanceBuilder.saveDomain(img1)
         img1 = img1.refresh()
         BasicInstanceBuilder.getUserAnnotationNotExist(img1.project, img1, true)
         ImageInstance img2 = BasicInstanceBuilder.getImageInstanceNotExist(project, true)
@@ -161,7 +161,7 @@ class ImageInstanceSearchTests {
 
 
         project.blindMode = false
-        project.save(true)
+        BasicInstanceBuilder.saveDomain(project)
 
         result = ImageInstanceAPI.listByProject(project.id, 0,0, searchParameters, Infos.ADMINLOGIN, Infos.ADMINPASSWORD)
         assert 200 == result.code

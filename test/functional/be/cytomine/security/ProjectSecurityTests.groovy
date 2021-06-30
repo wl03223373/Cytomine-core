@@ -858,7 +858,7 @@ class ProjectSecurityTests extends SecurityTestsAbstract {
 
         //Force project to Read and write
         project.mode = Project.EditingMode.RESTRICTED
-        BasicInstanceBuilder.saveDomain(project)
+        project = BasicInstanceBuilder.saveDomain(project)
 
         //Add a simple project user
         User simpleUser = BasicInstanceBuilder.getUser(simpleUsername,password)
