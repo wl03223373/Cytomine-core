@@ -185,7 +185,7 @@ class TagDomainAssociationSearchTests {
         TagDomainAssociation tda = BasicInstanceBuilder.getTagDomainAssociationNotExist()
         tda.tag = BasicInstanceBuilder.getTagNotExist(true)
         tda.domain = ua1
-        tda.save(true)
+        BasicInstanceBuilder.saveDomain(tda)
 
         def result = UserAnnotationAPI.listByProject(project.id, [tda.tag.id], Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
@@ -209,7 +209,7 @@ class TagDomainAssociationSearchTests {
         TagDomainAssociation tda2 = BasicInstanceBuilder.getTagDomainAssociationNotExist()
         tda2.tag = tda.tag
         tda2.domain = aa1
-        tda2.save(true)
+        BasicInstanceBuilder.saveDomain(tda2)
 
         result = AlgoAnnotationAPI.listByProject(project.id, [tda.tag.id], Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
@@ -237,7 +237,7 @@ class TagDomainAssociationSearchTests {
         TagDomainAssociation tda3 = BasicInstanceBuilder.getTagDomainAssociationNotExist()
         tda3.tag = tda.tag
         tda3.domain = ra1
-        tda3.save(true)
+        BasicInstanceBuilder.saveDomain(tda3)
 
         result = ReviewedAnnotationAPI.listByProject(project.id, [tda.tag.id], Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
@@ -262,7 +262,7 @@ class TagDomainAssociationSearchTests {
         TagDomainAssociation tda4 = BasicInstanceBuilder.getTagDomainAssociationNotExist()
         tda4.tag = tda.tag
         tda4.domain = roa1
-        tda4.save(true)
+        BasicInstanceBuilder.saveDomain(tda4)
 
         result = RoiAnnotationAPI.listByProject(project.id, [tda.tag.id], Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code

@@ -173,7 +173,7 @@ class AbstractImageTests {
         def ai = BasicInstanceBuilder.getAbstractImageNotExist(true)
         def ii = BasicInstanceBuilder.getImageInstanceNotExist(BasicInstanceBuilder.getProject(), false)
         ii.baseImage = ai
-        ii.save(true)
+        BasicInstanceBuilder.saveDomain(ii)
 
         assert ii.resolution == ai.resolution
         assert ii.magnification == ai.magnification
@@ -244,7 +244,7 @@ class AbstractImageTests {
         def imageToDelete = BasicInstanceBuilder.getImageInstance()
         def annotation = BasicInstanceBuilder.getUserAnnotation()
         annotation.image = imageToDelete
-        annotation.save(flush:true)
+        BasicInstanceBuilder.saveDomain(annotation)
         Long id = imageToDelete.baseImage.id
         def result = AbstractImageAPI.delete(id,Infos.SUPERADMINLOGIN,Infos.SUPERADMINPASSWORD)
         assert 403 == result.code
