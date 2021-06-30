@@ -872,7 +872,7 @@ class ProjectSecurityTests extends SecurityTestsAbstract {
         Software software = BasicInstanceBuilder.getSoftwareNotExist(true);
         Job job = BasicInstanceBuilder.getJobNotExist(true, software, project)
         JobData jobData = BasicInstanceBuilder.getJobDataNotExist(job)
-        BasicInstanceBuilder.saveDomain(jobData)
+        jobData = BasicInstanceBuilder.saveDomain(jobData)
 
 
         // Now Test as simple user
