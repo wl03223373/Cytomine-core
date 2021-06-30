@@ -386,7 +386,7 @@ class ImageInstanceSearchTests {
         assert json.collection instanceof JSONArray
         assert json.collection.size() == 1
         assert ImageInstanceAPI.containsInJSONList(img1.id,json)
-
+        println "project.blindMode : ${project.blindMode}"
         assert json.collection[0].blindedName == json.collection[0].baseImage.toString()
     }
 
