@@ -81,7 +81,7 @@ grails.project.dependency.resolution = {
         }
         compile 'org.grails:grails-datastore-gorm:3.1.4.RELEASE'
         //compile 'org.grails:grails-datastore-gorm-plugin-support:3.1.5.RELEASE'
-        compile group: 'org.odftoolkit', name: 'odfdom-java', version: '0.8.6' //grails export plugin tries to get the 0.8.5...
+
 
     }
     plugins {
@@ -95,9 +95,7 @@ grails.project.dependency.resolution = {
         compile ':spring-security-core:2.0.0'
         compile ":spring-security-acl:2.0.0"
         compile ':spring-security-appinfo:2.0.0'
-        compile (':export:1.6') {
-            excludes 'odfdom-java'
-        }
+        compile ':export:1.6'
         compile ":quartz:1.0.1"
         runtime ":quartz-monitor:0.3-RC3"
         runtime ":database-migration:1.3.8"
@@ -110,6 +108,7 @@ grails.project.dependency.resolution = {
         }
         test ":geb:0.9.0"
         compile ':webxml:1.4.1'
+
     }
 }
 // Remove the DisableOptimizationsTransformation jar before the war is bundled

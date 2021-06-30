@@ -12,6 +12,10 @@ RUN unzip /tools/grails.zip -d /tools
 
 COPY ./grails-app/conf/BuildConfig.groovy /app/grails-app/conf/BuildConfig.groovy
 
+COPY ./lib/odfdom-java-0.8.5.zip /app/lib/odfdom-java-0.8.5.zip
+RUN mkdir -p /root/.m2/repository/org/odftoolkit/odfdom-java
+RUN unzip /app/lib/odfdom-java-0.8.5.zip -d /root/.m2/repository/org/odftoolkit/odfdom-java
+
 RUN cd /app && \
     /tools/grails-2.4.4/bin/grails compile --stacktrace
 
@@ -27,4 +31,4 @@ ENV VERSION_NUMBER_ENV=$VERSION_NUMBER
 ENV GRAILS_OPTS="-Xmx4G -Xms512m -XX:MaxPermSize=512m"
 
 WORKDIR /app
-CMD /tools/grails-2.4.4/bin/grails -Dserver.port=8090 test-app functional:functional -echoOut --stacktrace -nocoverage --verbose
+CMD /tools/grails-2.4.4/bin/grails -Dserver.port=8090 test-app JobDataTests.testDataInDatabase functional:functional -echoOut --stacktrace -nocoverage --verbose

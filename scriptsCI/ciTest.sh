@@ -13,5 +13,6 @@ containerId=$(docker create --network scriptsci_default --link postgresqltest:po
 #docker network connect scripts_default $containerId
 docker start -ai  $containerId
 docker cp $containerId:/app/target/test-reports/ ./ci
+#docker cp $containerId:/tmp/testLog-debug.log ./ci
 
 docker rm $containerId
