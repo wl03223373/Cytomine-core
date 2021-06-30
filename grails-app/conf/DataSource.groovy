@@ -52,7 +52,7 @@ hibernate {
 //    cache.provider_class = 'net.sf.ehcache.hibernate.EhCacheProvider'
 //    cache.provider_class = 'net.sf.ehcache.hibernate.SingletonEhCacheProvider'
     // hibernate.cache.region.factory_class = 'net.sf.ehcache.hibernate.SingletonEhCacheRegionFactory'
-    cache.use_second_level_cache = true
+    cache.use_second_level_cache = false
     cache.use_query_cache = false
     //cache.region.factory_class = 'net.sf.ehcache.hibernate.EhCacheRegionFactory' // Hibernate 3
     cache.region.factory_class = 'org.hibernate.cache.ehcache.EhCacheRegionFactory' // Hibernate 4
@@ -96,7 +96,7 @@ environments {
         dataSource {
             //loggingSql = true
             dbCreate = "create"
-            url = "jdbc:postgresql://localhost:5432/docker"
+            url = "jdbc:postgresql://localhost:5433/docker"
             username = "docker"
             password = "docker"
             //password = "postgres"
@@ -134,6 +134,15 @@ grails {
         options {
             connectionsPerHost = 10 // The maximum number of connections allowed per host
             threadsAllowedToBlockForConnectionMultiplier = 5 // so it*connectionsPerHost threads can wait for a connection
+        }
+    }
+}
+environments {
+    test {
+        grails {
+            mongo {
+                port = 27018
+            }
         }
     }
 }
