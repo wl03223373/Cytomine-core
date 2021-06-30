@@ -89,9 +89,10 @@ class BasicInstanceBuilder {
      *  Check if a domain is well saved during test
      * @param domain Domain to check
      */
-    static def saveDomain(def domain) {
-        domain.save(flush: true, failOnError:true)
-        domain.refresh()
+    static CytomineDomain saveDomain(CytomineDomain domain) {
+        domain.getClass().withTransaction {
+            domain = domain.save(flush: true, failOnError:true)
+        }
         domain
     }
     static def insertDomain(def domain) {
