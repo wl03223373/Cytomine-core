@@ -164,7 +164,7 @@ class JobTests  {
         log.domainClassName = job.class.name
         log.domainIdent = job.id
         log.filename = "log.out"
-        log.save(flush: true)
+        log = BasicInstanceBuilder.saveDomain(log)
         result = JobAPI.getLog(job.id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
     }
