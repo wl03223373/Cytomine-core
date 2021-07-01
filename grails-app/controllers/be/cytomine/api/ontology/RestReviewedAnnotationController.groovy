@@ -178,6 +178,9 @@ class RestReviewedAnnotationController extends RestController {
                 securityACLService.checkFullOrRestrictedForOwner(image,image.user)
                 image.reviewStart = new Date()
                 image.reviewUser = cytomineService.currentUser
+                if (image.reviewUser && image.reviewUser.algo()) {
+                    throw new WrongArgumentException("The review user ${image.reviewUser} is not a real user (a userjob)");
+                }
                 reviewedAnnotationService.saveDomain(image)
 
                 response.message = image.reviewUser.username + " start reviewing on " + image.baseImage.filename

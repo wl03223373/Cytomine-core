@@ -28,6 +28,8 @@ import be.cytomine.test.http.AnnotationDomainAPI
 import be.cytomine.test.http.AnnotationIndexAPI
 import be.cytomine.test.http.ReviewedAnnotationAPI
 import grails.converters.JSON
+import org.junit.Ignore
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -86,6 +88,7 @@ class AnnotationIndexTests {
         checkAnnotationIndexReviewed(project,user1,user2)
     }
 
+    @Ignore // ignore as a userjob cannot start a review (which is the case in this test)
     def testIndexAlgoReviewedAnnotation() {
         //create project, with 2 users
         Project project = BasicInstanceBuilder.getProjectNotExist(true)
