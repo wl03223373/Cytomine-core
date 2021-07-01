@@ -16,20 +16,20 @@ node {
     stage 'Download and cache dependencies'
     sh 'scriptsCI/ciDownloadDependencies.sh'
 
-//     lock('cytomine-instance-test') {
-//         stage 'Run cytomine instance'
-//         catchError {
-//             sh 'docker-compose -f scriptsCI/docker-compose.yml down -v'
-//         }
-//         sh 'docker-compose -f scriptsCI/docker-compose.yml up -d'
-//
-//         stage 'Build and test'
-//         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-//             sh 'scriptsCI/ciTest.sh'
-//         }
-//         stage 'Publish test'
-//         step([$class: 'JUnitResultArchiver', testResults: '**/ci/test-reports/TESTS-TestSuites.xml'])
-//     }
+    lock('cytomine-instance-test') {
+        stage 'Run cytomine instance'
+        catchError {
+            sh 'docker-compose -f scriptsCI/docker-compose.yml down -v'
+        }
+        sh 'docker-compose -f scriptsCI/docker-compose.yml up -d'
+
+        stage 'Build and test'
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+            sh 'scriptsCI/ciTest.sh'
+        }
+        stage 'Publish test'
+        step([$class: 'JUnitResultArchiver', testResults: '**/ci/test-reports/TESTS-TestSuites.xml'])
+    }
 
     stage 'Build war'
     sh 'scriptsCI/ciBuildWar.sh'
