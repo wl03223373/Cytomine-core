@@ -51,5 +51,4 @@ node {
                 sh 'scriptsCI/ciBuildDockerImage.sh'
             }
         }
-    }
 }
