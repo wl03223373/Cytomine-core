@@ -181,7 +181,11 @@ class BootStrap {
 
 
         log.info "init change for old version..."
-        bootstrapOldVersionService.execChangeForOldVersion()
+        try {
+            bootstrapOldVersionService.execChangeForOldVersion()
+        } catch(java.lang.NumberFormatException ex) {
+            log.info "version cannot be parsed as x.y.z"
+        }
 
         // Initialize RabbitMQ server
         bootstrapUtilsService.initRabbitMq()
