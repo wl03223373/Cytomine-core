@@ -18,3 +18,4 @@ docker start -ai  $containerId
 docker cp $containerId:/app/target/cytomine.war ./ci
 
 docker rm $containerId
+docker rmi cytomine/cytomine-core-war

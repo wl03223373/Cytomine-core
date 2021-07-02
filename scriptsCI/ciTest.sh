@@ -16,3 +16,4 @@ docker cp $containerId:/app/target/test-reports/ ./ci
 #docker cp $containerId:/tmp/testLog-debug.log ./ci
 
 docker rm $containerId
+docker rmi cytomine/cytomine-core-test

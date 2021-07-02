@@ -29,6 +29,10 @@ node {
         }
         stage 'Publish test'
         step([$class: 'JUnitResultArchiver', testResults: '**/ci/test-reports/TESTS-TestSuites.xml'])
+
+        catchError {
+            sh 'docker-compose -f scriptsCI/docker-compose.yml down -v'
+        }
     }
 
     stage 'Build war'
@@ -36,4 +40,16 @@ node {
 
     stage 'Publish war'
     sh 'scriptsCI/ciPublishWar.sh'
+
+    stage 'Build docker image'
+    withCredentials(
+        [
+            usernamePassword(credentialsId: 'DOCKERHUB_CREDENTIAL', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_TOKEN')
+        ]
+        ) {
+            docker.withRegistry('https://index.docker.io/v1/', $DOCKERHUB_TOKEN) {
+                sh 'scriptsCI/ciBuildDockerImage.sh'
+            }
+        }
+    }
 }
