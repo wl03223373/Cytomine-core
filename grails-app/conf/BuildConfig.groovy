@@ -13,6 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+
 //grails.client = "be.cytomine.integration"
 grails.servlet.version = "3.0"
 grails.reload.enabled = true
@@ -22,6 +23,7 @@ grails.project.test.reports.dir = "target/test-reports"
 grails.project.war.file = "target/${appName}.war"
 //grails.project.dependency.resolver="ivy"
 grails.project.dependency.resolver = "maven"
+
 //UNCOMMENT TO HAVE WORKING TEST
 grails.project.fork = [
         test: false,
@@ -29,6 +31,7 @@ grails.project.fork = [
         war: false,
         console: false
 ]
+
 //UNCOMMENT TO HAVE AUTO RELOADING
 /*grails.project.fork = [
         // configure settings for compilation JVM, note that if you alter the Groovy version forked compilation is required
@@ -43,6 +46,8 @@ grails.project.fork = [
         // configure settings for the Console UI JVM
         console: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256]
 ]*/
+
+
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -53,6 +58,7 @@ grails.project.dependency.resolution = {
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     checksums true // Whether to verify checksums on resolve
     legacyResolve false // whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
+
     repositories {
         grailsPlugins()
         grailsHome()
@@ -66,7 +72,7 @@ grails.project.dependency.resolution = {
         mavenRepo "http://www.hibernatespatial.org/repository"
         //mavenRepo "http://repository.ow2.org/nexus/content/repositories/public"
         //mavenRepo "http://repository.ow2.org/nexus/content/repositories/ow2-legacy"
-        mavenRepo "http://repo.grails.org/grails/core"
+        mavenRepo "https://repo.grails.org/grails/core"
     }
     dependencies {
         test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
@@ -79,23 +85,19 @@ grails.project.dependency.resolution = {
         compile( "commons-validator:commons-validator:1.5.0" ) {
             excludes 'xml-apis','commons-digester','commons-logging','commons-beanutils', 'commons-collections'
         }
-        compile 'org.grails:grails-datastore-gorm:3.1.4.RELEASE'
-        //compile 'org.grails:grails-datastore-gorm-plugin-support:3.1.5.RELEASE'
-
-
     }
     plugins {
-        compile ":mongodb:3.0.3" // https://stackoverflow.com/questions/25510347/cannot-install-grails-mongodb-plugin
+        compile ":mongodb:3.0.2"
         runtime ':hibernate4:4.3.5.5'
         build ':tomcat:7.0.54'
         compile ':cache:1.1.7'
         //compile ":grails-melody:1.49.0"
         compile ":rest-api-doc:0.6"
         compile ":rest:0.8"
-        compile ':spring-security-core:2.0.0'
-        compile ":spring-security-acl:2.0.0"
-        compile ':spring-security-appinfo:2.0.0'
-        compile ':export:1.6'
+        compile ':spring-security-core:2.0-RC4'
+        compile ":spring-security-acl:2.0-RC2"
+        compile ':spring-security-appinfo:2.0-RC2'
+        runtime ':export:1.6'
         compile ":quartz:1.0.1"
         runtime ":quartz-monitor:0.3-RC3"
         runtime ":database-migration:1.3.8"
@@ -108,7 +110,6 @@ grails.project.dependency.resolution = {
         }
         test ":geb:0.9.0"
         compile ':webxml:1.4.1'
-
     }
 }
 // Remove the DisableOptimizationsTransformation jar before the war is bundled
