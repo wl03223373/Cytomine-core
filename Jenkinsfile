@@ -17,7 +17,7 @@ node {
     sh 'scriptsCI/ciDownloadDependencies.sh'
 
     lock('cytomine-instance-test') {
-        stage 'Run cytomine instance'
+        stage 'Run external tools (db, amqp,...)'
         catchError {
             sh 'docker-compose -f scriptsCI/docker-compose.yml down -v'
         }
