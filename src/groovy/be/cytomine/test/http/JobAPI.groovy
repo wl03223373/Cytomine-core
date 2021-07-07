@@ -83,6 +83,13 @@ class JobAPI extends DomainAPI {
         return result
     }
 
+    static def copy(def id, String username, String password) {
+        String URL = Infos.CYTOMINEURL + "api/job/${id}/copy.json"
+        def result = doPOST(URL, "",username,password)
+        result.data = Job.get(JSON.parse(result.data)?.job?.id)
+        return result
+    }
+
     static def update(def id, def jsonJob, String username, String password) {
         String URL = Infos.CYTOMINEURL + "api/job/" + id + ".json"
         return doPUT(URL,jsonJob,username,password)
