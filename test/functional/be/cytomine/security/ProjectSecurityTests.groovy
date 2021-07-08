@@ -81,7 +81,44 @@ class ProjectSecurityTests extends SecurityTestsAbstract {
         assert (200 == ProjectAPI.delete(project.id,USERNAME1,PASSWORD1).code)
     }
 
-    void testProjectSecurityForProjectUser() {
+    void testProjectSecurityForProjectManager() {
+
+        //Get user1
+        User user1 = BasicInstanceBuilder.getUser(USERNAME1,PASSWORD1)
+        //Get user2
+        User user2 = BasicInstanceBuilder.getUser(USERNAME2,PASSWORD2)
+
+        //Create new project (user1)
+        def result = ProjectAPI.create(BasicInstanceBuilder.getProjectNotExist().encodeAsJSON(),USERNAME1,PASSWORD1)
+        assert 200 == result.code
+        Project project = result.data
+
+        //Add admin right to user2 then remove them to test if old admin has no more right
+        def resAddUser = ProjectAPI.addAdminProject(project.id,user2.id,USERNAME1,PASSWORD1)
+        assert 200 == resAddUser.code
+        resAddUser = ProjectAPI.deleteAdminProject(project.id,user2.id,USERNAME1,PASSWORD1)
+        assert 200 == resAddUser.code
+
+        Infos.printRight(project)
+        //check if user 2 can access/update/delete he is still a contributor
+        assert (200 == ProjectAPI.show(project.id,USERNAME2,PASSWORD2).code)
+        assert (true ==ProjectAPI.containsInJSONList(project.id,JSON.parse(ProjectAPI.list(USERNAME2,PASSWORD2).data)))
+        assert (403 == ProjectAPI.update(project.id,project.encodeAsJSON(),USERNAME2,PASSWORD2).code)
+        assert (403 == ProjectAPI.delete(project.id,USERNAME2,PASSWORD2).code)
+
+        //Add admin right to user2
+        resAddUser = ProjectAPI.addAdminProject(project.id,user2.id,USERNAME1,PASSWORD1)
+        assert 200 == resAddUser.code
+
+        Infos.printRight(project)
+        //check if user 2 can access/update/delete
+        assert (200 == ProjectAPI.show(project.id,USERNAME2,PASSWORD2).code)
+        assert (true ==ProjectAPI.containsInJSONList(project.id,JSON.parse(ProjectAPI.list(USERNAME2,PASSWORD2).data)))
+        assert (200 == ProjectAPI.update(project.id,project.encodeAsJSON(),USERNAME2,PASSWORD2).code)
+        assert (200 == ProjectAPI.delete(project.id,USERNAME2,PASSWORD2).code)
+    }
+
+    void testProjectSecurityForProjectContributor() {
 
         //Get user1
         User user1 = BasicInstanceBuilder.getUser(USERNAME1,PASSWORD1)
