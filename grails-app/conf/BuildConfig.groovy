@@ -72,7 +72,7 @@ grails.project.dependency.resolution = {
         mavenRepo "http://www.hibernatespatial.org/repository"
         //mavenRepo "http://repository.ow2.org/nexus/content/repositories/public"
         //mavenRepo "http://repository.ow2.org/nexus/content/repositories/ow2-legacy"
-        mavenRepo "http://repo.grails.org/grails/core"
+        mavenRepo "https://repo.grails.org/grails/core"
     }
     dependencies {
         test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
@@ -92,7 +92,7 @@ grails.project.dependency.resolution = {
         runtime ':hibernate4:4.3.5.5'
         build ':tomcat:7.0.54'
         compile ':cache:1.1.7'
-        compile ":grails-melody:1.49.0"
+        //compile ":grails-melody:1.49.0"
         compile ":rest-api-doc:0.6"
         compile ":rest:0.8"
         compile ':spring-security-core:2.0-RC4'

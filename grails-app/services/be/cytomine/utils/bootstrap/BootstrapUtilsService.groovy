@@ -416,6 +416,7 @@ class BootstrapUtilsService {
         }
 
         String messageBrokerURL = grailsApplication.config.grails.messageBrokerServerURL
+        log.info "messageBrokerURL = $messageBrokerURL"
         def splittedURL = messageBrokerURL.split(':')
         if(toUpdate || (mbs == null)) {
             // create MBS

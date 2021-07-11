@@ -1262,7 +1262,7 @@ class BasicInstanceBuilder {
         if (!user) {
             user = new User(username: username,firstname: "Basic",lastname: "User ($username)",email: "Basic@User.be",password: password,enabled: true, origin: "TEST")
             user.generateKeys()
-            saveDomain(user)
+            user = saveDomain(user)
             SecUserSecRole.create(user,SecRole.findByAuthority("ROLE_USER"),true)
         }
         user

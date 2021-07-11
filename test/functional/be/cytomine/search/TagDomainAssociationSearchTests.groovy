@@ -24,6 +24,7 @@ import be.cytomine.ontology.ReviewedAnnotation
 import be.cytomine.ontology.UserAnnotation
 import be.cytomine.processing.RoiAnnotation
 import be.cytomine.project.Project
+import be.cytomine.security.SecUser
 import be.cytomine.security.User
 import be.cytomine.test.BasicInstanceBuilder
 import be.cytomine.test.Infos
@@ -101,8 +102,15 @@ class TagDomainAssociationSearchTests {
         TagDomainAssociation tda = BasicInstanceBuilder.getTagDomainAssociationNotExist()
         tda.tag = BasicInstanceBuilder.getTagNotExist(true)
         tda.domain = i1
-        tda.save(true)
+        BasicInstanceBuilder.saveDomain(tda)
 
+        ImageInstance.findAll().each {
+            println "image ${it.id} => review user ${it.reviewUser?.id}"
+        }
+
+        SecUser.findAll().each {
+            println it.id + " " + it.class
+        }
 
         def searchParameters = [[operator : "in", field : "tag", value:tda.tag.id]]
 

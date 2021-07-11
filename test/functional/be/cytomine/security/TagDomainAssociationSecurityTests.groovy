@@ -121,7 +121,7 @@ class TagDomainAssociationSecurityTests extends SecurityTestsAbstract {
         getUser2()
 
         project.mode = Project.EditingMode.READ_ONLY
-        project.save(true)
+        BasicInstanceBuilder.saveDomain(project)
 
         ProjectAPI.addUserProject(project.id,user2.id,SecurityTestsAbstract.USERNAME1,SecurityTestsAbstract.PASSWORD1)
 
@@ -138,14 +138,14 @@ class TagDomainAssociationSecurityTests extends SecurityTestsAbstract {
         assert result.code == 403
 
         project.mode = Project.EditingMode.RESTRICTED
-        project.save(true)
+        BasicInstanceBuilder.saveDomain(project)
         result = TagDomainAssociationAPI.create(association2.encodeAsJSON(), association2.domainClassName, association2.domainIdent, USERNAME2, PASSWORD2)
         assert result.code == 403
         result = TagDomainAssociationAPI.create(association3.encodeAsJSON(), association3.domainClassName, association3.domainIdent, USERNAME2, PASSWORD2)
         assert result.code == 403
 
         project.mode = Project.EditingMode.CLASSIC
-        project.save(true)
+        BasicInstanceBuilder.saveDomain(project)
 
         result = TagDomainAssociationAPI.create(association2.encodeAsJSON(), association2.domainClassName, association2.domainIdent, USERNAME2, PASSWORD2)
         assert result.code == 403 // even in classic mode, simple user cannot change project parameter
@@ -153,7 +153,7 @@ class TagDomainAssociationSecurityTests extends SecurityTestsAbstract {
         assert result.code == 200
 
         project.mode = Project.EditingMode.RESTRICTED
-        project.save(true)
+        BasicInstanceBuilder.saveDomain(project)
 
         ProjectAPI.addAdminProject(project.id,user2.id,SecurityTestsAbstract.USERNAME1,SecurityTestsAbstract.PASSWORD1)
 

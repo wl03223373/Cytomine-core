@@ -55,4 +55,4 @@ grails.serverID='44a44a2a-b4c8-45e9-a406-1bfc21727287'
 grails.mongo.host="mongodbtest"
 grails.mongo.port=27017
 
-//grails.cache.enabled=false
+grails.cache.enabled=false

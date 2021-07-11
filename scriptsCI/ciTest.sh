@@ -1,8 +1,5 @@
 #!/bin/bash
 
-set -o xtrace
-set -o errexit
-
 echo "************************************** Launch tests ******************************************"
 
 file='./ci/version'
@@ -16,6 +13,7 @@ containerId=$(docker create --network scriptsci_default --link postgresqltest:po
 #docker network connect scripts_default $containerId
 docker start -ai  $containerId
 docker cp $containerId:/app/target/test-reports/ ./ci
+#docker cp $containerId:/tmp/testLog-debug.log ./ci
 
 docker rm $containerId
 docker rmi cytomine/cytomine-core-test

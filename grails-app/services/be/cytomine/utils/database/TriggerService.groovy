@@ -504,7 +504,9 @@ class TriggerService {
         String createFunction = """
         CREATE OR REPLACE FUNCTION afterDeleteImage() RETURNS TRIGGER AS \$decImageAfter\$
         BEGIN
-
+            UPDATE project
+            SET count_images = count_images - 1
+            WHERE id = OLD.project_id;
             RETURN OLD;
         END ;
          \$decImageAfter\$ LANGUAGE plpgsql; """
@@ -754,8 +756,7 @@ class TriggerService {
         BEGIN
 
             IF NEW.deleted IS NULL AND OLD.deleted IS NOT NULL THEN
-                UPDATE project SET count_images = count_images + 1 WHERE project.id = OLD.project_id;
-
+            
                 UPDATE image_instance
                 SET count_image_reviewed_annotations = count_image_reviewed_annotations + 1
                 WHERE image_instance.id = NEW.image_id;
@@ -786,7 +787,6 @@ class TriggerService {
 
 
             ELSEIF NEW.deleted IS NOT NULL AND OLD.deleted IS NULL THEN
-                UPDATE project SET count_images = count_images - 1 WHERE project.id = OLD.project_id;
 
                 UPDATE image_instance
                 SET count_image_reviewed_annotations = count_image_reviewed_annotations - 1

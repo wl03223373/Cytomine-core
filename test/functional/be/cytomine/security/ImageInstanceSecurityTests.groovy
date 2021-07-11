@@ -225,10 +225,12 @@ class ImageInstanceSecurityTests extends SecurityTestsAbstract{
         result = ImageInstanceAPI.download(image.id, SecurityTestsAbstract.USERNAME3,SecurityTestsAbstract.PASSWORD3)
         assert result.code == 403
 
-        project.areImagesDownloadable = true
-        BasicInstanceBuilder.saveDomain(project)
+        Project.withTransaction {
+            project.areImagesDownloadable = true
+            project = BasicInstanceBuilder.saveDomain(project)
+        }
 
-
+        println "project.areImagesDownloadable ${project.areImagesDownloadable}"
         try {
             result = ImageInstanceAPI.download(image.id, SecurityTestsAbstract.USERNAME2, SecurityTestsAbstract.PASSWORD2)
             assert result.code == 200 || result.code == 500
