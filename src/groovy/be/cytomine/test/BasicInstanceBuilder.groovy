@@ -90,7 +90,10 @@ class BasicInstanceBuilder {
      * @param domain Domain to check
      */
     static def saveDomain(def domain) {
-        domain.save(flush: true, failOnError:true)
+        domain.getClass().withTransaction {
+            domain = domain.save(flush: true, failOnError:true)
+        }
+        domain.refresh()
         domain
     }
     static def insertDomain(def domain) {
