@@ -895,7 +895,7 @@ class ProjectSecurityTests extends SecurityTestsAbstract {
 
         //Force project to Read and write
         project.mode = Project.EditingMode.RESTRICTED
-        BasicInstanceBuilder.saveDomain(project)
+        project = BasicInstanceBuilder.saveDomain(project)
 
         //Add a simple project user
         User simpleUser = BasicInstanceBuilder.getUser(simpleUsername,password)
@@ -909,7 +909,7 @@ class ProjectSecurityTests extends SecurityTestsAbstract {
         Software software = BasicInstanceBuilder.getSoftwareNotExist(true);
         Job job = BasicInstanceBuilder.getJobNotExist(true, software, project)
         JobData jobData = BasicInstanceBuilder.getJobDataNotExist(job)
-        BasicInstanceBuilder.saveDomain(jobData)
+        jobData = BasicInstanceBuilder.saveDomain(jobData)
 
 
         // Now Test as simple user

@@ -34,6 +34,7 @@ import be.cytomine.ontology.UserAnnotation
 import be.cytomine.project.Project
 import be.cytomine.security.SecUser
 import be.cytomine.security.User
+import be.cytomine.security.UserJob
 import be.cytomine.meta.Description
 import be.cytomine.utils.JSONUtils
 import be.cytomine.utils.ModelService
@@ -213,6 +214,12 @@ class ImageInstanceService extends ModelService {
             map['reviewUser'] = map['reviewUserId']
             map['baseImage'] = map['baseImageId']
             map['project'] = map['projectId']
+//
+            println "review user"
+            println map['reviewUserId']
+            println User.read(map['reviewUserId'])
+            println UserJob.read(map['reviewUserId'])
+            println SecUser.read(map['reviewUserId'])
 
             //TODO improve perf !
             def line = ImageInstance.getDataFromDomain(ImageInstance.insertDataIntoDomain(map))
