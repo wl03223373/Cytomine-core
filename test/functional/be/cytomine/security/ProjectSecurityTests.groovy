@@ -1314,7 +1314,7 @@ class ProjectSecurityTests extends SecurityTestsAbstract {
         assert 200 == result.code
         assert 200 == JobAPI.delete(result.data.id, adminUsername, password).code
 
-        result = SoftwareProjectAPI.create(BasicInstanceBuilder.getSoftwareProjectNotExist(software, project, false).encodeAsJSON(),adminUsername, password)
+        result = SoftwareProjectAPI.create(BasicInstanceBuilder.getSoftwareProjectNotExist(BasicInstanceBuilder.getSoftwareNotExist(true), project, false).encodeAsJSON(),adminUsername, password)
         assert 200 == result.code
         assert 200 == SoftwareProjectAPI.delete(result.data.id, adminUsername, password).code
 
