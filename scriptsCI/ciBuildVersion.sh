@@ -9,7 +9,7 @@ cd $srcRoot
 # get version number from git
 lastGitTag=$(git describe --long --dirty)
 
-if [[ $lastGitTag =~ v[0-9]+.[0-9]+.[0-9]+-0-[0-9a-g]{8,9,10}$ ]]; then
+if [[ $lastGitTag =~ v[0-9]+.[0-9]+.[0-9]+-0-[0-9a-g]+$ ]]; then
   # official release x.y.z
   versionNumber=$(echo $lastGitTag | sed -r "s/v([0-9]+\.[0-9]+\.[0-9]+)-[0-9]+-.+/\1/")
 else
