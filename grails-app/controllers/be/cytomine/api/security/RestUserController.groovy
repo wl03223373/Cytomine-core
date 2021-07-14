@@ -495,7 +495,7 @@ class RestUserController extends RestController {
         users = User.findAllByIdInList(users)
 
         users.each { user ->
-            secUserService.deleteUserFromProject(user, project, true)
+            if(project.getPermissionInACL(project, user).contains(ADMINISTRATION.mask)) secUserService.deleteUserFromProject(user, project, true)
             def code = secUserService.deleteUserFromProject(user, project, false).status
             if(code != 200 && code != 201) {
                 errors << user.id
