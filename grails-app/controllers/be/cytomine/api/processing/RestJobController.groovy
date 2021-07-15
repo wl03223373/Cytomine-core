@@ -126,6 +126,31 @@ class RestJobController extends RestController {
     }
 
     /**
+     * Create a new job based on an already existing one
+     */
+    @RestApiMethod(description="Create a new job based on an already existing one")
+    @RestApiParams(params=[
+            @RestApiParam(name="id", type="long", paramType = RestApiParamType.PATH,description = "The original job id")
+    ])
+    def copy() {
+        try {
+            long jobId = params.long("id")
+            Job job = Job.read(jobId)
+
+            def result = jobService.copy(job)
+            long idJob = result?.data?.job?.id
+            def userjob = jobService.createUserJob(secUserService.getUser(springSecurityService.currentUser.id), Job.read(idJob))
+            result?.data?.job?.userJob = userjob?.id
+            result?.data?.job?.username = userjob?.humanUsername()
+            log.info userjob
+            responseResult(result)
+        } catch (CytomineException e) {
+            log.error(e)
+            response([success: false, errors: e.msg], e.code)
+        }
+    }
+
+    /**
      * Update a job
      */
     @RestApiMethod(description="Edit a job")

@@ -1100,6 +1100,15 @@ class BasicInstanceBuilder {
         save ? saveDomain(job) : checkDomain(job)
     }
 
+    static Job getJobNotExistWithParameters(Software software) {
+        Job job =  new Job(software:software, project : saveDomain(getProjectNotExist()))
+        saveDomain(job)
+        SoftwareParameter.findAllBySoftware(software).each {
+            saveDomain(new JobParameter(value: it.name + "_VALUE", job:job,softwareParameter:it))
+        }
+        job
+    }
+
     static Job getJobNotExist(boolean save = false, Project project) {
         Job job =  new Job(software:saveDomain(getSoftwareNotExist()), project : project)
         save ? saveDomain(job) : checkDomain(job)
@@ -1109,6 +1118,7 @@ class BasicInstanceBuilder {
         Job job =  new Job(software:software, project : project)
         save ? saveDomain(job) : checkDomain(job)
     }
+
 
     static JobTemplate getJobTemplate() {
         def job = JobTemplate.findByProjectAndSoftwareAndName(getProject(),getSoftware(),"jobtemplate")
@@ -1567,6 +1577,13 @@ class BasicInstanceBuilder {
             checkDomain(software)
         }
 
+        software
+    }
+
+    static Software getSoftwareNotExistWithParameters() {
+        Software software = getSoftwareNotExist(true)
+        saveDomain(new SoftwareParameter(name: getRandomString(),software:software,type:"String"))
+        saveDomain(new SoftwareParameter(name: getRandomString(),software:software,type:"String"))
         software
     }
 

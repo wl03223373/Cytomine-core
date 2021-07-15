@@ -34,6 +34,7 @@ import be.cytomine.social.AnnotationAction
 import be.cytomine.social.LastUserPosition
 import be.cytomine.social.PersistentImageConsultation
 import be.cytomine.social.PersistentUserPosition
+import be.cytomine.security.UserJob
 import be.cytomine.meta.Description
 import be.cytomine.utils.JSONUtils
 import be.cytomine.utils.ModelService

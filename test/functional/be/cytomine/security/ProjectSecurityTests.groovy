@@ -896,7 +896,7 @@ class ProjectSecurityTests extends SecurityTestsAbstract {
 
         //Force project to Read and write
         project.mode = Project.EditingMode.RESTRICTED
-        BasicInstanceBuilder.saveDomain(project)
+        project = BasicInstanceBuilder.saveDomain(project)
 
         //Add a simple project user
         User simpleUser = BasicInstanceBuilder.getUser(simpleUsername,password)
@@ -910,7 +910,7 @@ class ProjectSecurityTests extends SecurityTestsAbstract {
         Software software = BasicInstanceBuilder.getSoftwareNotExist(true);
         Job job = BasicInstanceBuilder.getJobNotExist(true, software, project)
         JobData jobData = BasicInstanceBuilder.getJobDataNotExist(job)
-        BasicInstanceBuilder.saveDomain(jobData)
+        jobData = BasicInstanceBuilder.saveDomain(jobData)
 
 
         // Now Test as simple user
@@ -1315,7 +1315,7 @@ class ProjectSecurityTests extends SecurityTestsAbstract {
         assert 200 == result.code
         assert 200 == JobAPI.delete(result.data.id, adminUsername, password).code
 
-        result = SoftwareProjectAPI.create(BasicInstanceBuilder.getSoftwareProjectNotExist(software, project, false).encodeAsJSON(),adminUsername, password)
+        result = SoftwareProjectAPI.create(BasicInstanceBuilder.getSoftwareProjectNotExist(BasicInstanceBuilder.getSoftwareNotExist(true), project, false).encodeAsJSON(),adminUsername, password)
         assert 200 == result.code
         assert 200 == SoftwareProjectAPI.delete(result.data.id, adminUsername, password).code
 
