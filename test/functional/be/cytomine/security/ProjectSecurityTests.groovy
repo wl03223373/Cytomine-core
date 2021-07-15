@@ -17,6 +17,7 @@ package be.cytomine.security
 */
 
 import be.cytomine.image.ImageInstance
+import be.cytomine.image.SliceInstance
 import be.cytomine.meta.Property
 import be.cytomine.ontology.UserAnnotation
 import be.cytomine.processing.Job
@@ -1281,7 +1282,7 @@ class ProjectSecurityTests extends SecurityTestsAbstract {
 
 
         assert 403 == JobDataAPI.upload(jobData.id, new byte[5], simpleUsername, password).code
-        JobDataAPI.upload(jobData.id, new byte[5], adminUsername, password)
+        assert 200 == JobDataAPI.upload(jobData.id, new byte[5], adminUsername, password).code
         assert 200 == JobDataAPI.download(jobData.id, simpleUsername, password).code
         assert 403 == JobDataAPI.update(jobData.id, jobData.encodeAsJSON(), simpleUsername, password).code
 
@@ -1336,6 +1337,7 @@ class ProjectSecurityTests extends SecurityTestsAbstract {
         /*super admin data*/
         //Create an annotation (by superadmin)
         ImageInstance image = BasicInstanceBuilder.getImageInstanceNotExist(project,true)
+        SliceInstance slice = BasicInstanceBuilder.getSliceInstanceNotExist(image,true)
         UserAnnotation annotation = BasicInstanceBuilder.getUserAnnotationNotExist(project,image,true)
         //Create a description
         Description description = BasicInstanceBuilder.getDescriptionNotExist(annotation,true)
@@ -1352,6 +1354,7 @@ class ProjectSecurityTests extends SecurityTestsAbstract {
         ImageInstance imageAdmin = BasicInstanceBuilder.getImageInstanceNotExist(project,false)
         imageAdmin.user = admin;
         BasicInstanceBuilder.saveDomain(imageAdmin)
+        slice = BasicInstanceBuilder.getSliceInstanceNotExist(imageAdmin,true)
         UserAnnotation annotationAdmin = BasicInstanceBuilder.getUserAnnotationNotExist(project,imageAdmin,admin,false)
         annotationAdmin.user = admin;
         BasicInstanceBuilder.saveDomain(annotationAdmin)
@@ -1370,6 +1373,7 @@ class ProjectSecurityTests extends SecurityTestsAbstract {
         ImageInstance imageUser = BasicInstanceBuilder.getImageInstanceNotExist(project,false)
         imageUser.user = simpleUser;
         BasicInstanceBuilder.saveDomain(imageUser)
+        slice = BasicInstanceBuilder.getSliceInstanceNotExist(imageUser,true)
         UserAnnotation annotationUser = BasicInstanceBuilder.getUserAnnotationNotExist(project,imageUser,simpleUser,false)
         annotationUser.user = simpleUser;
         BasicInstanceBuilder.saveDomain(annotationUser)

@@ -92,6 +92,22 @@ class UserUrlMappings {
         }
 
 
+        "/api/storage/$id/user.$format"(controller: "restUser"){
+            action = [GET: "showUserByStorage"]
+        }
+        "/api/storage/$id/user/$idUser.$format"(controller: "restUser"){
+            action = [DELETE:"deleteUserFromStorage",POST:"addUserToStorage"]
+        }
+
+
+        "/api/ldap/user.$format"(controller:"restUser"){
+            action = [POST:"addFromLDAP"]
+        }
+        "/api/ldap/$username/user.$format"(controller:"restUser"){
+            action = [GET:"isInLdap"]
+        }
+
+
         "/api/domain/$domainClassName/$domainIdent/user/$user.$format"(controller:"restACL"){
             action = [GET:"list",POST:"add",DELETE: "delete"]
         }

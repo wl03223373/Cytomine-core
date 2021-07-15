@@ -15,7 +15,9 @@
 */
 
 
-import be.cytomine.image.ImageProcessingService
+import be.cytomine.image.AbstractImage
+import be.cytomine.image.AbstractSlice
+import be.cytomine.middleware.ImageServer
 import be.cytomine.utils.CytomineMailService
 import be.cytomine.image.multidim.ImageGroupHDF5Service
 import be.cytomine.image.ImagePropertiesService
@@ -38,6 +40,8 @@ import org.grails.plugin.resource.URLUtils
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import java.lang.management.ManagementFactory
+import java.nio.file.Files
+import java.nio.file.Paths
 
 /**
  * Bootstrap contains code that must be execute during application (re)start
@@ -116,6 +120,10 @@ class BootStrap {
             Version.setCurrentVersion(grailsApplication.metadata.'app.version')
         }
 
+        if (!bootstrapUtilsService.checkSqlColumnExistence("sec_user", "language")) {
+            new Sql(dataSource).executeUpdate("ALTER TABLE sec_user ADD COLUMN language VARCHAR;")
+        }
+
         //Initialize marshallers and services
         log.info "init marshaller..."
         marshallersService.initMarshallers()
@@ -143,9 +151,13 @@ class BootStrap {
 
         /* Fill data just in test environment*/
         log.info "fill with data..."
+        log.info grailsApplication.config.grails.adminPassword
         if (Environment.getCurrent() == Environment.TEST) {
             bootstrapDataService.initData()
             noSQLCollectionService.cleanActivityDB()
+            println "grailsApplication.config.grails"
+            println grailsApplication.config.grails
+            println grailsApplication.config.grails.adminPassword
             def usersSamples = [
                     [username : Infos.ANOTHERLOGIN, firstname : 'Just another', lastname : 'User', email : grailsApplication.config.grails.admin.email, group : [[name : "Cytomine"]], password : grailsApplication.config.grails.adminPassword, color : "#FF0000", roles : ["ROLE_USER", "ROLE_ADMIN","ROLE_SUPER_ADMIN"]]
             ]
@@ -192,7 +204,6 @@ class BootStrap {
 
         log.info "create multiple IS and Retrieval..."
         bootstrapUtilsService.createMultipleIS()
-        bootstrapUtilsService.createMultipleRetrieval()
         bootstrapUtilsService.updateDefaultProcessingServer()
 
         bootstrapUtilsService.fillProjectConnections();
@@ -203,15 +214,20 @@ class BootStrap {
 
     private void mockServicesForTests(){
         //mock services which use IMS
-        ImageProcessingService.metaClass.getImageFromURL = {
-            String url -> println "\n\n mocked getImageFromURL \n\n";
-                return javax.imageio.ImageIO.read(new File("test/functional/be/cytomine/utils/images/thumb256.png"))
-        }
         ImageGroupHDF5Service.metaClass.callIMSConversion = {
             SecUser currentUser, def imagesFilenames, String filename -> println "\n\n mocked callIMSConversion \n\n";
         }
-        ImageServerService.metaClass.getStorageSpaces = {
-            return [[used : 0, available : 10]]
+        ImageServerService.metaClass.crop = {
+            AbstractSlice slice, params, urlOnly, parametersOnly -> println "\n\n mocked crop \n\n";
+                return Files.readAllBytes(Paths.get("test/functional/be/cytomine/utils/images/crop.jpg"));
+        }
+        ImageServerService.metaClass.storageSpace = {
+            ImageServer is -> println "\n\n mocked storageSpace \n\n";
+            return [used : 1, available: 1];
+        }
+        ImageServerService.metaClass.downloadUri = {
+            AbstractImage ai -> println "\n\n mocked downloadUri \n\n";
+                return "https://www.google.com";
         }
         //mock services which use Retrieval
         ImageRetrievalService.metaClass.doRetrievalIndex = {

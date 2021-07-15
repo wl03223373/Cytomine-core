@@ -28,6 +28,7 @@ import be.cytomine.security.User
 import be.cytomine.security.UserJob
 import be.cytomine.sql.AlgoAnnotationListing
 import be.cytomine.sql.ReviewedAnnotationListing
+import be.cytomine.meta.AttachedFile
 import be.cytomine.utils.ModelService
 import be.cytomine.utils.Task
 import groovy.sql.GroovyResultSet
@@ -185,6 +186,17 @@ class JobService extends ModelService {
         def mapParams = sqlSearchConditions.parameters
         if(usernameParams.size() > 0) mapParams += usernameParams
 
+        // https://stackoverflow.com/a/42080302
+        if (mapParams.isEmpty() && usernameParams.isEmpty()) {
+            mapParams = []
+        }
+        else if (mapParams.isEmpty()) {
+            mapParams = usernameParams
+        }
+        else {
+            mapParams += usernameParams
+        }
+
         sql.eachRow(request, mapParams) {
             def map = [:]
 
@@ -236,7 +248,13 @@ class JobService extends ModelService {
         }
         sql.close()
 
-        return [data:data, total:size]
+        def result = [data:data, total:size]
+        max = (max > 0) ? max : Integer.MAX_VALUE
+        result.offset = offset
+        result.perPage = Math.min(max, result.total)
+        result.totalPages = Math.ceil(result.total / max)
+
+        return result
     }
 
     /**
@@ -462,6 +480,7 @@ class JobService extends ModelService {
             job.number = it.number
             job.created = it.created?.time?.toString()
             job.dataDeleted = it.dataDeleted
+            job.favorite = it.favorite
             data << job
         }
         return data

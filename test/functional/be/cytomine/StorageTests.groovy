@@ -17,7 +17,6 @@ package be.cytomine
 */
 
 import be.cytomine.image.server.Storage
-import be.cytomine.image.server.ImageServerStorage
 import be.cytomine.test.BasicInstanceBuilder
 import be.cytomine.test.Infos
 import be.cytomine.test.http.StorageAPI

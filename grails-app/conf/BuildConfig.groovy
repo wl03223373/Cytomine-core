@@ -14,14 +14,13 @@
 * limitations under the License.
 */
 
-//grails.client = "be.cytomine.integration"
+
 grails.servlet.version = "3.0"
 grails.reload.enabled = true
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 grails.project.war.file = "target/${appName}.war"
-//grails.project.dependency.resolver="ivy"
 grails.project.dependency.resolver = "maven"
 
 //UNCOMMENT TO HAVE WORKING TEST
@@ -76,12 +75,15 @@ grails.project.dependency.resolution = {
     }
     dependencies {
         test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
-        runtime 'org.postgresql:postgresql:42.2.2'
+        runtime 'org.postgresql:postgresql:42.2.14'
         runtime 'com.rabbitmq:amqp-client:3.4.4'
         compile "javax.validation:validation-api:1.1.0.Final"
         runtime "org.hibernate:hibernate-validator:5.0.3.Final"
         compile 'commons-beanutils:commons-beanutils:1.8.3'
+        compile 'org.imsglobal:basiclti-util:1.1.2'
+        compile 'org.json:json:20141113'
         compile 'joda-time:joda-time:2.10.1'
+        compile 'com.github.jai-imageio:jai-imageio-core:1.4.0'
         compile( "commons-validator:commons-validator:1.5.0" ) {
             excludes 'xml-apis','commons-digester','commons-logging','commons-beanutils', 'commons-collections'
         }

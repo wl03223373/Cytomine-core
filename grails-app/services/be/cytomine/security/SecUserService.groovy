@@ -26,9 +26,7 @@ import be.cytomine.command.*
 import be.cytomine.image.ImageInstance
 import be.cytomine.image.NestedImageInstance
 import be.cytomine.image.UploadedFile
-import be.cytomine.image.server.ImageServerStorage
 import be.cytomine.image.server.Storage
-import be.cytomine.image.server.StorageAbstractImage
 import be.cytomine.ontology.*
 import be.cytomine.processing.Job
 import be.cytomine.project.Project
@@ -51,6 +49,7 @@ import org.springframework.util.ReflectionUtils
 
 import static org.springframework.security.acls.domain.BasePermission.ADMINISTRATION
 import static org.springframework.security.acls.domain.BasePermission.READ
+import static org.springframework.security.acls.domain.BasePermission.WRITE
 
 class SecUserService extends ModelService {
 
@@ -179,7 +178,9 @@ class SecUserService extends ModelService {
         if(sortColumn == "role") {
             sort = "ORDER BY $sortColumn $sortDirection, u.id ASC "
         } else if(sortColumn == "fullName"){
-            sort = "ORDER BY u.firstname $sortDirection "
+            sort = "ORDER BY u.firstname $sortDirection, u.id "
+        } else if(sortColumn != "id"){ //avoid random sort when multiple values of the
+            sort = "ORDER BY u.$sortColumn $sortDirection, u.id "
         } else sort = "ORDER BY u.$sortColumn $sortDirection "
 
         String request = select + from + where + search + groupBy + sort
@@ -238,7 +239,13 @@ class SecUserService extends ModelService {
         }
         sql.close()
 
-        return [data:data, total:size]
+        def result = [data:data, total:size]
+        max = (max > 0) ? max : Integer.MAX_VALUE
+        result.offset = offset
+        result.perPage = Math.min(max, result.total)
+        result.totalPages = Math.ceil(result.total / max)
+
+        return result
     }
 
     def lock(SecUser user){
@@ -395,7 +402,13 @@ class SecUserService extends ModelService {
             frequenciessFetched = true
         }
 
-        return [data: results, total: total]
+        def result = [data:results, total:total]
+        max = (max > 0) ? max : Integer.MAX_VALUE
+        result.offset = offset
+        result.perPage = Math.min(max, result.total)
+        result.totalPages = Math.ceil(result.total / max)
+
+        return result
     }
 
     def listUsersByProject(Project project, boolean withProjectRole = true, def searchParameters = [], String sortColumn, String sortDirection, Long max = 0, Long offset = 0){
@@ -426,7 +439,7 @@ class SecUserService extends ModelService {
         if(onlineUserSearch) {
             def onlineUsers = getAllOnlineUserIds(project)
             if(onlineUsers.isEmpty())
-                return [data: [], total: 0]
+                return [data: [], total: 0, offset: 0, perPage: 0, totalPages: 0]
 
             where += " and secUser.id in ("+getAllOnlineUserIds(project).join(",")+") "
         }
@@ -477,10 +490,17 @@ class SecUserService extends ModelService {
             return item[0]
         }
 
-        return [data: users, total: total]
+        def result = [data:users, total:total]
+        max = (max > 0) ? max : Integer.MAX_VALUE
+        result.offset = offset
+        result.perPage = Math.min(max, result.total)
+        result.totalPages = Math.ceil(result.total / max)
+
+        return result
     }
 
     def listUsers(Project project, boolean showUserJob = false) {
+        securityACLService.check(project,READ)
         List<User> users = User.executeQuery("select distinct secUser " +
                 "from AclObjectIdentity as aclObjectId, AclEntry as aclEntry, AclSid as aclSid, User as secUser "+
                 "where aclObjectId.objectId = "+project.id+" " +
@@ -488,6 +508,7 @@ class SecUserService extends ModelService {
                 "and aclEntry.sid = aclSid.id " +
                 "and aclSid.sid = secUser.username " +
                 "and secUser.class = 'be.cytomine.security.User'")
+
         if(showUserJob) {
             //TODO:: should be optim (see method head comment)
             List<Job> allJobs = Job.findAllByProject(project, [sort: 'created', order: 'desc'])
@@ -514,8 +535,15 @@ class SecUserService extends ModelService {
 
 
     def listAdmins(Project project) {
-        def users = SecUser.executeQuery("select distinct secUser from AclObjectIdentity as aclObjectId, AclEntry as aclEntry, AclSid as aclSid, SecUser as secUser "+
-                "where aclObjectId.objectId = "+project.id+" and aclEntry.aclObjectIdentity = aclObjectId.id and aclEntry.mask = 16 and aclEntry.sid = aclSid.id and aclSid.sid = secUser.username and secUser.class = 'be.cytomine.security.User'")
+        securityACLService.check(project,READ)
+        def users = SecUser.executeQuery("select distinct secUser " +
+                "from AclObjectIdentity as aclObjectId, AclEntry as aclEntry, AclSid as aclSid, SecUser as secUser "+
+                "where aclObjectId.objectId = "+project.id+" " +
+                "and aclEntry.aclObjectIdentity = aclObjectId.id " +
+                "and aclEntry.mask = 16 " +
+                "and aclEntry.sid = aclSid.id " +
+                "and aclSid.sid = secUser.username " +
+                "and secUser.class = 'be.cytomine.security.User'")
         return users
     }
 
@@ -528,6 +556,17 @@ class SecUserService extends ModelService {
             users.addAll(listUsers(project))
         }
         users.unique()
+    }
+
+    def listUsers(Storage storage) {
+        securityACLService.check(storage, READ)
+        return User.executeQuery("select distinct secUser " +
+                "from AclObjectIdentity as aclObjectId, AclEntry as aclEntry, AclSid as aclSid, User as secUser "+
+                "where aclObjectId.objectId = "+storage.id+" " +
+                "and aclEntry.aclObjectIdentity = aclObjectId.id " +
+                "and aclEntry.sid = aclSid.id " +
+                "and aclSid.sid = secUser.username " +
+                "and secUser.class = 'be.cytomine.security.User'")
     }
 
     def listByGroup(Group group) {
@@ -561,12 +600,17 @@ class SecUserService extends ModelService {
 
     private def getUserJobImage(ImageInstance image) {
 
-        String request = "SELECT u.id as id, u.username as username, s.name as softwareName, s.software_version as softwareVersion, j.created as created \n" +
-                "FROM annotation_index ai, sec_user u, job j, software s\n" +
-                "WHERE ai.image_id = ${image.id}\n" +
-                "AND ai.user_id = u.id\n" +
-                "AND u.job_id = j.id\n" +
-                "AND j.software_id = s.id\n" +
+        String request = "SELECT DISTINCT u.id as id, u.username as username, " +
+                "s.name as softwareName, s.software_version as softwareVersion, " +
+                "j.created as created, u.job_id as job " +
+                "FROM annotation_index ai " +
+                "RIGHT JOIN slice_instance si ON ai.slice_id = si.id " + 
+                "RIGHT JOIN sec_user u ON ai.user_id = u.id " +
+                "RIGHT JOIN job j ON j.id = u.job_id " +
+                "RIGHT JOIN software_project sp ON sp.software_id = j.software_id " +
+                "RIGHT JOIN software s ON s.id = sp.software_id " +
+                "WHERE si.image_id = ${image.id} " +
+                "AND sp.project_id = ${image.project.id} " +
                 "ORDER BY j.created"
         def data = []
         def sql = new Sql(dataSource)
@@ -578,6 +622,7 @@ class SecUserService extends ModelService {
 
             item.created = it.created
             item.algo = true
+            item.job = it.job
             data << item
         }
         try {
@@ -593,42 +638,35 @@ class SecUserService extends ModelService {
      * If project has private layer, just get current user layer
      */
     def listLayers(Project project, ImageInstance image = null) {
-        securityACLService.check(project,READ)
+        securityACLService.check(project, READ)
         SecUser currentUser = cytomineService.getCurrentUser()
-        def users = listUsers(project)
 
-        if(image) {
-            def jobs = getUserJobImage(image)
-            users.addAll(jobs)
+        def humanAdmins = listAdmins(project)
+        def humanUsers = listUsers(project)
+        def humanUsersFormatted = humanUsers.collect { User.getDataFromDomain(it) }
+
+        def layersFormatted = []
+        if (project.checkPermission(ADMINISTRATION, currentRoleServiceProxy.isAdminByNow(currentUser))
+                || (!project.hideAdminsLayers && !project.hideUsersLayers)) {
+            layersFormatted.addAll(humanUsersFormatted)
         }
-        def admins = listAdmins(project)
+        else if (project.hideAdminsLayers && !project.hideUsersLayers) {
+            def humanAdminsIds = humanAdmins.collect { it.id }
+            layersFormatted.addAll(humanUsersFormatted.findAll { !humanAdminsIds.contains(it.id) })
+        }
+        else if (!project.hideAdminsLayers && project.hideUsersLayers) {
+            layersFormatted.addAll(humanAdmins.collect { User.getDataFromDomain(it) })
+        }
 
+        if (humanUsers.contains(currentUser) && !layersFormatted.find { it.id == currentUser.id }) {
+            def currentUserFormatted = User.getDataFromDomain(currentUser)
+            layersFormatted.add(currentUserFormatted)
+        }
 
-        if(project.checkPermission(ADMINISTRATION,currentRoleServiceProxy.isAdminByNow(currentUser))) {
-            return users
-        } else if(project.hideAdminsLayers && project.hideUsersLayers && users.contains(currentUser)) {
-            return [currentUser]
-        } else if(project.hideAdminsLayers && !project.hideUsersLayers && users.contains(currentUser)) {
-            users.removeAll(admins)
-            return users
-        } else if(!project.hideAdminsLayers && project.hideUsersLayers && users.contains(currentUser)) {
-            admins.add(currentUser)
-            return admins
-         }else if(!project.hideAdminsLayers && !project.hideUsersLayers && users.contains(currentUser)) {
-            return users
-         }else { //should no arrive but possible if user is admin and not in project
-             []
-         }
+        def jobUsersFormatted = (image) ? getUserJobImage(image) : []
+        layersFormatted.addAll(jobUsersFormatted)
 
-//
-//        //if user is admin of the project, show all layers
-//        if (!project.checkPermission(ADMINISTRATION) && project.privateLayer && users.contains(currentUser)) {
-//            return [currentUser]
-//        } else if (!project.privateLayer || project.checkPermission(ADMINISTRATION)) {
-//            return  users
-//        } else { //should no arrive but possible if user is admin and not in project
-//            []
-//        }
+        return layersFormatted
     }
 
     /**
@@ -702,13 +740,15 @@ class SecUserService extends ModelService {
      * @return Response structure (created domain data,..)
      */
     def add(JSONObject json) {
-        SecUser currentUser = cytomineService.getCurrentUser()
-        securityACLService.checkUser(currentUser)
-        if(json.user == null) {
-            json.user = cytomineService.getCurrentUser().id
-            json.origin = "ADMINISTRATOR"
+        synchronized (this.getClass()) {
+            SecUser currentUser = cytomineService.getCurrentUser()
+            securityACLService.checkUser(currentUser)
+            if (json.user == null) {
+                json.user = cytomineService.getCurrentUser().id
+                json.origin = "ADMINISTRATOR"
+            }
+            return executeCommand(new AddCommand(user: currentUser), null, json)
         }
-        return executeCommand(new AddCommand(user: currentUser),null,json)
     }
 
     /**
@@ -822,13 +862,43 @@ class SecUserService extends ModelService {
 
     }
 
-    def beforeDelete(def domain) {
-        Command.findAllByUser(domain).each {
-            UndoStackItem.findAllByCommand(it).each { it.delete()}
-            RedoStackItem.findAllByCommand(it).each { it.delete()}
-            CommandHistory.findAllByCommand(it).each {it.delete()}
-            it.delete()
+    def addUserToStorage(SecUser user, Storage storage) {
+        securityACLService.check(storage, ADMINISTRATION)
+
+        log.info "Add user $user to storage $storage"
+        permissionService.addPermission(storage, user.username, READ)
+        permissionService.addPermission(storage, user.username, WRITE)
+
+        [data: [message: "OK"], status: 201]
+    }
+
+    def deleteUserFromStorage(SecUser user, Storage storage) {
+        securityACLService.checkIsSameUserOrAdminContainer(storage, user, cytomineService.currentUser)
+
+        if (user == storage.user) {
+            throw new InvalidRequestException("The storage owner cannot be deleted.")
         }
+
+        log.info "Remove user $user from storage $storage"
+        permissionService.deletePermission(storage, user.username, READ)
+        permissionService.deletePermission(storage, user.username, WRITE)
+        [data: [message: "OK"], status: 201]
+    }
+
+    def beforeDelete(def domain) {
+        def sql = new Sql(dataSource)
+        sql.executeUpdate("delete from command_history where user_id = ${domain.id};")
+        sql.executeUpdate("delete from redo_stack_item where user_id = ${domain.id};")
+        sql.executeUpdate("delete from undo_stack_item where user_id = ${domain.id};")
+        sql.executeUpdate("delete from command where user_id = ${domain.id};")
+        sql.close()
+
+//        Command.findAllByUser(domain).each {
+//            UndoStackItem.findAllByCommand(it).each { it.delete()}
+//            RedoStackItem.findAllByCommand(it).each { it.delete()}
+//            CommandHistory.findAllByCommand(it).each {it.delete()}
+//            it.delete()
+//        }
     }
 
     def afterAdd(def domain, def response) {
@@ -987,12 +1057,9 @@ class SecUserService extends ModelService {
 
     def deleteDependentStorage(SecUser user,Transaction transaction, Task task = null) {
         for (storage in Storage.findAllByUser(user)) {
-            if (StorageAbstractImage.countByStorage(storage) > 0) {
+            if (UploadedFile.countByStorage(storage) > 0) {
                 throw new ConstraintException("Storage contains data, cannot delete user. Remove or assign storage to an another user first")
             } else {
-                ImageServerStorage.findAllByStorage(storage).each {
-                    it.delete()
-                }
                 storage.delete()
             }
         }

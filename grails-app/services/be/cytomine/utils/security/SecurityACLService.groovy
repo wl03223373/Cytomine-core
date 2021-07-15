@@ -201,9 +201,9 @@ class SecurityACLService {
         }
     }
 
-    public List<Storage> getStorageList(SecUser user) {
+    public List<Storage> getStorageList(SecUser user, def adminByPass = true) {
         //faster method
-        if (currentRoleServiceProxy.isAdminByNow(user)) return Storage.list();
+        if (adminByPass && currentRoleServiceProxy.isAdminByNow(user)) return Storage.list();
         while (user instanceof UserJob) {
             user = ((UserJob) user).user
         }

@@ -26,9 +26,8 @@ import be.cytomine.processing.JobData
 import be.cytomine.processing.ProcessingServer
 import be.cytomine.processing.Software
 import be.cytomine.project.Project
-import be.cytomine.security.SecUser
-import be.cytomine.security.User
 import be.cytomine.security.UserJob
+import be.cytomine.utils.JSONUtils
 import be.cytomine.utils.Task
 import grails.converters.JSON
 import org.restapidoc.annotation.*
@@ -59,7 +58,7 @@ class RestJobController extends RestController {
     /**
      * List all job
      */
-    @RestApiMethod(description="List jobs", listing = true)
+    @RestApiMethod(description="Get a list of jobs", listing = true)
     @RestApiParams(params=[
         @RestApiParam(name="light", type="boolean", paramType = RestApiParamType.QUERY, required = false, description = "If true, get a light/quick listing (without job parameters,...)"),
         @RestApiParam(name="software", type="long", paramType = RestApiParamType.QUERY, required = false, description = "A list of software id to filter"),
@@ -88,7 +87,7 @@ class RestJobController extends RestController {
 
         def result = jobService.list(softwares, projects, [withJobParameters:withJobParameters, withUser:withUser], params.sort, params.order, searchParameters, params.long('max',0), params.long('offset',0), light)
 
-        responseSuccess([collection : result.data, size:result.total])
+        responseSuccess([collection : result.data, size:result.total, offset: result.offset, perPage: result.perPage, totalPages: result.totalPages])
     }
 
     /**
@@ -157,6 +156,7 @@ class RestJobController extends RestController {
         long jobId = params.long("id")
         Job job = Job.read(jobId)
 
+        securityACLService.checkUser(cytomineService.currentUser)
         securityACLService.check(job.container(), READ)
         UserJob userJob = UserJob.findByJob(job)
 
@@ -177,6 +177,7 @@ class RestJobController extends RestController {
         long processingServerId = params.long("processingServerId")
         ProcessingServer processingServer = ProcessingServer.read(processingServerId)
 
+        securityACLService.checkUser(cytomineService.currentUser)
         securityACLService.check(job.container(), READ)
         UserJob userJob = UserJob.findByJob(job)
 
@@ -259,13 +260,19 @@ class RestJobController extends RestController {
                 taskService.updateTask(task,60,"Delete all annotations...")
                 jobService.deleteAllAlgoAnnotations(job)
 
-                taskService.updateTask(task,90,"Delete all files...")
+                taskService.updateTask(task,80,"Delete all files...")
                 jobService.deleteAllJobData(job)
 
-                taskService.finishTask(task)
-                job.dataDeleted = true;
-                job.save(flush:true)
-                responseSuccess([message:"All data from job launch "+ job.created + " are deleted!"])
+                taskService.updateTask(task, 90, "Delete job...")
+                try {
+                    def result = jobService.delete(job, transactionService.start())
+                    taskService.finishTask(task)
+                    responseResult(result)
+                } catch (CytomineException e) {
+                    taskService.finishTask(task)
+                    log.error(e)
+                    response([success: false, errors: e.msg, errorValues : e.values], e.code)
+                }
             }
         }
     }

@@ -3,3 +3,5 @@ target/*
 scripts/yui-compressor-ant-task/*
 /grails-app/conf/Config.groovy
 .idea
+.slcache
+node_modules

@@ -546,15 +546,12 @@ class AttachedFileSecurityTests extends SecurityTestsAbstract{
         User user2 = getUser2()
 
         def abstractImage = BasicInstanceBuilder.getAbstractImageNotExist(true)
-        def result = AbstractImageAPI.create(BasicInstanceBuilder.getAbstractImageNotExist().encodeAsJSON(), USERNAME1, PASSWORD1)
-        assert 200 == result.code
-        abstractImage = result.data
 
         def attachedFileToAdd = BasicInstanceBuilder.getAttachedFileNotExist(false)
         attachedFileToAdd.domainClassName = abstractImage.class.name
         attachedFileToAdd.domainIdent = abstractImage.id
 
-        result = AttachedFileAPI.upload(attachedFileToAdd.domainClassName,attachedFileToAdd.domainIdent,new File("test/functional/be/cytomine/utils/simpleFile.txt"),USERNAME2, PASSWORD2)
+        def result = AttachedFileAPI.upload(attachedFileToAdd.domainClassName,attachedFileToAdd.domainIdent,new File("test/functional/be/cytomine/utils/simpleFile.txt"),USERNAME2, PASSWORD2)
         assert 403 == result.code
 
         result = AttachedFileAPI.upload(attachedFileToAdd.domainClassName,attachedFileToAdd.domainIdent,new File("test/functional/be/cytomine/utils/simpleFile.txt"),USERNAME1, PASSWORD1)

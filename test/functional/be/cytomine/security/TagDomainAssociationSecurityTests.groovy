@@ -260,8 +260,11 @@ class TagDomainAssociationSecurityTests extends SecurityTestsAbstract {
         assert result.code == 200
         association2 = result.data
 
+        def slice = BasicInstanceBuilder.getSliceInstanceNotExist(BasicInstanceBuilder.getImageInstanceNotExist(project, true), true)
         def algoAnnot = BasicInstanceBuilder.getAlgoAnnotationNotExist()
         algoAnnot.project = project
+        algoAnnot.slice = slice
+        algoAnnot.image = slice.image
         ProjectAPI.addUserProject(project.id,algoAnnot.user.user.id,SecurityTestsAbstract.USERNAME1,SecurityTestsAbstract.PASSWORD1)
         result = AlgoAnnotationAPI.create(algoAnnot.encodeAsJSON(), algoAnnot.user.username, 'PasswordUserJob')
         algoAnnot = result.data
