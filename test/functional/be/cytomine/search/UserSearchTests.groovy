@@ -443,7 +443,7 @@ class UserSearchTests {
         json = JSON.parse(result.data)
         assert json.collection instanceof JSONArray
         assert json.size == totalSize
-        size = totalSize
+        def size = totalSize
         assert json.collection.size() == size
         String origin1 = json.collection[0].origin
         String origin2 = json.collection[-1].origin
