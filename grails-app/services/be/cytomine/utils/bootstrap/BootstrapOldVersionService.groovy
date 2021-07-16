@@ -148,17 +148,17 @@ class BootstrapOldVersionService {
         //TODO: use old ImageServerStorage and StorageAbstractImage
         //TODO: manage all old image servers.
         def server = ImageServer.first()
-        UploadedFile.executeUpdate("update UploadedFile uf set uf.imageServer = ? where uf.imageServer is null",
-                [server])
+        if (server) {
+            UploadedFile.executeUpdate("update UploadedFile uf set uf.imageServer = ? where uf.imageServer is null",
+                    [server])
 
-        log.info "Image server: Update base path in image_server with known base path"
-        ImageServer.executeUpdate("update ImageServer i set i.basePath = ? where i.basePath is null",
-                [grailsApplication.config.storage_path])
-
+            log.info "Image server: Update base path in image_server with known base path"
+            ImageServer.executeUpdate("update ImageServer i set i.basePath = ? where i.basePath is null",
+                    [grailsApplication.config.storage_path])
+        }
         log.info "Image server: Remove no more used columns"
         bootstrapUtilsService.dropSqlColumn("image_server", "service")
         bootstrapUtilsService.dropSqlColumn("image_server", "class_name")
-
 
         /****** UPLOADED FILE (1) ******/
         if (bootstrapUtilsService.checkSqlColumnExistence('uploaded_file', 'image_id')) {
@@ -174,7 +174,7 @@ class BootstrapOldVersionService {
 
 
         /****** ABSTRACT SLICE ******/
-        if (AbstractSlice.count() == 0) {
+        if (bootstrapUtilsService.checkSqlColumnExistence('uploaded_file', 'image_id') && AbstractSlice.count() == 0) {
             log.info "Migration of abstract slice"
 
             log.info "Abstract slice: Add (0,0,0) abstract slice for all abstract images"
