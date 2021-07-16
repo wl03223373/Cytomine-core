@@ -895,36 +895,23 @@ class BasicInstanceBuilder {
     }
 
     static void buildStorageImageServerLinkForImage(AbstractImage abstractImage) {
-        List<ImageServerStorage> imageServersStorages = abstractImage.getImageServersStorage()
-        if (imageServersStorages.isEmpty()) {
-            Storage storage = getStorage()
-            ImageServer imageServer = getImageServer()
-            if (ImageServerStorage.findByImageServerAndStorage(imageServer, storage)==null) {
-                ImageServerStorage imageServerStorage = new ImageServerStorage(imageServer: imageServer, storage: storage)
-                saveDomain(imageServerStorage);
-            }
-            if (!MimeImageServer.findByImageServerAndMime(imageServer, abstractImage.getMime())) {
-                MimeImageServer mimeImageServer = new MimeImageServer(imageServer: imageServer, mime: abstractImage.getMime())
-                saveDomain(mimeImageServer)
-            }
-        }
-
-
         def imageServer = ImageServer.findByName("bidon")
         if (!imageServer) {
             imageServer = new ImageServer(name:"bidon",url:"http://bidon.server.com/",service:"service",className:"sample",available:true)
             saveDomain(imageServer)
         }
+        UploadedFile uploadedFile = getUploadedFileNotExist(true)
+        uploadedFile.imageServer = imageServer
+        saveDomain(uploadedFile)
 
-        def storage = getStorage()
 
-        def imageServerStorage = ImageServerStorage.findByImageServerAndStorage(imageServer, storage)
-        if (!imageServerStorage) {
-            imageServerStorage = new ImageServerStorage(imageServer: imageServer, storage : storage)
-            saveDomain(imageServerStorage)
+        abstractImage.uploadedFile = uploadedFile
+        saveDomain(abstractImage)
+        if (!MimeImageServer.findByImageServerAndMime(imageServer, abstractImage.referenceSlice.getMime())) {
+            MimeImageServer mimeImageServer = new MimeImageServer(imageServer: imageServer, mime: abstractImage.referenceSlice.getMime())
+            saveDomain(mimeImageServer)
         }
         imageServer
-
     }
 
     static AbstractImage getAbstractImageNotExist(boolean save = false) {
