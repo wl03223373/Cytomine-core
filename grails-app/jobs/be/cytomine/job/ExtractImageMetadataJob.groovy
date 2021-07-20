@@ -19,6 +19,7 @@ package be.cytomine.job
 import be.cytomine.image.AbstractImage
 import be.cytomine.image.UploadedFile
 import grails.validation.ValidationException
+import org.springframework.transaction.annotation.Transactional
 
 class ExtractImageMetadataJob {
 
@@ -29,6 +30,7 @@ class ExtractImageMetadataJob {
         simple name: 'extractImageMetadataJob', startDelay: 10000, repeatInterval: 1000*20
     }
 
+    @Transactional
     def execute() {
         Collection<AbstractImage> abstractImages = AbstractImage.findAllByWidthInListOrWidthIsNull([-1,0])
         abstractImages.each { image ->
