@@ -29,6 +29,9 @@ environments {
         //grails.config.locations = ["file:${userHome}/Cytomine/Cytomine-bootstrap/configs/core/cytomineconfig.groovy"]
         grails.config.locations = ["file:${userHome}/.grails/cytomineconfig.groovy"]
     }
+    test {
+        grails.config.locations = ["file:${userHome}/.grails/cytomineconfig.groovy"]
+    }
 }
 println "External configuration file : ${grails.config.locations}"
 File configFile = new File(grails.config.locations.first().minus("file:") as String)
