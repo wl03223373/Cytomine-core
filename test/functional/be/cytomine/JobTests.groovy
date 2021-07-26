@@ -27,6 +27,7 @@ import be.cytomine.project.Project
 import be.cytomine.security.UserJob
 import be.cytomine.test.BasicInstanceBuilder
 import be.cytomine.test.Infos
+import be.cytomine.test.http.DomainAPI
 import be.cytomine.test.http.JobAPI
 import be.cytomine.test.http.JobDataAPI
 import be.cytomine.test.http.TaskAPI
@@ -61,6 +62,35 @@ class JobTests  {
         assert json.collection instanceof JSONArray
         assert json.collection.size() == 0
     }
+
+    void testListJobByProjectOnlyFavorite() {
+        Job jobFavorite = BasicInstanceBuilder.getJobNotExist(true)
+        jobFavorite.setFavorite(true)
+        BasicInstanceBuilder.saveDomain(jobFavorite)
+        Job jobNotFavorite = BasicInstanceBuilder.getJobNotExist(true)
+        jobNotFavorite.setProject(jobFavorite.project)
+        jobNotFavorite.setFavorite(false)
+        BasicInstanceBuilder.saveDomain(jobNotFavorite)
+
+        def parameters = []
+
+        def result = JobAPI.listByProject(jobFavorite.project.id, parameters, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+        def json = JSON.parse(result.data)
+        assert json.collection instanceof JSONArray
+        assert DomainAPI.containsInJSONList(jobFavorite.id,json)
+        assert DomainAPI.containsInJSONList(jobNotFavorite.id,json)
+
+        parameters = [[field: 'favorite', operator: 'in', value: true]]
+
+        result = JobAPI.listByProject(jobFavorite.project.id, parameters, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
+        json = JSON.parse(result.data)
+        assert json.collection instanceof JSONArray
+        assert DomainAPI.containsInJSONList(jobFavorite.id,json)
+        assert !DomainAPI.containsInJSONList(jobNotFavorite.id,json)
+    }
+
 
     void testListJobBySoftwareAndProjectWithCredentialLight() {
         Job job = BasicInstanceBuilder.getJob()

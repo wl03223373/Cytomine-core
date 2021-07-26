@@ -32,7 +32,7 @@ class CurrentRoleService implements Serializable {
 
     static final long serialVersionUID = 1L; //assign a long value
 
-    static scope = 'session'
+    //static scope = 'session'
 
     static transactional = false
 
