@@ -563,10 +563,10 @@ class BootstrapOldVersionService {
         SpringSecurityUtils.doWithAuth("superadmin", {
             projects.each { project ->
                 log.info "project $project"
-                secUserService.listUsers(project).each { user ->
+                secUserService.listUsers(project, false, false).each { user ->
                     permissionService.addPermission(project.ontology, user.username, BasePermission.READ)
                 }
-                secUserService.listAdmins(project).each { admin ->
+                secUserService.listAdmins(project, false).each { admin ->
                     permissionService.addPermission(project.ontology, admin.username, BasePermission.ADMINISTRATION)
                 }
                 i++

@@ -499,8 +499,8 @@ class SecUserService extends ModelService {
         return result
     }
 
-    def listUsers(Project project, boolean showUserJob = false) {
-        securityACLService.check(project,READ)
+    def listUsers(Project project, boolean showUserJob = false, boolean checkPermission = true) {
+        if (checkPermission) securityACLService.check(project,READ)
         List<User> users = User.executeQuery("select distinct secUser " +
                 "from AclObjectIdentity as aclObjectId, AclEntry as aclEntry, AclSid as aclSid, User as secUser "+
                 "where aclObjectId.objectId = "+project.id+" " +
@@ -524,7 +524,7 @@ class SecUserService extends ModelService {
         return users
     }
 
-    def listCreator(Project project) {
+    def listCreator(Project project, boolean checkPermission = true) {
         securityACLService.check(project,READ)
         List<User> users = SecUser.executeQuery("select secUser from AclObjectIdentity as aclObjectId, AclSid as aclSid, SecUser as secUser where aclObjectId.objectId = "+project.id+" and aclObjectId.owner = aclSid.id and aclSid.sid = secUser.username and secUser.class = 'be.cytomine.security.User'")
         User user = users.isEmpty() ? null : users.first()
@@ -534,8 +534,8 @@ class SecUserService extends ModelService {
 
 
 
-    def listAdmins(Project project) {
-        securityACLService.check(project,READ)
+    def listAdmins(Project project, boolean checkPermission = true) {
+        if (checkPermission) securityACLService.check(project,READ)
         def users = SecUser.executeQuery("select distinct secUser " +
                 "from AclObjectIdentity as aclObjectId, AclEntry as aclEntry, AclSid as aclSid, SecUser as secUser "+
                 "where aclObjectId.objectId = "+project.id+" " +
