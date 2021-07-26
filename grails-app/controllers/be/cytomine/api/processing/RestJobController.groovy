@@ -229,6 +229,17 @@ class RestJobController extends RestController {
         return responseSuccess(job)
     }
 
+    def setFavorite() {
+        Job job = jobService.read(params.long('id'))
+        securityACLService.checkisNotReadOnly(job.container())
+        if (job) {
+            def favorite = JSONUtils.getJSONAttrBoolean(request.JSON, 'favorite', false)
+            responseSuccess(jobService.markAsFavorite(job, favorite))
+        } else {
+            responseNotFound("Job", params.id)
+        }
+    }
+
     @RestApiMethod(description="Get the execution log of a job")
     @RestApiParams(params=[
             @RestApiParam(name="id", type="long", paramType = RestApiParamType.PATH,description = "The job id")

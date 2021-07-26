@@ -189,6 +189,14 @@ class JobService extends ModelService {
         def mapParams = sqlSearchConditions.parameters
         if(usernameParams.size() > 0) mapParams += usernameParams
 
+        if (mapParams instanceof Map) {
+            if (mapParams.containsKey("j_favorite_1")) {
+                mapParams["j_favorite_1"] = (mapParams["j_favorite_1"] == 'true');
+            }
+            if (mapParams.containsKey("j_favorite_2")) {
+                mapParams["j_favorite_2"] = (mapParams["j_favorite_2"] == 'true');
+            }
+        }
         // https://stackoverflow.com/a/42080302
         if (mapParams.isEmpty() && usernameParams.isEmpty()) {
             mapParams = []
@@ -368,6 +376,12 @@ class JobService extends ModelService {
         def ret = AttachedFile.getDataFromDomain(log)
         ret['data'] = new String(log.data);
         return ret
+    }
+
+    def markAsFavorite(Job job, boolean favorite) {
+        new Sql(dataSource).executeUpdate("UPDATE job SET favorite = ${favorite} WHERE id = ${job.id}");
+        job.favorite = favorite
+        return job
     }
 
     List<UserJob> getAllLastUserJob(Project project, Software software) {
