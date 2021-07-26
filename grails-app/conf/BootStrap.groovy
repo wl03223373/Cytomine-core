@@ -98,7 +98,8 @@ class BootStrap {
         log.info "#############################################################################"
         log.info "#############################################################################"
         log.info "#############################################################################"
-
+        log.info "Current version " + grailsApplication.metadata.'app.version'
+        log.info "Force version " + Holders.config.cytomine.forceVersion
         [
             "Environment" : Environment.getCurrent().name,
             "Server URL": grailsApplication.config.grails.serverURL,
@@ -121,6 +122,9 @@ class BootStrap {
                 Version.setCurrentVersion(grailsApplication.metadata.'app.version')
             } catch(NumberFormatException ex) {
                 log.warn "Cannot parse version ${grailsApplication.metadata.'app.version'}, ignore version"
+                String version = Holders.config.cytomine.forceVersion
+                log.warn "Check forceVersion $version"
+                Version.setCurrentVersion(version)
             }
         }
 
