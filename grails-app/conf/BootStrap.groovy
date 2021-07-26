@@ -117,7 +117,11 @@ class BootStrap {
 
         if(Version.count()==0) {
             log.info "Version was not set, set to last version"
-            Version.setCurrentVersion(grailsApplication.metadata.'app.version')
+            try {
+                Version.setCurrentVersion(grailsApplication.metadata.'app.version')
+            } catch(NumberFormatException ex) {
+                log.warn "Cannot parse version ${grailsApplication.metadata.'app.version'}, ignore version"
+            }
         }
 
         if (!bootstrapUtilsService.checkSqlColumnExistence("sec_user", "language")) {
