@@ -94,7 +94,7 @@ class BootstrapOldVersionService {
             Version.setCurrentVersion(grailsApplication.metadata.'app.version')
         } catch(NumberFormatException ex) {
             log.warn "Cannot parse version ${grailsApplication.metadata.'app.version'}, ignore version"
-            forceVersion = Holders.config.cytomine.forceVersion
+            def forceVersion = Holders.config.cytomine.forceVersion
             log.warn "Check forceVersion $forceVersion"
             Version.setCurrentVersion(forceVersion)
         }
