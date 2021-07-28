@@ -39,6 +39,7 @@ import be.cytomine.security.User
 import be.cytomine.meta.Configuration
 import be.cytomine.utils.Version
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.util.Holders
 import groovy.sql.Sql
 import org.springframework.security.acls.domain.BasePermission
 
@@ -89,12 +90,19 @@ class BootstrapOldVersionService {
             }
 
         }
-        Version.setCurrentVersion(grailsApplication.metadata.'app.version')
+        try {
+            Version.setCurrentVersion(grailsApplication.metadata.'app.version')
+        } catch(NumberFormatException ex) {
+            log.warn "Cannot parse version ${grailsApplication.metadata.'app.version'}, ignore version"
+            forceVersion = Holders.config.cytomine.forceVersion
+            log.warn "Check forceVersion $forceVersion"
+            Version.setCurrentVersion(forceVersion)
+        }
     }
 
 
-    def initv3_1_0() {
-        log.info "Migration to V3.1.0"
+    def initv3_2_0() {
+        log.info "Migration to V3.2.0"
         def sql = new Sql(dataSource)
 
         /****** USERS ******/
