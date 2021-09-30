@@ -950,26 +950,26 @@ class ProjectSecurityTests extends SecurityTestsAbstract {
 
 
         //add, update, delete tag domain association (simple user data)
-        assert 200 == TagDomainAssociationAPI.delete(tdaUser.id,adminUsername, password).code //TODO fix it. Should be 403
+        assert 200 == TagDomainAssociationAPI.delete(tdaUser.id,adminUsername, password).code
         assert 200 == TagDomainAssociationAPI.create(BasicInstanceBuilder.getTagDomainAssociationNotExist(annotationUser, false).encodeAsJSON(),project.class.name, project.id, adminUsername, password).code
 
         //add, update, delete tag domain association (admin data)
-        assert 403 == TagDomainAssociationAPI.delete(tdaAdmin.id, adminUsername, password).code
-        assert 403 == TagDomainAssociationAPI.create(BasicInstanceBuilder.getTagDomainAssociationNotExist(annotationAdmin, false).encodeAsJSON(),project.class.name, project.id, adminUsername, password).code
+        assert 200 == TagDomainAssociationAPI.delete(tdaAdmin.id, adminUsername, password).code
+        assert 200 == TagDomainAssociationAPI.create(BasicInstanceBuilder.getTagDomainAssociationNotExist(annotationAdmin, false).encodeAsJSON(),project.class.name, project.id, adminUsername, password).code
 
         //add, update, delete tag domain association (super admin data)
-        assert 403 == TagDomainAssociationAPI.delete(tda.id, adminUsername, password).code
-        assert 403 == TagDomainAssociationAPI.create(BasicInstanceBuilder.getTagDomainAssociationNotExist(annotation, false).encodeAsJSON(),project.class.name, project.id, adminUsername, password).code
+        assert 200 == TagDomainAssociationAPI.delete(tda.id, adminUsername, password).code
+        assert 200 == TagDomainAssociationAPI.create(BasicInstanceBuilder.getTagDomainAssociationNotExist(annotation, false).encodeAsJSON(),project.class.name, project.id, adminUsername, password).code
 
         //add, update, delete attached file (simple user data)
         assert 200 == AttachedFileAPI.delete(attachedFileUser.id,adminUsername, password).code
         assert 200 == AttachedFileAPI.upload("test", annotationUser.class.name,annotationUser.id,new File("test/functional/be/cytomine/utils/simpleFile.txt"),adminUsername, password).code
         //add, update, delete attached file (admin data)
-        assert 403 == AttachedFileAPI.delete(attachedFileAdmin.id, adminUsername, password).code
-        assert 403 == AttachedFileAPI.upload("test", annotationAdmin.class.name,annotationAdmin.id,new File("test/functional/be/cytomine/utils/simpleFile.txt"),adminUsername, password).code
+        assert 200 == AttachedFileAPI.delete(attachedFileAdmin.id, adminUsername, password).code
+        assert 200 == AttachedFileAPI.upload("test", annotationAdmin.class.name,annotationAdmin.id,new File("test/functional/be/cytomine/utils/simpleFile.txt"),adminUsername, password).code
         //add, update, delete attached file (super admin data)
-        assert 403 == AttachedFileAPI.delete(attachedFile.id, adminUsername, password).code
-        assert 403 == AttachedFileAPI.upload("test", annotation.class.name,annotation.id,new File("test/functional/be/cytomine/utils/simpleFile.txt"),adminUsername, password).code
+        assert 200 == AttachedFileAPI.delete(attachedFile.id, adminUsername, password).code
+        assert 200 == AttachedFileAPI.upload("test", annotation.class.name,annotation.id,new File("test/functional/be/cytomine/utils/simpleFile.txt"),adminUsername, password).code
 
         println "###"+image.id
         //start reviewing image (simple user data)
