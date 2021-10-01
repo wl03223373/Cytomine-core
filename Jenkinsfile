@@ -57,19 +57,19 @@ node {
                     }
                 }
         } else {
-//             stage 'Publish war'
-//             sh 'scriptsCI/ciPublishWar.sh'
-//
-//             stage 'Build docker image'
-//             withCredentials(
-//                 [
-//                     usernamePassword(credentialsId: 'DOCKERHUB_CREDENTIAL', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_TOKEN')
-//                 ]
-//                 ) {
-//                     docker.withRegistry('https://index.docker.io/v1/', 'DOCKERHUB_CREDENTIAL') {
-//                         sh 'scriptsCI/ciBuildDockerImage.sh'
-//                     }
-//                 }
+            stage 'Publish war'
+            sh 'scriptsCI/ciPublishWar.sh'
+
+            stage 'Build docker image'
+            withCredentials(
+                [
+                    usernamePassword(credentialsId: 'DOCKERHUB_CREDENTIAL', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_TOKEN')
+                ]
+                ) {
+                    docker.withRegistry('https://index.docker.io/v1/', 'DOCKERHUB_CREDENTIAL') {
+                        sh 'scriptsCI/ciBuildDockerImage.sh'
+                    }
+                }
         }
     }
 }
