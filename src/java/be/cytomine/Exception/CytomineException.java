@@ -55,4 +55,8 @@ public abstract class CytomineException extends RuntimeException{
         this.code = code;
         this.values = values;
     }
+
+    public String toString() {
+        return this.msg;
+    }
 }

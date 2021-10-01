@@ -30,7 +30,7 @@ import javax.mail.internet.MimeMessage
 
 class CytomineMailService {
 
-    static final String NO_REPLY_EMAIL = "no-reply@cytomine.org"
+    static final String NO_REPLY_EMAIL = "no-reply@cytomine.com"
 
     static transactional = false
 
