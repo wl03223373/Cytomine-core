@@ -229,16 +229,16 @@ class ImageInstanceTests  {
         def image = BasicInstanceBuilder.getImageInstance()
 
         def updatedImage = JSON.parse((String)image.encodeAsJSON())
-        updatedImage.resolution = 2.5d
+        updatedImage.physicalSizeX = 2.5d
         updatedImage.magnification = 20
         def result = ImageInstanceAPI.update(image.id, updatedImage.toString(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
         def json = JSON.parse(result.data)
         assert json instanceof JSONObject
-        assert json.imageinstance.resolution == 2.5
+        assert json.imageinstance.physicalSizeX == 2.5
         assert json.imageinstance.magnification == 20
 
-        assert json.imageinstance.resolution != image.baseImage.resolution
+        assert json.imageinstance.physicalSizeX != image.baseImage.physicalSizeX
         assert json.imageinstance.magnification != image.baseImage.magnification
     }
 
@@ -259,12 +259,12 @@ class ImageInstanceTests  {
         Double area = json.area
 
         def updatedImage = JSON.parse((String)image.encodeAsJSON())
-        updatedImage.resolution = 2.5d
+        updatedImage.physicalSizeX = 2.5d
         result = ImageInstanceAPI.update(image.id, updatedImage.toString(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
         json = JSON.parse(result.data)
         assert json instanceof JSONObject
-        assert json.imageinstance.resolution == 2.5
+        assert json.imageinstance.physicalSizeX == 2.5
 
         result = UserAnnotationAPI.show(annot.id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code

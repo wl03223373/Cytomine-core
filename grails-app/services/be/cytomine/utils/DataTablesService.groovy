@@ -73,8 +73,6 @@ class DataTablesService {
                         data = it.baseImage.width
                     }else if(property.equals("height")) {
                         data = it.baseImage.height
-                    }else if(property.equals("resolution")) {
-                        data = it.baseImage.resolution
                     }else if(property.equals("magnification")) {
                         data = it.baseImage.magnification
                     }else {
