@@ -78,22 +78,24 @@ class UploadedFileService extends ModelService {
     def listWithDetails(User user, def searchParameters = [], def sortedProperty = "created", def sortDirection = "desc") {
         securityACLService.checkIsSameUser(user, cytomineService.currentUser)
 
-        String search = ""
-        searchParameters.each {
-            search += "AND uf.${SQLUtils.toSnakeCase(it.field)} ${it.sqlOperator} '${it.value}' "
+        def validatedSearchParameters = getDomainAssociatedSearchParameters(UploadedFile, searchParameters)
+        validatedSearchParameters.findAll { !it.property.contains(".") }.each {
+            it.property = "uf." + it.property
         }
+
+        def sqlSearchConditions = searchParametersToSQLConstraints(validatedSearchParameters)
+        String search = sqlSearchConditions.data.collect { it.sql }.join(" AND ")
 
         String sort = ""
         if (["content_type", "id", "created", "filename", "originalFilename", "size", "status"].contains(sortedProperty)) {
-            sort += "uf.${SQLUtils.toSnakeCase(sortedProperty)}"
+            sort = "uf.${SQLUtils.toSnakeCase(sortedProperty)}"
+        } else if(sortedProperty == "globalSize") {
+            sort = "COALESCE(SUM(DISTINCT tree.size),0)+uf.size"
+        } else {
+            sort = "uf.created "
         }
-        else if(sortedProperty == "globalSize") {
-            sort += "COALESCE(SUM(DISTINCT tree.size),0)+uf.size"
-        }
-
-        if (!sort.isEmpty()) {
-            sort = "ORDER BY $sort $sortDirection"
-        }
+        sort = " ORDER BY $sort "
+        sort += (sortDirection.equals("desc")) ? " DESC " : " ASC "
 
         String request = "SELECT uf.id, " +
                 "uf.content_type, " +
@@ -122,13 +124,16 @@ class UploadedFileService extends ModelService {
                 "AND (uf.parent_id IS NULL OR parent.content_type similar to '%zip%') " +
                 "AND uf.content_type NOT similar to '%zip%' " +
                 "AND uf.deleted IS NULL " +
+                "AND " +
                 search +
-                "GROUP BY uf.id, ai.id " +
+                " GROUP BY uf.id, ai.id " +
                 sort
 
         def data = []
         def sql = new Sql(dataSource)
-        sql.eachRow(request, [username: user.username]) { resultSet ->
+        def mapParams = sqlSearchConditions.sqlParameters
+        mapParams.put("username", user.username)
+        sql.eachRow(request, mapParams) { resultSet ->
             def row = SQLUtils.keysToCamelCase(resultSet.toRowResult())
             row.thumbURL = (row.image) ? UrlApi.getAbstractImageThumbUrl(row.image as Long) : null
             data << row
