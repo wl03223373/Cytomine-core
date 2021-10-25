@@ -41,6 +41,7 @@ import be.cytomine.utils.Version
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.util.Holders
 import groovy.sql.Sql
+import org.postgresql.util.PSQLException
 import org.springframework.security.acls.domain.BasePermission
 
 /**
@@ -257,13 +258,29 @@ class BootstrapOldVersionService {
         /****** ABSTRACT IMAGE ******/
         log.info "Migration of abstract images"
 
+        if (!bootstrapUtilsService.checkSqlColumnExistence("abstract_image", "physical_sizex") &&
+                bootstrapUtilsService.checkSqlColumnExistence("abstract_image", "resolution")) {
+            bootstrapUtilsService.renameSqlColumn("abstract_image", "resolution","physical_sizex")
+        }
+
         if (bootstrapUtilsService.checkSqlColumnExistence("abstract_image", "physical_sizex")) {
+            log.info "Migration of image instances"
             new Sql(dataSource).executeUpdate("UPDATE abstract_image SET physical_size_x = physical_sizex;")
-            new Sql(dataSource).executeUpdate("UPDATE abstract_image SET physical_size_y = physical_sizey;")
-            new Sql(dataSource).executeUpdate("UPDATE abstract_image SET physical_size_z = physical_sizez;")
             bootstrapUtilsService.dropSqlColumn("abstract_image", "physical_sizex")
-            bootstrapUtilsService.dropSqlColumn("abstract_image", "physical_sizey")
-            bootstrapUtilsService.dropSqlColumn("abstract_image", "physical_sizez")
+
+            if (bootstrapUtilsService.checkSqlColumnExistence("abstract_image", "physical_sizey")) {
+                log.info "Migration of image instances"
+                new Sql(dataSource).executeUpdate("UPDATE abstract_image SET physical_size_y = physical_sizey;")
+                bootstrapUtilsService.dropSqlColumn("abstract_image", "physical_sizey")
+            } else {
+                new Sql(dataSource).executeUpdate("UPDATE abstract_image SET physical_size_y = physical_size_x;")
+            }
+
+            if (bootstrapUtilsService.checkSqlColumnExistence("abstract_image", "physical_sizez")) {
+                log.info "Migration of image instances"
+                new Sql(dataSource).executeUpdate("UPDATE abstract_image SET physical_size_z = physical_sizez;")
+                bootstrapUtilsService.dropSqlColumn("abstract_image", "physical_sizez")
+            }
         }
 
         log.info "Abstract image: update new fields depth, duration and channels"
@@ -282,16 +299,30 @@ class BootstrapOldVersionService {
 
 
         /****** IMAGE INSTANCE ******/
+        if (!bootstrapUtilsService.checkSqlColumnExistence("image_instance", "physical_sizex") &&
+                bootstrapUtilsService.checkSqlColumnExistence("image_instance", "resolution")) {
+            bootstrapUtilsService.renameSqlColumn("image_instance", "resolution","physical_sizex")
+        }
+
         if (bootstrapUtilsService.checkSqlColumnExistence("image_instance", "physical_sizex")) {
             log.info "Migration of image instances"
             new Sql(dataSource).executeUpdate("UPDATE image_instance SET physical_size_x = physical_sizex;")
-            new Sql(dataSource).executeUpdate("UPDATE image_instance SET physical_size_y = physical_sizey;")
-            new Sql(dataSource).executeUpdate("UPDATE image_instance SET physical_size_z = physical_sizez;")
             new Sql(dataSource).executeUpdate("ALTER TABLE image_instance DROP COLUMN physical_sizex CASCADE;")
-            new Sql(dataSource).executeUpdate("ALTER TABLE image_instance DROP COLUMN physical_sizey CASCADE;")
-            new Sql(dataSource).executeUpdate("ALTER TABLE image_instance DROP COLUMN physical_sizez CASCADE;")
-        }
 
+            if (bootstrapUtilsService.checkSqlColumnExistence("image_instance", "physical_sizey")) {
+                log.info "Migration of image instances"
+                new Sql(dataSource).executeUpdate("UPDATE image_instance SET physical_size_y = physical_sizey;")
+                new Sql(dataSource).executeUpdate("ALTER TABLE image_instance DROP COLUMN physical_sizey CASCADE;")
+            } else {
+                new Sql(dataSource).executeUpdate("UPDATE image_instance SET physical_size_y = physical_size_x;")
+            }
+
+            if (bootstrapUtilsService.checkSqlColumnExistence("image_instance", "physical_sizez")) {
+                log.info "Migration of image instances"
+                new Sql(dataSource).executeUpdate("UPDATE image_instance SET physical_size_z = physical_sizez;")
+                new Sql(dataSource).executeUpdate("ALTER TABLE image_instance DROP COLUMN physical_sizez CASCADE;")
+            }
+        }
 
         /****** IMAGE GROUP ******/
         def imageInstancesFromImageGroupToSlices = [:]
@@ -556,7 +587,7 @@ class BootstrapOldVersionService {
 
         /****** VIEWS ******/
         log.info "Regeneration of DB views"
-        sql.executeUpdate("DROP VIEW user_image;")
+        sql.executeUpdate("DROP VIEW IF EXISTS user_image;")
         tableService.initTable()
 
         sql.close()
