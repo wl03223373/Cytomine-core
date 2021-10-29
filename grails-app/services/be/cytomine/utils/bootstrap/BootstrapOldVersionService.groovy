@@ -102,6 +102,14 @@ class BootstrapOldVersionService {
     }
 
 
+    def initv3_2_1() {
+        log.info "Migration to V3.2.1"
+        new Sql(dataSource).executeUpdate("DROP VIEW user_image;")
+        bootstrapUtilsService.dropSqlColumn("abstract_image", "resolution")
+        bootstrapUtilsService.dropSqlColumn("image_instance", "resolution")
+        tableService.initTable()
+    }
+
     def initv3_2_0() {
         log.info "Migration to V3.2.0"
         def sql = new Sql(dataSource)

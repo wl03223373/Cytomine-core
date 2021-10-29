@@ -1861,7 +1861,7 @@ class BasicInstanceBuilder {
             abstractImage.width = 25088
             abstractImage.height = 37888
             abstractImage.magnification = 8
-            abstractImage.resolution = 0.65d
+            abstractImage.physicalSizeX = 0.65d
             abstractImage.originalFilename = "test01.jpg"
             abstractImage.user = user
             abstractImage.uploadedFile = uploadedFile
