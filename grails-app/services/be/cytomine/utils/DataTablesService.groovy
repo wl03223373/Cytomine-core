@@ -32,6 +32,7 @@ class DataTablesService {
     def securityACLService
     def currentRoleServiceProxy
 
+    @Deprecated
     def process(params, domain, restrictions, returnFields, project) {
         params.max = params['length'] ? params['length'] as int : 10;
         params.offset = params.start ? params.start as int : 0;
