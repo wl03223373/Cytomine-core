@@ -175,7 +175,6 @@ class AbstractImageService extends ModelService {
 
         boolean magnificationUpdated = magnification != abstractImage.magnification
         boolean physicalSizeXUpdated = physicalSizeX != abstractImage.physicalSizeX
-        log.info("10")
         log.info("magnificationUpdated=$magnificationUpdated")
         log.info("physicalSizeXUpdated=$physicalSizeXUpdated")
         log.info("magnification=$magnification")
@@ -192,9 +191,7 @@ class AbstractImageService extends ModelService {
             } else {
                 images.addAll(ImageInstance.findAllByBaseImageAndPhysicalSizeXIsNullAndMagnificationIsNull(image))
             }
-            log.info("ImageInstances=${images.size()}")
             images.each {
-                log.info("Image=$images")
                 def json = JSON.parse(it.encodeAsJSON())
                 json.physicalSizeX = abstractImage.physicalSizeX
                 json.magnification = abstractImage.magnification
