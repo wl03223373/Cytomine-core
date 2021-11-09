@@ -737,6 +737,11 @@ class ImageInstanceService extends ModelService {
             def jsonNewData = JSON.parse(alreadyExist.encodeAsJSON())
             jsonNewData.deleted = null
             Command c = new EditCommand(user: currentUser)
+            SliceInstance.findAllByImage(alreadyExist).each {
+                def newValues = JSON.parse(it.encodeAsJSON())
+                newValues.deleted = null
+                sliceInstanceService.update(it, newValues)
+            }
             return executeCommand(c, alreadyExist, jsonNewData)
         }
         else {

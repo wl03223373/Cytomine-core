@@ -17,12 +17,14 @@ package be.cytomine
 */
 
 import be.cytomine.image.ImageInstance
+import be.cytomine.image.SliceInstance
 import be.cytomine.ontology.UserAnnotation
 import be.cytomine.project.Project
 import be.cytomine.test.BasicInstanceBuilder
 import be.cytomine.test.Infos
 import be.cytomine.test.http.DomainAPI
 import be.cytomine.test.http.ImageInstanceAPI
+import be.cytomine.test.http.SliceInstanceAPI
 import be.cytomine.test.http.UserAnnotationAPI
 import be.cytomine.utils.UpdateData
 import grails.converters.JSON
@@ -456,30 +458,30 @@ class ImageInstanceTests  {
         assert 200 == result.code
         ImageInstance image = result.data
         Long idImage = image.id
+        Long idSliceInstance = SliceInstance.findAllByImage(image)[0].id
 
         project.refresh()
         assert project.countImages == 1
 
         result = ImageInstanceAPI.show(image.id, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
+        result = SliceInstanceAPI.show(idSliceInstance, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code
 
         result = ImageInstanceAPI.delete(image, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
         println result.data
 
-
         image = ImageInstance.read(image.id)
-        println image.id+"=>"+image.deleted  + " version"+image.version
         image.refresh()
-        println image.id+"=>"+image.deleted + " version"+image.version
-
         println project.list().collect{it.name}
         project.refresh()
         assert project.countImages == 0
 
         result = ImageInstanceAPI.show(idImage, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 404 == result.code
-
+        result = SliceInstanceAPI.show(idSliceInstance, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 404 == result.code
 
         result = ImageInstanceAPI.create(image.encodeAsJSON(), Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
@@ -489,6 +491,7 @@ class ImageInstanceTests  {
 
         result = ImageInstanceAPI.show(idImage, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
         assert 200 == result.code
-
+        result = SliceInstanceAPI.show(idSliceInstance, Infos.SUPERADMINLOGIN, Infos.SUPERADMINPASSWORD)
+        assert 200 == result.code //OP-695 : expect slices to be restored
     }
 }
