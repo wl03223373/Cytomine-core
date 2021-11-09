@@ -35,7 +35,7 @@ class CytomineMailService {
     static transactional = false
 
 
-    def send(String from, String[] to, String cc, String subject, String message, def attachment = null) {
+    def send(String from, String[] to, String[] cc, String[] bcc, String subject, String message, def attachment = null) {
 
         String defaultEmail = Holders.getGrailsApplication().config.grails.notification.email
 
@@ -68,10 +68,11 @@ class CytomineMailService {
         MimeMessage mail = sender.createMimeMessage()
         MimeMessageHelper helper = new MimeMessageHelper(mail, true)
 
-        helper.setReplyTo("noreply@cytomine.org")
+        helper.setReplyTo(Holders.getGrailsApplication().config.grails.admin.email.toString())
         helper.setFrom(from)
         helper.setTo(to)
         //helper.setCc(cc)
+        helper.setBcc(bcc)
         helper.setSubject(subject)
         helper.setText("",message)
         attachment?.each {
