@@ -18,7 +18,6 @@ FROM tomcat:9.0-jdk8-openjdk
 
 MAINTAINER Cytomine SCRLFS "support@cytomine.coop"
 
-
 # base librairies and configuration
 RUN apt-get update -y && apt-get -y install \
       build-essential \
@@ -46,6 +45,7 @@ RUN cp /tmp/logrotate-3.18.0/logrotate /usr/sbin/logrotate
 
 RUN ln -s /usr/local/tomcat /var/lib/tomcat9 #for backward compatibility
 RUN ln -s /usr/share/tomcat9/.grails /root/.grails #for backward compatibility
+
 
 ADD ci/cytomine.war /tmp/cytomine.war
 
