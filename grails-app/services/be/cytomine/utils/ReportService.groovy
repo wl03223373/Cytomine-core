@@ -175,6 +175,8 @@ class ReportService {
             }
         }
 
+        exportResult = exportResult.unique {a -> a.id}
+
         termNameUsed.unique()
         userNameUsed.unique()
         List fields = ["id", "area", "perimeter", "XCentroid", "YCentroid", "image", "filename", "user", "term", "cropURL", "cropGOTO"]
