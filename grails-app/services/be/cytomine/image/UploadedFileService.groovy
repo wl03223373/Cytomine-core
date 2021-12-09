@@ -125,13 +125,17 @@ class UploadedFileService extends ModelService {
                 "AND uf.content_type NOT similar to '%zip%' " +
                 "AND uf.deleted IS NULL " +
                 "AND " +
-                search +
+                (search==null || search.isEmpty() ? "true" : search) +
                 " GROUP BY uf.id, ai.id " +
                 sort
 
         def data = []
         def sql = new Sql(dataSource)
         def mapParams = sqlSearchConditions.sqlParameters
+        println request
+        if (mapParams instanceof List && mapParams.isEmpty()) {
+            mapParams = [:] // if sqlSearchConditions.sqlParameters is empty, it return a list, otherwise a map (a bit tricky...).
+        }
         mapParams.put("username", user.username)
         sql.eachRow(request, mapParams) { resultSet ->
             def row = SQLUtils.keysToCamelCase(resultSet.toRowResult())
