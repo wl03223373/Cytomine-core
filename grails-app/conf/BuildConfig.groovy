@@ -88,6 +88,10 @@ grails.project.dependency.resolution = {
             excludes 'xml-apis','commons-digester','commons-logging','commons-beanutils', 'commons-collections'
         }
         compile 'com.sun.mail:javax.mail:1.6.0'
+//        compile 'org.bouncycastle:bcprov-jdk14:1.38'
+//        compile 'org.bouncycastle:bcmail-jdk14:1.38'
+//        compile ('org.bouncycastle:bctsp-jdk14:1.38')
+        build("com.lowagie:itext:2.1.7") { excludes "bouncycastle:bcprov-jdk14:138", "org.bouncycastle:bcprov-jdk14:1.38" }
     }
     plugins {
         compile ":mongodb:3.0.2"
@@ -101,8 +105,9 @@ grails.project.dependency.resolution = {
         compile ":spring-security-acl:2.0-RC2"
         compile ':spring-security-appinfo:2.0-RC2'
         runtime (':export:1.6') {
-            excludes "itext-rtf","itext"
+            exclude group: "bouncycastle"
         }
+
         compile ":quartz:1.0.1"
         runtime ":quartz-monitor:0.3-RC3"
         runtime ":database-migration:1.3.8"
