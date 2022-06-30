@@ -80,7 +80,9 @@ grails.project.dependency.resolution = {
         compile "javax.validation:validation-api:1.1.0.Final"
         runtime "org.hibernate:hibernate-validator:5.0.3.Final"
         compile 'commons-beanutils:commons-beanutils:1.8.3'
-        compile 'org.imsglobal:basiclti-util:1.1.2'
+        compile( "org.imsglobal:basiclti-util:1.1.2" ) {
+            excludes 'httpclient', 'httpcore'
+        }
         compile 'org.json:json:20141113'
         compile 'joda-time:joda-time:2.10.1'
         compile 'com.github.jai-imageio:jai-imageio-core:1.4.0'
